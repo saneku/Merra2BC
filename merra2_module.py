@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 import numpy as np
 
 
+Ptop_mera=1 #Pa   (=0.01 hPa)
 mera_lat=0
 mera_lon=0
 merra_files=[]
@@ -33,6 +34,26 @@ def get_index_in_file_by_time(time):
 
 def get_file_name_by_index(index):
     return merra_files[index]
+
+
+def get_pressure_by_time(time,merra_file):
+    global Ptop_mera
+    MER_Pres = np.zeros([mer_number_of_z_points,mer_number_of_y_points,mer_number_of_x_points])
+    #filling top layer with Ptop_mera
+    MER_Pres[0,:,:]=Ptop_mera
+    # Extract delta P from NetCDF file at index defined by time
+    mera_time_idx=get_index_in_file_by_time(time)
+    DELP = merra_file.variables['DELP'][mera_time_idx,:]  #Pa
+
+    #        for z_level in reversed(range(mer_number_of_z_points-1)):
+    #            MER_Pres[z_level,:,:]=MER_Pres[z_level+1,:,:]+DELP[z_level+1,:,:]
+
+    for z_level in range(mer_number_of_z_points-1):
+        MER_Pres[z_level+1]=MER_Pres[z_level]+DELP[z_level]
+
+    return MER_Pres
+
+
 
 def initialise():
     global merra_files,mer_number_of_x_points,mer_number_of_y_points,mer_number_of_z_points,mera_lon,mera_lat,times_per_file
@@ -62,19 +83,3 @@ def initialise():
         index=index+1
 
 #initialise()
-
-#print mera_times
-#print "\n"
-#print mera_times_files
-
-
-'''
-wrf_times
-{0: '2010-07-14_00:00:00', 1: '2010-07-14_06:00:00', 2: '2010-07-14_12:00:00', 3: '2010-07-14_18:00:00', 4: '2010-07-15_00:00:00',
- 5: '2010-07-15_06:00:00', 6: '2010-07-15_12:00:00', 7: '2010-07-15_18:00:00', 8: '2010-07-16_00:00:00', 9: '2010-07-16_06:00:00',
-10: '2010-07-16_12:00:00', 11: '2010-07-16_18:00:00', 12: '2010-07-17_00:00:00', 13: '2010-07-17_06:00:00',
-14: '2010-07-17_12:00:00', 15: '2010-07-17_18:00:00', 16: '2010-07-18_00:00:00', 17: '2010-07-18_06:00:00',
-18: '2010-07-18_12:00:00', 19: '2010-07-18_18:00:00', 20: '2010-07-19_00:00:00', 21: '2010-07-19_06:00:00',
-22: '2010-07-19_12:00:00', 23: '2010-07-19_18:00:00'}
-
-'''

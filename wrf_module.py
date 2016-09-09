@@ -17,6 +17,23 @@ met_files=[]
 met_times_files={}
 wrf_times={}
 
+nx=ny=nz=nw=0
+wrf_p_top=0
+znu=[]
+xlon=[[]]
+xlat=[[]]
+
+
+def get_pressure_by_from_metfile(metfile):
+    PSFC=metfile.variables['PSFC'][:]
+    p_wrf(:) = ps_wrf(i,j)*znu(nz:1:-1) + (1. - znu(nz:1:-1))*p_top
+    return PSFC
+
+def get_sfcp_from_met_file(filename):
+    metfile= Dataset(pathes.wrf_met_dir+"/"+filename,'r')
+    PSFC=metfile.variables['PSFC'][:]
+    metfile.close()
+    return PSFC
 
 def get_met_file_by_time(time):
     return met_times_files.get(time)
@@ -36,7 +53,7 @@ def get_ordered_met_files():
 
 
 def initialise():
-    global met_files,wrf_times
+    global met_files,wrf_times,wrf_p_top,znu,xlon,xlat,nx,ny,nz,nw
 
     met_files=sorted([f for f in os.listdir(pathes.wrf_dir) if re.match(pathes.wrf_met_files, f)], key=numericalSort1)
     wrfbddy = Dataset(pathes.wrf_dir+"/"+pathes.wrf_bdy_file,'r')
@@ -44,15 +61,18 @@ def initialise():
         #wrf_times.append(''.join(wrfbddy.variables['Times'][i]))
         wrf_times.update({''.join(wrfbddy.variables['Times'][i]):i})
         met_times_files.update({''.join(wrfbddy.variables['Times'][i]):met_files[i]})
+
+    nx=wrfbddy.dimensions['west_east'].size
+    ny=wrfbddy.dimensions['south_north'].size
+    nz=wrfbddy.dimensions['bottom_top'].size
+    nw=wrfbddy.dimensions['bdy_width'].size
+
     wrfbddy.close()
 
-#initialise()
-
-#print met_files
-#print "\n"
-#print wrf_times
-
-'''
-wrf_times
-{'2010-07-16_06:00:00': 9, '2010-07-17_00:00:00': 12, '2010-07-15_18:00:00': 7, '2010-07-19_12:00:00': 22, '2010-07-18_00:00:00': 16, '2010-07-16_00:00:00': 8, '2010-07-16_18:00:00': 11, '2010-07-19_06:00:00': 21, '2010-07-19_00:00:00': 20, '2010-07-15_06:00:00': 5, '2010-07-17_06:00:00': 13, '2010-07-14_06:00:00': 1, '2010-07-15_12:00:00': 6, '2010-07-14_00:00:00': 0, '2010-07-14_18:00:00': 3, '2010-07-18_18:00:00': 19, '2010-07-14_12:00:00': 2, '2010-07-18_12:00:00': 18, '2010-07-17_12:00:00': 14, '2010-07-15_00:00:00': 4, '2010-07-19_18:00:00': 23, '2010-07-16_12:00:00': 10, '2010-07-18_06:00:00': 17, '2010-07-17_18:00:00': 15}
-'''
+    #Reading "PRESSURE TOP OF THE MODEL, PA" and "eta values on half (mass) levels"
+    wrfinput=Dataset(pathes.wrf_dir+"/"+pathes.wrf_input_file,'r')
+    wrf_p_top=wrfinput.variables['P_TOP'][:]
+    znu=wrfinput.variables['ZNU'][:]
+    xlon=wrfinput.variables['XLONG'][:]
+    xlat=wrfinput.variables['XLAT'][:]
+    wrfinput.close()
