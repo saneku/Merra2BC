@@ -14,7 +14,12 @@ import os
 from netCDF4 import Dataset
 
 met_files=[]
+met_times_files={}
 wrf_times={}
+
+
+def get_met_file_by_time(time):
+    return met_times_files.get(time)
 
 def get_index_in_file_by_time(time):
     return wrf_times.get(time)
@@ -38,7 +43,7 @@ def initialise():
     for i in range(0,len(wrfbddy.variables['Times'][:]),1):
         #wrf_times.append(''.join(wrfbddy.variables['Times'][i]))
         wrf_times.update({''.join(wrfbddy.variables['Times'][i]):i})
-
+        met_times_files.update({''.join(wrfbddy.variables['Times'][i]):met_files[i]})
     wrfbddy.close()
 
 #initialise()

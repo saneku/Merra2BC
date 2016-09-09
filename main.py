@@ -32,6 +32,12 @@ if(len(time_intersection)!=len(wrf_module.wrf_times)):
 time_intersection=sorted(time_intersection, key=lambda x: time.mktime(time.strptime(x,"%Y-%m-%d_%H:%M:%S")))
 
 
+for cur_time in time_intersection:
+    print "Cur_time="+cur_time+ "\t corresponding metfile: "+wrf_module.get_met_file_by_time(cur_time)
+
+
+
+'''
 print "START INITIAL CONDITIONS"
 cur_time=time_intersection[0]
 index_of_opened_mera_file=merra2_module.get_file_index_by_time(cur_time)
@@ -41,7 +47,7 @@ print "INTERPOLATION"
 print "Closing prev. opened mera file "+merra2_module.get_file_name_by_index(index_of_opened_mera_file)
 print "Saving wrfinput"
 print "FINISH INITIAL CONDITIONS"
-'''
+
 
 print "\n\nSTART BOUNDARY CONDITIONS"
 
