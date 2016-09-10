@@ -33,17 +33,28 @@ index_of_opened_mera_file=merra2_module.get_file_index_by_time(cur_time)
 print "Opening mera file: "+merra2_module.get_file_name_by_index(index_of_opened_mera_file)+" with initial time: "+cur_time
 merra_f = Dataset(pathes.mera_dir+"/"+merra2_module.get_file_name_by_index(index_of_opened_mera_file),'r')
 MERA_PRES=merra2_module.get_pressure_by_time(cur_time,merra_f)
+#print MERA_PRES[:,40,50]
 
-#print MERA_PRES[:,20,20]
-
+#Horizontal interpolation of Merra pressure on WRF horizontal grid
+MER_HOR_PRES=merra2_module.hor_interpolate_3dfield_on_wrf_grid(MERA_PRES,wrf_module.ny,wrf_module.nx,wrf_module.xlon,wrf_module.xlat)
+#print MER_HOR_PRES[:,20,20]
 
 print "Opening metfile: "+wrf_module.get_met_file_by_time(cur_time)
 #print wrf_module.get_sfcp_from_met_file(wrf_module.get_met_file_by_time(cur_time))
-
 metfile= Dataset(pathes.wrf_met_dir+"/"+wrf_module.get_met_file_by_time(cur_time),'r')
 WRF_PRES=wrf_module.get_pressure_from_metfile(metfile)
+#print WRF_PRES[:,10,10]
 
-print WRF_PRES[:,10,10]
+
+for merra_specie in pathes.chem_map:
+    print "\t\t - Reading "+merra_specie+" field from Merra2. It corresponds to "+pathes.chem_map[merra_specie]+" in WRF."
+    MER_SPECIE=merra2_module.get_3dfield_by_time(cur_time,merra_f,merra_specie)
+
+    #Horizontal interpolation of Merra specie on WRF horizontal grid
+    MER_HOR_SPECIE=merra2_module.hor_interpolate_3dfield_on_wrf_grid(MER_SPECIE,wrf_module.ny,wrf_module.nx,wrf_module.xlon,wrf_module.xlat)
+
+    #Vertical interpolation of MER_HOR_SPECIE on WRF vertical grid
+    I STOPPED HERE!!!
 
 
 print "Opening wrfinput"

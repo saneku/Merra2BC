@@ -4,7 +4,7 @@ import os
 from netCDF4 import Dataset
 from datetime import datetime, timedelta
 import numpy as np
-
+from scipy import interpolate
 
 Ptop_mera=1 #Pa   (=0.01 hPa)
 mera_lat=0
@@ -17,6 +17,11 @@ mer_number_of_y_points=0
 mer_number_of_z_points=0
 
 times_per_file=0
+
+
+merra_points=0
+#xx=0
+#yy=0
 
 numbers = re.compile(r'(\d+)')
 def numericalSort(value):
@@ -34,6 +39,36 @@ def get_index_in_file_by_time(time):
 
 def get_file_name_by_index(index):
     return merra_files[index]
+
+
+#TODO ASK SERGEY HOW HE INTERPOLATES ON MERRA GRID?
+#Horizontal interpolation of 3d Merra field on WRF horizontal grid
+def hor_interpolate_3dfield_on_wrf_grid(FIELD, wrf_ny, wrf_nx, wrf_lon, wrf_lat):
+    FIELD_HOR=np.zeros([mer_number_of_z_points, wrf_ny, wrf_nx])
+    for z_level in range(mer_number_of_z_points):
+        #f = interpolate.interp2d(mera_lon, mera_lat, MER_Pres[z_level,:,:], kind='linear')
+        #MER_HOR_Pres[z_level,:,:]=f(wrf_lon[0,:], wrf_lat[0,:])
+        FIELD_HOR[z_level,:,:]= interpolate.griddata(merra_points, FIELD[z_level,:,:].ravel(), (wrf_lon[0,:], wrf_lat[0,:]), method='linear')
+    return FIELD_HOR
+
+
+I STOPPED HERE!!!
+def ver_interpolate_3dfield_on_wrf_grid(FIELD, wrf_ny, wrf_nx, wrf_lon, wrf_lat):
+    MOZ_SPECIE = np.zeros([moz_number_of_z_points,moz_number_of_y_points,moz_number_of_x_points])  # Required SPEC on MOZART mesh
+    for x in range(0,moz_number_of_x_points,1):
+        for y in range(0,moz_number_of_y_points,1):
+            f = interpolate.interp1d(MER_HOR_Pres[:,y,x], MER_HOR_SPECIE[:,y,x], kind='linear',bounds_error=False,fill_value=0)
+            MOZ_SPECIE[:,y,x]=f(MOZ_Pres[:,y,x])
+
+
+#extracts 3d field from merra2 file from given time
+def get_3dfield_by_time(time,merra_file,field_name):
+    FIELD = np.zeros([mer_number_of_z_points,mer_number_of_y_points,mer_number_of_x_points])
+    # Extract field from NetCDF file at index defined by time
+    mera_time_idx=get_index_in_file_by_time(time)
+    FIELD = merra_file.variables[field_name][mera_time_idx,:]  #Pa
+
+    return FIELD
 
 
 def get_pressure_by_time(time,merra_file):
@@ -56,7 +91,7 @@ def get_pressure_by_time(time,merra_file):
 
 
 def initialise():
-    global merra_files,mer_number_of_x_points,mer_number_of_y_points,mer_number_of_z_points,mera_lon,mera_lat,times_per_file
+    global merra_files,mer_number_of_x_points,mer_number_of_y_points,mer_number_of_z_points,mera_lon,mera_lat,times_per_file,merra_points
 
     merra_files=sorted([f for f in os.listdir(pathes.mera_dir) if re.match(pathes.mera_files, f)], key=numericalSort)
     merra_f = Dataset(pathes.mera_dir+"/"+merra_files[0],'r')
@@ -66,6 +101,12 @@ def initialise():
 
     mera_lon  = merra_f.variables['lon'][:]
     mera_lat  = merra_f.variables['lat'][:]
+
+    xx, yy = np.meshgrid(mera_lon, mera_lat)
+    xx=xx.ravel()
+    yy=yy.ravel()
+    merra_points=(xx, yy)
+
 
     #number of times in  mera file
     times_per_file=merra_f.variables['time'].size
