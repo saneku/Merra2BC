@@ -34,14 +34,16 @@ print "Opening mera file: "+merra2_module.get_file_name_by_index(index_of_opened
 merra_f = Dataset(pathes.mera_dir+"/"+merra2_module.get_file_name_by_index(index_of_opened_mera_file),'r')
 MERA_PRES=merra2_module.get_pressure_by_time(cur_time,merra_f)
 
-#print MERA_PRES[:,1,1]
+#print MERA_PRES[:,20,20]
 
 
 print "Opening metfile: "+wrf_module.get_met_file_by_time(cur_time)
 #print wrf_module.get_sfcp_from_met_file(wrf_module.get_met_file_by_time(cur_time))
 
 metfile= Dataset(pathes.wrf_met_dir+"/"+wrf_module.get_met_file_by_time(cur_time),'r')
-WRF_PRES=wrf_module.get_pressure_by_from_metfile(metfile)
+WRF_PRES=wrf_module.get_pressure_from_metfile(metfile)
+
+print WRF_PRES[:,10,10]
 
 
 print "Opening wrfinput"

@@ -12,6 +12,7 @@ import pathes
 import re
 import os
 from netCDF4 import Dataset
+import numpy as np
 
 met_files=[]
 met_times_files={}
@@ -24,10 +25,12 @@ xlon=[[]]
 xlat=[[]]
 
 
-def get_pressure_by_from_metfile(metfile):
+def get_pressure_from_metfile(metfile):
     PSFC=metfile.variables['PSFC'][:]
-    p_wrf(:) = ps_wrf(i,j)*znu(nz:1:-1) + (1. - znu(nz:1:-1))*p_top
-    return PSFC
+    WRF_Pres = np.zeros([nz,ny,nx])
+    for z_level in reversed(range(nz)):
+        WRF_Pres[nz-1-z_level,:]=PSFC*znu[0,z_level]+ (1.0 - znu[0,z_level])*wrf_p_top
+    return WRF_Pres
 
 def get_sfcp_from_met_file(filename):
     metfile= Dataset(pathes.wrf_met_dir+"/"+filename,'r')
@@ -76,3 +79,8 @@ def initialise():
     xlon=wrfinput.variables['XLONG'][:]
     xlat=wrfinput.variables['XLAT'][:]
     wrfinput.close()
+
+
+#initialise()
+#metfile= Dataset(pathes.wrf_met_dir+"/met_em.d01.2010-07-14_00:00:00.nc",'r')
+#get_pressure_from_metfile(metfile)
