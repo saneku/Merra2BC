@@ -48,41 +48,45 @@ def hor_interpolate_3dfield_on_wrf_grid(FIELD, wrf_ny, wrf_nx, wrf_lon, wrf_lat)
     for z_level in range(mer_number_of_z_points):
         #f = interpolate.interp2d(mera_lon, mera_lat, MER_Pres[z_level,:,:], kind='linear')
         #MER_HOR_Pres[z_level,:,:]=f(wrf_lon[0,:], wrf_lat[0,:])
-        FIELD_HOR[z_level,:,:]= interpolate.griddata(merra_points, FIELD[z_level,:,:].ravel(), (wrf_lon[0,:], wrf_lat[0,:]), method='linear')
+        FIELD_HOR[z_level,:,:]= interpolate.griddata(merra_points, FIELD[z_level,:,:].ravel(), (wrf_lon[0,:], wrf_lat[0,:]), method='linear',fill_value=0)
     return FIELD_HOR
 
 
-I STOPPED HERE!!!
-def ver_interpolate_3dfield_on_wrf_grid(FIELD, wrf_ny, wrf_nx, wrf_lon, wrf_lat):
-    MOZ_SPECIE = np.zeros([moz_number_of_z_points,moz_number_of_y_points,moz_number_of_x_points])  # Required SPEC on MOZART mesh
-    for x in range(0,moz_number_of_x_points,1):
-        for y in range(0,moz_number_of_y_points,1):
-            f = interpolate.interp1d(MER_HOR_Pres[:,y,x], MER_HOR_SPECIE[:,y,x], kind='linear',bounds_error=False,fill_value=0)
-            MOZ_SPECIE[:,y,x]=f(MOZ_Pres[:,y,x])
+def ver_interpolate_3dfield_on_wrf_grid(MER_HOR_SPECIE, MER_HOR_PRES,WRF_PRES,wrf_nz, wrf_ny, wrf_nx):
+    WRF_SPECIE = np.zeros([wrf_nz,wrf_ny,wrf_nx])  # Required SPEC on WRF grid
+    for x in range(0,wrf_nx,1):
+        for y in range(0,wrf_ny,1):
+            f = interpolate.interp1d(MER_HOR_PRES[:,y,x], MER_HOR_SPECIE[:,y,x], kind='linear',bounds_error=False,fill_value=0)
+            WRF_SPECIE[:,y,x]=f(WRF_PRES[:,y,x])
+    return WRF_SPECIE
 
 
 #extracts 3d field from merra2 file from given time
 def get_3dfield_by_time(time,merra_file,field_name):
-    FIELD = np.zeros([mer_number_of_z_points,mer_number_of_y_points,mer_number_of_x_points])
+    #FIELD = np.zeros([mer_number_of_z_points,mer_number_of_y_points,mer_number_of_x_points])
     # Extract field from NetCDF file at index defined by time
+    #FIELD = merra_file.variables[field_name][mera_time_idx,:]
+    #return FIELD
     mera_time_idx=get_index_in_file_by_time(time)
-    FIELD = merra_file.variables[field_name][mera_time_idx,:]  #Pa
-
-    return FIELD
+    return merra_file.variables[field_name][mera_time_idx,:]
 
 
+#TODO What is the right way to restore pressure?
 def get_pressure_by_time(time,merra_file):
     global Ptop_mera
     MER_Pres = np.zeros([mer_number_of_z_points,mer_number_of_y_points,mer_number_of_x_points])
     #filling top layer with Ptop_mera
     MER_Pres[0,:,:]=Ptop_mera
+    #OR
+    #MER_Pres[mer_number_of_z_points-1,:,:]=Ptop_mera
+
     # Extract delta P from NetCDF file at index defined by time
     mera_time_idx=get_index_in_file_by_time(time)
     DELP = merra_file.variables['DELP'][mera_time_idx,:]  #Pa
 
-    #        for z_level in reversed(range(mer_number_of_z_points-1)):
-    #            MER_Pres[z_level,:,:]=MER_Pres[z_level+1,:,:]+DELP[z_level+1,:,:]
-
+    #for z_level in reversed(range(mer_number_of_z_points-1)):
+    #    MER_Pres[z_level,:,:]=MER_Pres[z_level+1,:,:]+DELP[z_level+1,:,:]
+    #OR
     for z_level in range(mer_number_of_z_points-1):
         MER_Pres[z_level+1]=MER_Pres[z_level]+DELP[z_level]
 
