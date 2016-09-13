@@ -18,7 +18,6 @@ met_files=[]
 met_times_files={}
 wrf_times={}
 
-start_time=""
 nx=ny=nz=nw=0
 wrf_p_top=0
 znu=[]
@@ -57,7 +56,7 @@ def get_ordered_met_files():
 
 
 def initialise():
-    global met_files,wrf_times,wrf_p_top,znu,xlon,xlat,nx,ny,nz,nw,start_time
+    global met_files,wrf_times,wrf_p_top,znu,xlon,xlat,nx,ny,nz,nw
 
     met_files=sorted([f for f in os.listdir(pathes.wrf_dir) if re.match(pathes.wrf_met_files, f)], key=numericalSort1)
     wrfbddy = Dataset(pathes.wrf_dir+"/"+pathes.wrf_bdy_file,'r')
@@ -77,9 +76,9 @@ def initialise():
     wrfinput=Dataset(pathes.wrf_dir+"/"+pathes.wrf_input_file,'r')
     wrf_p_top=wrfinput.variables['P_TOP'][:]
     znu=wrfinput.variables['ZNU'][:]
-    xlon=wrfinput.variables['XLONG'][:]
-    xlat=wrfinput.variables['XLAT'][:]
-    start_time=''.join(wrfinput.variables['Times'][0])
+    xlon=wrfinput.variables['XLONG'][0,:]
+    xlat=wrfinput.variables['XLAT'][0,:]
+    #start_time=''.join(wrfinput.variables['Times'][0])
     wrfinput.close()
 
 

@@ -48,7 +48,7 @@ def hor_interpolate_3dfield_on_wrf_grid(FIELD, wrf_ny, wrf_nx, wrf_lon, wrf_lat)
     for z_level in range(mer_number_of_z_points):
         #f = interpolate.interp2d(mera_lon, mera_lat, MER_Pres[z_level,:,:], kind='linear')
         #MER_HOR_Pres[z_level,:,:]=f(wrf_lon[0,:], wrf_lat[0,:])
-        FIELD_HOR[z_level,:,:]= interpolate.griddata(merra_points, FIELD[z_level,:,:].ravel(), (wrf_lon[0,:], wrf_lat[0,:]), method='linear',fill_value=0)
+        FIELD_HOR[z_level,:,:]= interpolate.griddata(merra_points, FIELD[z_level,:,:].ravel(), (wrf_lon, wrf_lat), method='linear',fill_value=0)
     return FIELD_HOR
 
 
