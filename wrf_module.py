@@ -24,6 +24,8 @@ znu=[]
 xlon=[[]]
 xlat=[[]]
 
+wrf_lons=[]
+wrf_lats=[]
 
 def get_pressure_from_metfile(metfile):
     PSFC=metfile.variables['PSFC'][:]
@@ -56,7 +58,7 @@ def get_ordered_met_files():
 
 
 def initialise():
-    global met_files,wrf_times,wrf_p_top,znu,xlon,xlat,nx,ny,nz,nw
+    global met_files,wrf_times,wrf_p_top,znu,xlon,xlat,nx,ny,nz,nw,wrf_lons,wrf_lats
 
     met_files=sorted([f for f in os.listdir(pathes.wrf_dir) if re.match(pathes.wrf_met_files, f)], key=numericalSort1)
     wrfbddy = Dataset(pathes.wrf_dir+"/"+pathes.wrf_bdy_file,'r')
@@ -80,6 +82,10 @@ def initialise():
     xlat=wrfinput.variables['XLAT'][0,:]
     #start_time=''.join(wrfinput.variables['Times'][0])
     wrfinput.close()
+
+    wrf_lons=np.concatenate((xlon[:,0],xlon[ny-1,:],xlon[:,nx-1],xlon[0,:]), axis=0)
+    wrf_lats=np.concatenate((xlat[:,0],xlat[ny-1,:],xlat[:,nx-1],xlat[0,:]), axis=0)
+
 
 
 #initialise()

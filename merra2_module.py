@@ -44,21 +44,6 @@ def get_file_name_by_index(index):
 
 
 #********************************
-'''
-def hor_interpolate_3dfield_on_wrf_left_and_right_boubdary(FIELD, wrf_ny, wrf_nx, wrf_lon, wrf_lat):
-    FIELD_HOR=np.zeros([mer_number_of_z_points, wrf_ny])
-    for z_level in range(mer_number_of_z_points):
-        FIELD_HOR[z_level,:]=interpolate.griddata(merra_points, FIELD[z_level,:,:].ravel(), (wrf_lon, wrf_lat), method='linear',fill_value=0)
-    return FIELD_HOR
-
-
-def hor_interpolate_3dfield_on_wrf_top_and_bottom_boubdary(FIELD, wrf_ny, wrf_nx, wrf_lon, wrf_lat):
-    FIELD_HOR=np.zeros([mer_number_of_z_points, wrf_nx])
-    for z_level in range(mer_number_of_z_points):
-        FIELD_HOR[z_level,:]=interpolate.griddata(merra_points, FIELD[z_level,:,:].ravel(), (wrf_lon, wrf_lat), method='linear',fill_value=0)
-    return FIELD_HOR
-'''
-
 #Horizontal interpolation of 3d Merra field on WRF boundary
 def hor_interpolate_3dfield_on_wrf_boubdary(FIELD, wrf_length, wrf_lon, wrf_lat):
     FIELD_HOR=np.zeros([mer_number_of_z_points, wrf_length])
@@ -66,17 +51,13 @@ def hor_interpolate_3dfield_on_wrf_boubdary(FIELD, wrf_length, wrf_lon, wrf_lat)
         FIELD_HOR[z_level,:]=interpolate.griddata(merra_points, FIELD[z_level,:,:].ravel(), (wrf_lon, wrf_lat), method='linear',fill_value=0)
     return FIELD_HOR
 
-
+#Vertical interpolation of Merra boundary on WRF boundary
 def ver_interpolate_3dfield_on_wrf_boubdary(MER_HOR_SPECIE_BND,MER_HOR_PRES_BND,WRF_PRES_BND,wrf_nz, wrf_length):
-
     WRF_SPECIE_BND = np.zeros([wrf_nz,wrf_length])  # Required SPEC on WRF boundary
     for i in range(0,wrf_length):
         f = interpolate.interp1d(MER_HOR_PRES_BND[:,i], MER_HOR_SPECIE_BND[:,i], kind='linear',bounds_error=False,fill_value=0)
         WRF_SPECIE_BND[:,i]=f(WRF_PRES_BND[:,i])
     return WRF_SPECIE_BND
-
-
-
 #********************************
 
 
