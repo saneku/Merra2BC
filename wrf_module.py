@@ -56,6 +56,11 @@ def numericalSort1(value):
 def get_ordered_met_files():
     return met_files
 
+def update_boundaries(wrfbxs,wrfbye,wrfbxe,wrfbys,wrfbdy_f,name,index):
+    wrfbdy_f.variables[name+"_BXS"][index,:]=wrfbxs
+    wrfbdy_f.variables[name+"_BXE"][index,:]=wrfbxe
+    wrfbdy_f.variables[name+"_BYS"][index,:]=wrfbys
+    wrfbdy_f.variables[name+"_BYE"][index,:]=wrfbye
 
 def initialise():
     global met_files,wrf_times,wrf_p_top,znu,xlon,xlat,nx,ny,nz,nw,wrf_lons,wrf_lats

@@ -18,10 +18,7 @@ mer_number_of_z_points=0
 
 times_per_file=0
 
-
 merra_points=0
-#xx=0
-#yy=0
 
 numbers = re.compile(r'(\d+)')
 def numericalSort(value):
@@ -39,8 +36,6 @@ def get_index_in_file_by_time(time):
 
 def get_file_name_by_index(index):
     return merra_files[index]
-
-
 
 
 #********************************
