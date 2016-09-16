@@ -78,10 +78,6 @@ def ver_interpolate_3dfield_on_wrf_grid(MER_HOR_SPECIE, MER_HOR_PRES,WRF_PRES,wr
 
 #extracts 3d field from merra2 file from given time
 def get_3dfield_by_time(time,merra_file,field_name):
-    #FIELD = np.zeros([mer_number_of_z_points,mer_number_of_y_points,mer_number_of_x_points])
-    # Extract field from NetCDF file at index defined by time
-    #FIELD = merra_file.variables[field_name][mera_time_idx,:]
-    #return FIELD
     mera_time_idx=get_index_in_file_by_time(time)
     return np.flipud(merra_file.variables[field_name][mera_time_idx,:])
 
@@ -127,12 +123,9 @@ def initialise():
     yy=yy.ravel()
     merra_points=(xx, yy)
 
-
     #number of times in  mera file
     times_per_file=merra_f.variables['time'].size
-    #print merra_file.RangeBeginningDate
     merra_f.close()
-
 
     index=0
     for merra_file in merra_files:
@@ -142,5 +135,3 @@ def initialise():
             mera_times_files.update({t.strftime("%Y-%m-%d_%H:%M:%S"):index})
             mera_times.update({t.strftime("%Y-%m-%d_%H:%M:%S"):i})
         index=index+1
-
-#initialise()

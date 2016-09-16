@@ -1,5 +1,6 @@
 #TODO check that spatial dimensions are covered
 #TODO add coefficients
+#TODO check species correspondance
 
 import pathes
 import time
@@ -103,9 +104,9 @@ for cur_time in time_intersection:
     WRF_PRES=wrf_module.get_pressure_from_metfile(metfile)
     WRF_PRES_BND=np.concatenate((WRF_PRES[:,:,0],WRF_PRES[:,wrf_module.ny-1,:],WRF_PRES[:,:,wrf_module.nx-1],WRF_PRES[:,0,:]), axis=1)
     #TODO UNCOMMENT IT
-    #metfile.close()
+    metfile.close()
 
-
+    sp_index=0
     for merra_specie in pathes.chem_map:
         print "\n\t\t - Reading "+merra_specie+" field from MERRA."# It corresponds to "+pathes.chem_map[merra_specie]+" in WRF."
         MER_SPECIE=merra2_module.get_3dfield_by_time(cur_time,merra_f,merra_specie)
@@ -122,13 +123,15 @@ for cur_time in time_intersection:
         WRF_SPECIE_RIGHT_BND =WRF_SPECIE_BND[:,wrf_module.ny+wrf_module.nx:2*wrf_module.ny+wrf_module.nx]
         WRF_SPECIE_BOT_BND   =WRF_SPECIE_BND[:,2*wrf_module.ny+wrf_module.nx:2*wrf_module.ny+2*wrf_module.nx]
 
-        wrfxs=np.repeat(WRF_SPECIE_LEFT_BND[:,:,np.newaxis], wrf_module.nw, axis=2)
-        wrfye=np.repeat(WRF_SPECIE_TOP_BND[:,:,np.newaxis], wrf_module.nw, axis=2)
-        wrfxe=np.repeat(WRF_SPECIE_RIGHT_BND[:,:,np.newaxis], wrf_module.nw, axis=2)
-        wrfys=np.repeat(WRF_SPECIE_BOT_BND[:,:,np.newaxis], wrf_module.nw, axis=2)
+        wrfxs=np.repeat(WRF_SPECIE_LEFT_BND[np.newaxis,:,:], wrf_module.nw, axis=0)
+        wrfye=np.repeat(WRF_SPECIE_TOP_BND[np.newaxis,:,:], wrf_module.nw, axis=0)
+        wrfxe=np.repeat(WRF_SPECIE_RIGHT_BND[np.newaxis,:,:], wrf_module.nw, axis=0)
+        wrfys=np.repeat(WRF_SPECIE_BOT_BND[np.newaxis,:,:], wrf_module.nw, axis=0)
 
-        print "\t\tUpdating "+pathes.chem_map[merra_specie]+" in wrfbdy at index "+str(wrf_module.get_index_in_file_by_time(cur_time))
-        wrf_module.update_boundaries(wrfxs,wrfye,wrfxe,wrfys,wrfbdy_f,pathes.chem_map[merra_specie],wrf_module.get_index_in_file_by_time(cur_time))
+        print "\t\t - Updating "+pathes.chem_map[merra_specie]+" in wrfbdy at index "+str(wrf_module.get_index_in_file_by_time(cur_time))
+        wrf_module.update_boundaries(wrfxs,wrfye,wrfxe,wrfys,wrfbdy_f,pathes.chem_map[merra_specie],wrf_module.get_index_in_file_by_time(cur_time),sp_index)
+        sp_index=sp_index+1
+
 
     print("--- %s seconds ---" % (time.time() - start_time))
 #************************
