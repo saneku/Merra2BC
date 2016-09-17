@@ -41,6 +41,41 @@ def get_file_name_by_index(index):
     return merra_files[index]
 
 
+
+
+
+#*******************************
+#*******************************
+#*******************************
+def hor_interpolate_3dfield_on_wrf_boubdary1(wrf_length, wrf_lon, wrf_lat,FIELD):
+    FIELD_BND=np.zeros([FIELD.shape[0], wrf_length])
+    #print 'process id: '+str(os.getpid())+"  FIELD.shape="+str(FIELD.shape)#+" wrf_ny="+str(wrf_ny)+" wrf_nx="+str(wrf_nx)#+" shape="+FIELD.shape
+    #print 'process id: '+str(os.getpid())+" FIELD_BND.shape="+str(FIELD_BND.shape)
+
+    for z_level in range(FIELD.shape[0]):
+        FIELD_BND[z_level,:]= interpolate.griddata(merra_points, FIELD[z_level,:,:].ravel(), (wrf_lon, wrf_lat), method='linear',fill_value=0)
+    return FIELD_BND
+
+
+def threaded_hor_interpolate_3dfield_on_wrf_boubdary(FIELD, wrf_length, wrf_lon, wrf_lat):
+    # Make the Pool of number_of_workers workers
+    N=pathes.number_of_workers
+    pool = Pool(N)
+    result=np.zeros([mer_number_of_z_points, wrf_length])
+    func = partial(hor_interpolate_3dfield_on_wrf_boubdary1, wrf_length, wrf_lon, wrf_lat)
+    result=pool.map(func, np.array_split(FIELD, N))
+    pool.close()
+    pool.join()
+
+    return np.concatenate(result)
+
+#*******************************
+#*******************************
+#*******************************
+
+
+
+
 #********************************
 #Horizontal interpolation of 3d Merra field on WRF boundary
 def hor_interpolate_3dfield_on_wrf_boubdary(FIELD, wrf_length, wrf_lon, wrf_lat):
@@ -75,9 +110,9 @@ def hor_interpolate_3dfield_on_wrf_grid(FIELD, wrf_ny, wrf_nx, wrf_lon, wrf_lat)
 #*******************************
 #*******************************
 def hor_interpolate_3dfield_on_wrf_grid1(wrf_ny, wrf_nx, wrf_lon, wrf_lat,FIELD):
+    FIELD_HOR=np.zeros([FIELD.shape[0], wrf_ny, wrf_nx])
     #print 'process id: '+str(os.getpid())+"  FIELD.shape="+str(FIELD.shape)#+" wrf_ny="+str(wrf_ny)+" wrf_nx="+str(wrf_nx)#+" shape="+FIELD.shape
     #print 'process id: '+str(os.getpid())+" FIELD_HOR.shape="+str(FIELD_HOR.shape)
-    FIELD_HOR=np.zeros([FIELD.shape[0], wrf_ny, wrf_nx])
 
     for z_level in range(FIELD.shape[0]):
         FIELD_HOR[z_level,:,:]= interpolate.griddata(merra_points, FIELD[z_level,:,:].ravel(), (wrf_lon, wrf_lat), method='linear',fill_value=0)

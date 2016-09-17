@@ -1,6 +1,7 @@
 #TODO check that spatial dimensions are covered
 #TODO add coefficients
 #TODO check species correspondance
+#TODO compare CS of my interpolation with CS of MOZART interpolation
 
 import pathes
 import time
@@ -31,7 +32,7 @@ print "Opening mera file: "+merra2_module.get_file_name_by_index(index_of_opened
 merra_f = Dataset(pathes.mera_dir+"/"+merra2_module.get_file_name_by_index(index_of_opened_mera_file),'r')
 MERA_PRES=merra2_module.get_pressure_by_time(cur_time,merra_f)
 
-
+'''
 #Threaded Horizontal interpolation of Merra pressure on WRF horizontal grid
 MER_HOR_PRES=merra2_module.threaded_hor_interpolate_3dfield_on_wrf_grid(MERA_PRES,wrf_module.ny,wrf_module.nx,wrf_module.xlon,wrf_module.xlat)
 
@@ -103,8 +104,11 @@ for cur_time in time_intersection:
     print "\n\tCur_time="+cur_time
     print "\tReading MERRA Pressure at index "+str(merra2_module.get_index_in_file_by_time(cur_time))
     MERA_PRES=merra2_module.get_pressure_by_time(cur_time,merra_f)
+
     print "\tHorizontal interpolation of MERRA Pressure on WRF boundary"
-    MER_HOR_PRES_BND=merra2_module.hor_interpolate_3dfield_on_wrf_boubdary(MERA_PRES,len(wrf_module.wrf_lons),wrf_module.wrf_lons,wrf_module.wrf_lats)
+    MER_HOR_PRES_BND=merra2_module.threaded_hor_interpolate_3dfield_on_wrf_boubdary(MERA_PRES,len(wrf_module.wrf_lons),wrf_module.wrf_lons,wrf_module.wrf_lats)
+    #MER_HOR_PRES_BND=merra2_module.hor_interpolate_3dfield_on_wrf_boubdary(MERA_PRES,len(wrf_module.wrf_lons),wrf_module.wrf_lons,wrf_module.wrf_lats)
+
 
     print "\tReading WRF Pressure from: "+wrf_module.get_met_file_by_time(cur_time)
     metfile= Dataset(pathes.wrf_met_dir+"/"+wrf_module.get_met_file_by_time(cur_time),'r')
@@ -119,7 +123,9 @@ for cur_time in time_intersection:
         MER_SPECIE=merra2_module.get_3dfield_by_time(cur_time,merra_f,merra_specie)
 
         print "\t\tHorizontal interpolation of "+merra_specie+" on WRF boundary"
-        MER_HOR_SPECIE_BND=merra2_module.hor_interpolate_3dfield_on_wrf_boubdary(MER_SPECIE,len(wrf_module.wrf_lons),wrf_module.wrf_lons,wrf_module.wrf_lats)
+        MER_HOR_SPECIE_BND=merra2_module.threaded_hor_interpolate_3dfield_on_wrf_boubdary(MER_SPECIE,len(wrf_module.wrf_lons),wrf_module.wrf_lons,wrf_module.wrf_lats)
+        #MER_HOR_SPECIE_BND=merra2_module.hor_interpolate_3dfield_on_wrf_boubdary(MER_SPECIE,len(wrf_module.wrf_lons),wrf_module.wrf_lons,wrf_module.wrf_lats)
+
 
         print "\t\tVertical interpolation of "+merra_specie+" on WRF boundary"
         WRF_SPECIE_BND=merra2_module.ver_interpolate_3dfield_on_wrf_boubdary(MER_HOR_SPECIE_BND,MER_HOR_PRES_BND,WRF_PRES_BND,wrf_module.nz,len(wrf_module.wrf_lons))
@@ -151,6 +157,6 @@ print "Closing "+pathes.wrf_bdy_file
 wrfbdy_f.close()
 
 print "FINISH BOUNDARY CONDITIONS"
-'''
+
 
 print("--- %s seconds ---" % (time.time() - start_time))
