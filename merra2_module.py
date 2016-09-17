@@ -6,6 +6,9 @@ from datetime import datetime, timedelta
 import numpy as np
 from scipy import interpolate
 
+from multiprocessing import Pool
+from functools import partial
+
 Ptop_mera=1 #Pa   (=0.01 hPa)
 mera_lat=0
 mera_lon=0
@@ -65,6 +68,37 @@ def hor_interpolate_3dfield_on_wrf_grid(FIELD, wrf_ny, wrf_nx, wrf_lon, wrf_lat)
         #MER_HOR_Pres[z_level,:,:]=f(wrf_lon[0,:], wrf_lat[0,:])
         FIELD_HOR[z_level,:,:]= interpolate.griddata(merra_points, FIELD[z_level,:,:].ravel(), (wrf_lon, wrf_lat), method='linear',fill_value=0)
     return FIELD_HOR
+
+
+
+#*******************************
+#*******************************
+#*******************************
+def hor_interpolate_3dfield_on_wrf_grid1(wrf_ny, wrf_nx, wrf_lon, wrf_lat,FIELD):
+    #print 'process id: '+str(os.getpid())+"  FIELD.shape="+str(FIELD.shape)#+" wrf_ny="+str(wrf_ny)+" wrf_nx="+str(wrf_nx)#+" shape="+FIELD.shape
+    #print 'process id: '+str(os.getpid())+" FIELD_HOR.shape="+str(FIELD_HOR.shape)
+    FIELD_HOR=np.zeros([FIELD.shape[0], wrf_ny, wrf_nx])
+
+    for z_level in range(FIELD.shape[0]):
+        FIELD_HOR[z_level,:,:]= interpolate.griddata(merra_points, FIELD[z_level,:,:].ravel(), (wrf_lon, wrf_lat), method='linear',fill_value=0)
+    return FIELD_HOR
+
+
+def threaded_hor_interpolate_3dfield_on_wrf_grid(FIELD, wrf_ny, wrf_nx, wrf_lon, wrf_lat):
+    # Make the Pool of number_of_workers workers
+    N=pathes.number_of_workers
+    pool = Pool(N)
+    result=np.zeros([mer_number_of_z_points, wrf_ny, wrf_nx])
+    func = partial(hor_interpolate_3dfield_on_wrf_grid1, wrf_ny, wrf_nx, wrf_lon, wrf_lat)
+    result=pool.map(func, np.array_split(FIELD, N))
+    pool.close()
+    pool.join()
+
+    return np.concatenate(result)
+
+#*******************************
+#*******************************
+#*******************************
 
 
 def ver_interpolate_3dfield_on_wrf_grid(MER_HOR_SPECIE, MER_HOR_PRES,WRF_PRES,wrf_nz, wrf_ny, wrf_nx):

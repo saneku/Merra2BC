@@ -23,7 +23,7 @@ if(len(time_intersection)!=len(wrf_module.wrf_times)):
 #sorting times for processing
 time_intersection=sorted(time_intersection, key=lambda x: time.mktime(time.strptime(x,"%Y-%m-%d_%H:%M:%S")))
 
-'''
+
 print "START INITIAL CONDITIONS"
 cur_time=time_intersection[0]
 index_of_opened_mera_file=merra2_module.get_file_index_by_time(cur_time)
@@ -32,8 +32,12 @@ merra_f = Dataset(pathes.mera_dir+"/"+merra2_module.get_file_name_by_index(index
 MERA_PRES=merra2_module.get_pressure_by_time(cur_time,merra_f)
 
 
+#Threaded Horizontal interpolation of Merra pressure on WRF horizontal grid
+MER_HOR_PRES=merra2_module.threaded_hor_interpolate_3dfield_on_wrf_grid(MERA_PRES,wrf_module.ny,wrf_module.nx,wrf_module.xlon,wrf_module.xlat)
+
 #Horizontal interpolation of Merra pressure on WRF horizontal grid
-MER_HOR_PRES=merra2_module.hor_interpolate_3dfield_on_wrf_grid(MERA_PRES,wrf_module.ny,wrf_module.nx,wrf_module.xlon,wrf_module.xlat)
+#MER_HOR_PRES=merra2_module.hor_interpolate_3dfield_on_wrf_grid(MERA_PRES,wrf_module.ny,wrf_module.nx,wrf_module.xlon,wrf_module.xlat)
+
 
 print "Opening metfile: "+wrf_module.get_met_file_by_time(cur_time)
 metfile= Dataset(pathes.wrf_met_dir+"/"+wrf_module.get_met_file_by_time(cur_time),'r')
@@ -48,7 +52,10 @@ for merra_specie in pathes.chem_map:
 
     #Horizontal interpolation of Merra specie on WRF horizontal grid
     print "\t\t - Horisontal interpolation of "+merra_specie+" on WRF horizontal grid"
-    MER_HOR_SPECIE=merra2_module.hor_interpolate_3dfield_on_wrf_grid(MER_SPECIE,wrf_module.ny,wrf_module.nx,wrf_module.xlon,wrf_module.xlat)
+    #MER_HOR_SPECIE=merra2_module.hor_interpolate_3dfield_on_wrf_grid(MER_SPECIE,wrf_module.ny,wrf_module.nx,wrf_module.xlon,wrf_module.xlat)
+
+    #Threaded Horizontal interpolation of Merra specie on WRF horizontal grid
+    MER_HOR_SPECIE=merra2_module.threaded_hor_interpolate_3dfield_on_wrf_grid(MER_SPECIE,wrf_module.ny,wrf_module.nx,wrf_module.xlon,wrf_module.xlat)
 
     #Vertical interpolation of MER_HOR_SPECIE on WRF vertical grid
     print "\t\t - Vertical interpolation of "+merra_specie+" on WRF vertical grid"
@@ -144,6 +151,6 @@ print "Closing "+pathes.wrf_bdy_file
 wrfbdy_f.close()
 
 print "FINISH BOUNDARY CONDITIONS"
-
+'''
 
 print("--- %s seconds ---" % (time.time() - start_time))
