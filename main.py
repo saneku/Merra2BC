@@ -1,6 +1,3 @@
-#TODO add coefficients
-#TODO compare CS of my interpolation with CS of MOZART interpolation
-
 import pathes
 import time
 start_time = time.time()
@@ -85,6 +82,9 @@ if pathes.do_IC:
         WRF_SPECIE=merra2_module.ver_interpolate_3dfield_on_wrf_grid(MER_HOR_SPECIE,MER_HOR_PRES,WRF_PRES,wrf_module.nz,wrf_module.ny,wrf_module.nx)
         WRF_SPECIE=np.flipud(WRF_SPECIE)
 
+        print "\t\t - Multipplying "+merra_specie+" by "+str(pathes.coefficients[merra_specie])
+        WRF_SPECIE=WRF_SPECIE*pathes.coefficients[merra_specie]
+
         print "\t\t - Updating wrfinput by "+merra_specie+" from MERRA2\n"
         wrfinput_f.variables[pathes.chem_map[merra_specie]][0,:]=WRF_SPECIE
 
@@ -155,6 +155,9 @@ if pathes.do_BC:
             print "\t\tVertical interpolation of "+merra_specie+" on WRF boundary"
             WRF_SPECIE_BND=merra2_module.ver_interpolate_3dfield_on_wrf_boubdary(MER_HOR_SPECIE_BND,MER_HOR_PRES_BND,WRF_PRES_BND,wrf_module.nz,len(wrf_module.wrf_lons))
             WRF_SPECIE_BND=np.flipud(WRF_SPECIE_BND)
+
+            print "\t\t - Multipplying "+merra_specie+" by "+str(pathes.coefficients[merra_specie])
+            WRF_SPECIE_BND=WRF_SPECIE_BND*pathes.coefficients[merra_specie]
 
             WRF_SPECIE_LEFT_BND  =WRF_SPECIE_BND[:,0:wrf_module.ny]
             WRF_SPECIE_TOP_BND   =WRF_SPECIE_BND[:,wrf_module.ny:wrf_module.ny+wrf_module.nx]

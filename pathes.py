@@ -17,3 +17,4 @@ do_BC=True
 
 #mapping between MERRA2 species and WRF species
 chem_map      ={'DU001':'DUST_1','DU002':'DUST_2','DU003':'DUST_3','DU004':'DUST_4','DU005':'DUST_5'}
+coefficients  ={'DU001':1e9,'DU002':1e9,'DU003':1e9,'DU004':1e9,'DU005':1e9}

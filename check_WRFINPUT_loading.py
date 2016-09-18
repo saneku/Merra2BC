@@ -39,6 +39,10 @@ WRF_DUST=np.delete(WRF_DUST, 0, axis=0)
 
 WRF_DUST=np.flipud(WRF_DUST)
 
+#converting to kg/kg
+WRF_DUST=WRF_DUST*1e-9
+
+
 WRF_LOAD=WRF_DELP*WRF_DUST/g
 WRF_LOAD=np.sum(WRF_LOAD, axis=0)
 

@@ -39,6 +39,9 @@ WRF_DUST=np.flipud(WRF_DUST)
 fig = plt.figure(figsize=(20,20))
 WRF_DUST=WRF_DUST[:,ny_cs,:]
 
+#converting to kg/kg
+WRF_DUST=WRF_DUST*1e-9
+
 WRF_Pres=WRF_Pres[:,ny_cs,:]
 WRF_Pres=(WRF_Pres/100.0)  #convert to hPa, 1 hPa = 100 Pa
 
