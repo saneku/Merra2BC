@@ -9,7 +9,6 @@ met_times_files={}
 wrf_times={}
 
 spec_number=0
-dt=0
 nx=ny=nz=nw=0
 wrf_p_top=0
 znu=[]
@@ -56,8 +55,8 @@ def get_ordered_met_files():
     return met_files
 
 
-def update_boundaries(wrfbxs,wrfbye,wrfbxe,wrfbys,wrfbdy_f,name,index,sp_index):
-    global wrfbxs_o,wrfbxe_o,wrfbys_o,wrfbye_o,dt
+def update_boundaries(wrfbxs,wrfbye,wrfbxe,wrfbys,wrfbdy_f,name,index,sp_index,dt):
+    global wrfbxs_o,wrfbxe_o,wrfbys_o,wrfbye_o
 
     print "\t\t\tWriting BC for "+name
     wrfbdy_f.variables[name+"_BXS"][index,:]=wrfbxs
@@ -79,7 +78,7 @@ def update_boundaries(wrfbxs,wrfbye,wrfbxe,wrfbys,wrfbdy_f,name,index,sp_index):
 
 
 def initialise():
-    global met_files,wrf_times,wrf_p_top,znu,xlon,xlat,nx,ny,nz,nw,wrf_lons,wrf_lats,dt,spec_number,wrfbxs_o,wrfbxe_o,wrfbys_o,wrfbye_o,wrf_vars
+    global met_files,wrf_times,wrf_p_top,znu,xlon,xlat,nx,ny,nz,nw,wrf_lons,wrf_lats,spec_number,wrfbxs_o,wrfbxe_o,wrfbys_o,wrfbye_o,wrf_vars
 
     met_files=sorted([f for f in os.listdir(pathes.wrf_dir) if re.match(pathes.wrf_met_files, f)], key=numericalSort1)
     wrfbddy = Dataset(pathes.wrf_dir+"/"+pathes.wrf_bdy_file,'r')
@@ -91,7 +90,6 @@ def initialise():
     ny=wrfbddy.dimensions['south_north'].size
     nz=wrfbddy.dimensions['bottom_top'].size
     nw=wrfbddy.dimensions['bdy_width'].size
-    dt=wrfbddy.getncattr('DT')
     wrfbddy.close()
 
     #Reading "PRESSURE TOP OF THE MODEL, PA" and "eta values on half (mass) levels"

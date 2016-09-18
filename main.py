@@ -6,6 +6,8 @@ import wrf_module
 import utils
 from netCDF4 import Dataset
 import numpy as np
+from datetime import datetime, timedelta
+
 
 #modules initialisation
 merra2_module.initialise()
@@ -106,6 +108,8 @@ if pathes.do_BC:
     print "Opening "+pathes.wrf_bdy_file
     wrfbdy_f=Dataset(pathes.wrf_dir+"/"+pathes.wrf_bdy_file,'r+')
 
+    #difference betweeen two given times
+    dt=(datetime.strptime(time_intersection[1], '%Y-%m-%d_%H:%M:%S')-datetime.strptime(time_intersection[0], '%Y-%m-%d_%H:%M:%S')).total_seconds()
 
     cur_time=time_intersection[0]
     index_of_opened_mera_file=merra2_module.get_file_index_by_time(cur_time)
@@ -170,7 +174,7 @@ if pathes.do_BC:
             wrfys=np.repeat(WRF_SPECIE_BOT_BND[np.newaxis,:,:], wrf_module.nw, axis=0)
 
             print "\t\t - Updating "+pathes.chem_map[merra_specie]+" in wrfbdy at index "+str(wrf_module.get_index_in_file_by_time(cur_time))
-            wrf_module.update_boundaries(wrfxs,wrfye,wrfxe,wrfys,wrfbdy_f,pathes.chem_map[merra_specie],wrf_module.get_index_in_file_by_time(cur_time),sp_index)
+            wrf_module.update_boundaries(wrfxs,wrfye,wrfxe,wrfys,wrfbdy_f,pathes.chem_map[merra_specie],wrf_module.get_index_in_file_by_time(cur_time),sp_index,dt)
             sp_index=sp_index+1
 
         print("--- %s seconds ---" % (time.time() - start_time))
