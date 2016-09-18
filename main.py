@@ -1,5 +1,3 @@
-#TODO fix bug with tendecies
-
 #TODO add coefficients
 #TODO compare CS of my interpolation with CS of MOZART interpolation
 
