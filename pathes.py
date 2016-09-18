@@ -9,6 +9,11 @@ mera_dir="/home/ukhova/Downloads/Merra2ForVISUVI/"
 mera_files="svc_MERRA2_300.inst3_3d_aer_Nv.20100*"
 
 number_of_workers=18
+enable_threading=True
+
+do_IC=True
+do_BC=True
+
 
 #mapping between MERRA2 species and WRF species
 chem_map      ={'DU001':'DUST_1','DU002':'DUST_2','DU003':'DUST_3','DU004':'DUST_4','DU005':'DUST_5'}

@@ -152,7 +152,6 @@ def get_3dfield_by_time(time,merra_file,field_name):
     return np.flipud(merra_file.variables[field_name][mera_time_idx,:])
 
 
-#TODO What is the right way to restore pressure?
 def get_pressure_by_time(time,merra_file):
     global Ptop_mera
     MER_Pres = np.zeros([mer_number_of_z_points,mer_number_of_y_points,mer_number_of_x_points])
