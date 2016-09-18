@@ -16,6 +16,8 @@ znu=[]
 xlon=[[]]
 xlat=[[]]
 
+wrf_vars=[]
+
 wrfbxs_o=[]
 wrfbxe_o=[[[[]]]]
 wrfbys_o=[[[[]]]]
@@ -77,7 +79,7 @@ def update_boundaries(wrfbxs,wrfbye,wrfbxe,wrfbys,wrfbdy_f,name,index,sp_index):
 
 
 def initialise():
-    global met_files,wrf_times,wrf_p_top,znu,xlon,xlat,nx,ny,nz,nw,wrf_lons,wrf_lats,dt,spec_number,wrfbxs_o,wrfbxe_o,wrfbys_o,wrfbye_o
+    global met_files,wrf_times,wrf_p_top,znu,xlon,xlat,nx,ny,nz,nw,wrf_lons,wrf_lats,dt,spec_number,wrfbxs_o,wrfbxe_o,wrfbys_o,wrfbye_o,wrf_vars
 
     met_files=sorted([f for f in os.listdir(pathes.wrf_dir) if re.match(pathes.wrf_met_files, f)], key=numericalSort1)
     wrfbddy = Dataset(pathes.wrf_dir+"/"+pathes.wrf_bdy_file,'r')
@@ -98,7 +100,7 @@ def initialise():
     znu=wrfinput.variables['ZNU'][:]
     xlon=wrfinput.variables['XLONG'][0,:]
     xlat=wrfinput.variables['XLAT'][0,:]
-    #start_time=''.join(wrfinput.variables['Times'][0])
+    wrf_vars=[var for var in wrfinput.variables]
     wrfinput.close()
 
     wrf_lons=np.concatenate((xlon[:,0],xlon[ny-1,:],xlon[:,nx-1],xlon[0,:]), axis=0)

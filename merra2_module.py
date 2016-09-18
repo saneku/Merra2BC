@@ -15,6 +15,7 @@ mera_lon=0
 merra_files=[]
 mera_times={}                           #map between time and index in file
 mera_times_files={}                     #map between time and file index
+merra_vars=[]
 mer_number_of_x_points=0
 mer_number_of_y_points=0
 mer_number_of_z_points=0
@@ -176,13 +177,15 @@ def get_pressure_by_time(time,merra_file):
 
 
 def initialise():
-    global merra_files,mer_number_of_x_points,mer_number_of_y_points,mer_number_of_z_points,mera_lon,mera_lat,times_per_file,merra_points
+    global merra_files,mer_number_of_x_points,mer_number_of_y_points,mer_number_of_z_points,mera_lon,mera_lat,times_per_file,merra_points,merra_vars
 
     merra_files=sorted([f for f in os.listdir(pathes.mera_dir) if re.match(pathes.mera_files, f)], key=numericalSort)
     merra_f = Dataset(pathes.mera_dir+"/"+merra_files[0],'r')
     mer_number_of_x_points=merra_f.variables['lon'].size
     mer_number_of_y_points=merra_f.variables['lat'].size
     mer_number_of_z_points=merra_f.variables['lev'].size
+
+    merra_vars = [var for var in merra_f.variables]
 
     mera_lon  = merra_f.variables['lon'][:]
     mera_lat  = merra_f.variables['lat'][:]

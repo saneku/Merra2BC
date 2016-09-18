@@ -1,6 +1,8 @@
-#TODO check that spatial dimensions are covered
+#TODO add flag for threaded processing
+
+#TODO fix bug with tendecies
+
 #TODO add coefficients
-#TODO check species correspondance
 #TODO compare CS of my interpolation with CS of MOZART interpolation
 
 import pathes
@@ -16,8 +18,26 @@ import numpy as np
 merra2_module.initialise()
 wrf_module.initialise()
 
+
+#-----------------------------
+#Sanity checks:
+#check species availability in wrf and in merra files
+for var in pathes.chem_map:
+    if var not in merra2_module.merra_vars:
+        utils.error_message("Could not find variable "+var+" in MERRA2 file. Exiting...")
+
+for var in pathes.chem_map.values():
+    if var not in wrf_module.wrf_vars:
+        utils.error_message("Could not find variable "+var+" in WRF input file. Exiting...")
+
+#check that spatial dimensions are covered
+if((min(wrf_module.wrf_lons)<min(merra2_module.mera_lon))|(max(wrf_module.wrf_lons)>max(merra2_module.mera_lon))|(min(wrf_module.wrf_lats)<min(merra2_module.mera_lat))|(max(wrf_module.wrf_lats)>max(merra2_module.mera_lat))):
+    utils.error_message("WRF area is not fully covered by MERRA2 area. Exiting...")
+#-----------------------------
+
 time_intersection=wrf_module.wrf_times.viewkeys() & merra2_module.mera_times.viewkeys()
 
+#check that wrf time is covered by merra2 time
 if(len(time_intersection)!=len(wrf_module.wrf_times)):
     utils.error_message("WRF time range is not fully covered by MERRA2 time range. Exiting...")
 
