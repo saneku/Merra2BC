@@ -28,8 +28,8 @@ for var in pathes.chem_map.values():
         utils.error_message("Could not find variable "+var+" in WRF input file. Exiting...")
 
 #check that spatial dimensions are covered
-#if((min(wrf_module.wrf_lons)<min(merra2_module.mera_lon))|(max(wrf_module.wrf_lons)>max(merra2_module.mera_lon))|(min(wrf_module.wrf_lats)<min(merra2_module.mera_lat))|(max(wrf_module.wrf_lats)>max(merra2_module.mera_lat))):
-#    utils.error_message("WRF area is not fully covered by MERRA2 area. Exiting...")
+if((min(wrf_module.wrf_lons)<min(merra2_module.mera_lon))|(max(wrf_module.wrf_lons)>max(merra2_module.mera_lon))|(min(wrf_module.wrf_lats)<min(merra2_module.mera_lat))|(max(wrf_module.wrf_lats)>max(merra2_module.mera_lat))):
+    utils.error_message("WRF area is not fully covered by MERRA2 area. Exiting...")
 #-----------------------------
 
 time_intersection=wrf_module.wrf_times.viewkeys() & merra2_module.mera_times.viewkeys()

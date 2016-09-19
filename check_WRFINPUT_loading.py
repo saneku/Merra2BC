@@ -48,7 +48,7 @@ WRF_LOAD=np.sum(WRF_LOAD, axis=0)
 
 
 fig = plt.figure(figsize=(20,20))
-ash_map = Basemap(width=4400000,height=4400000,resolution='l',area_thresh=100.,projection='lcc', lat_1=30.,lat_2=40,lat_0=35,lon_0=25)
+ash_map = Basemap(width=4400000,height=4400000,resolution='l',area_thresh=100.,projection='lcc', lat_1=30.,lat_2=40,lat_0=35,lon_0=28)
 ash_map.drawcoastlines(linewidth=1)
 ash_map.drawmapboundary(linewidth=0.25)
 
