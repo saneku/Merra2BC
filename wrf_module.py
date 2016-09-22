@@ -104,7 +104,7 @@ def initialise():
     wrf_lons=np.concatenate((xlon[:,0],xlon[ny-1,:],xlon[:,nx-1],xlon[0,:]), axis=0)
     wrf_lats=np.concatenate((xlat[:,0],xlat[ny-1,:],xlat[:,nx-1],xlat[0,:]), axis=0)
 
-    spec_number=len(pathes.chem_map)
+    spec_number=len(pathes.spc_map)
 
     wrfbxs_o=np.zeros((spec_number,nw,nz,ny))
     wrfbxe_o=np.zeros((spec_number,nw,nz,ny))

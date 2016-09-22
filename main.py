@@ -1,8 +1,13 @@
+#TODO set option for interpolation type
+#TODO if there is a dublicate in WRF scpes in spc_map
+#TODO if there is a dublicate in MERRA specs in spc_map
+
 import pathes
 import time
 start_time = time.time()
 import merra2_module
 import wrf_module
+import merra2wrf_mapper
 import utils
 from netCDF4 import Dataset
 import numpy as np
@@ -12,6 +17,7 @@ from datetime import datetime, timedelta
 #modules initialisation
 merra2_module.initialise()
 wrf_module.initialise()
+merra2wrf_mapper.initialise()
 
 if pathes.enable_threading:
     print "Multiprocessing is active. "+str(pathes.number_of_workers)+" threads will be used."
@@ -19,11 +25,11 @@ if pathes.enable_threading:
 #-----------------------------
 #Sanity checks:
 #check species availability in wrf and in merra files
-for var in pathes.chem_map:
+for var in merra2wrf_mapper.get_merra_vars():
     if var not in merra2_module.merra_vars:
         utils.error_message("Could not find variable "+var+" in MERRA2 file. Exiting...")
 
-for var in pathes.chem_map.values():
+for var in merra2wrf_mapper.get_wrf_vars():
     if var not in wrf_module.wrf_vars:
         utils.error_message("Could not find variable "+var+" in WRF input file. Exiting...")
 
@@ -65,8 +71,8 @@ if pathes.do_IC:
     print "Opening wrfintput: "+pathes.wrf_input_file
     wrfinput_f=Dataset(pathes.wrf_dir+"/"+pathes.wrf_input_file,'r+')
 
-    for merra_specie in pathes.chem_map:
-        print "\t\t - Reading "+merra_specie+" field from Merra2. It corresponds to "+pathes.chem_map[merra_specie]+" in WRF."
+    for merra_specie in merra2wrf_mapper.get_merra_vars():
+        print "\t\t - Reading "+merra_specie+" field from Merra2."#It corresponds to "+pathes.chem_map[merra_specie]+" in WRF."
         MER_SPECIE=merra2_module.get_3dfield_by_time(cur_time,merra_f,merra_specie)
 
         print "\t\t - Horisontal interpolation of "+merra_specie+" on WRF horizontal grid"
@@ -84,10 +90,12 @@ if pathes.do_IC:
         WRF_SPECIE=merra2_module.ver_interpolate_3dfield_on_wrf_grid(MER_HOR_SPECIE,MER_HOR_PRES,WRF_PRES,wrf_module.nz,wrf_module.ny,wrf_module.nx)
         WRF_SPECIE=np.flipud(WRF_SPECIE)
 
+        #TODO FIX HERE
         print "\t\t - Multipplying "+merra_specie+" by "+str(pathes.coefficients[merra_specie])
         WRF_SPECIE=WRF_SPECIE*pathes.coefficients[merra_specie]
 
-        print "\t\t - Updating wrfinput by "+merra_specie+" from MERRA2\n"
+        #TODO FIX HERE
+        print "\t\t - Updating wrfinput by "+merra_specie+" from MERRA2 \n"
         wrfinput_f.variables[pathes.chem_map[merra_specie]][0,:]=WRF_SPECIE
 
     print "Closing wrfintput: "+pathes.wrf_input_file
@@ -101,7 +109,7 @@ if pathes.do_IC:
 
     print "FINISH INITIAL CONDITIONS"
 
-
+'''
 if pathes.do_BC:
     print "\n\nSTART BOUNDARY CONDITIONS"
 
@@ -186,6 +194,6 @@ if pathes.do_BC:
     wrfbdy_f.close()
 
     print "FINISH BOUNDARY CONDITIONS"
-
+'''
 
 print("--- %s seconds ---" % (time.time() - start_time))
