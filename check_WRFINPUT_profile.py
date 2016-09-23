@@ -16,7 +16,8 @@ g=9.81
 ny_cs=3
 
 #dust bins from wrfinput
-dust_array=['DUST_1','DUST_2','DUST_3','DUST_4','DUST_5']
+#dust_array=['DUST_1','DUST_2','DUST_3','DUST_4','DUST_5']
+dust_array=['oin_a02','oin_a03','oin_a04','oin_a05','oin_a06','oin_a07','oin_a08']
 
 merra2_module.initialise()
 wrf_module.initialise()

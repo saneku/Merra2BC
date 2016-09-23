@@ -11,7 +11,7 @@ import merra2wrf_mapper
 import utils
 from netCDF4 import Dataset
 import numpy as np
-from datetime import datetime, timedelta
+from datetime import datetime
 
 
 #modules initialisation
@@ -72,7 +72,7 @@ if pathes.do_IC:
     wrfinput_f=Dataset(pathes.wrf_dir+"/"+pathes.wrf_input_file,'r+')
 
     for merra_specie in merra2wrf_mapper.get_merra_vars():
-        print "\t\t - Reading "+merra_specie+" field from Merra2."#It corresponds to "+pathes.chem_map[merra_specie]+" in WRF."
+        print "\t\t - Reading "+merra_specie+" field from Merra2."
         MER_SPECIE=merra2_module.get_3dfield_by_time(cur_time,merra_f,merra_specie)
 
         print "\t\t - Horisontal interpolation of "+merra_specie+" on WRF horizontal grid"
@@ -90,13 +90,13 @@ if pathes.do_IC:
         WRF_SPECIE=merra2_module.ver_interpolate_3dfield_on_wrf_grid(MER_HOR_SPECIE,MER_HOR_PRES,WRF_PRES,wrf_module.nz,wrf_module.ny,wrf_module.nx)
         WRF_SPECIE=np.flipud(WRF_SPECIE)
 
-        #TODO FIX HERE
-        print "\t\t - Multipplying "+merra_specie+" by "+str(pathes.coefficients[merra_specie])
-        WRF_SPECIE=WRF_SPECIE*pathes.coefficients[merra_specie]
+        for wrf_name_and_coef in merra2wrf_mapper.get_list_of_wrf_spec_by_merra_var(merra_specie):
+            wrf_spec=wrf_name_and_coef[0]
+            coef=wrf_name_and_coef[1]
+            wrf_mult=merra2wrf_mapper.coefficients[wrf_spec]
+            print "\t\t - Updating wrfinput field "+wrf_spec+"[0]="+wrf_spec+"[0]+"+merra_specie+"*"+str(coef)+"*"+str(wrf_mult)+"\n"
+            wrfinput_f.variables[wrf_spec][0,:]=wrfinput_f.variables[wrf_spec][0,:]+WRF_SPECIE*coef*wrf_mult
 
-        #TODO FIX HERE
-        print "\t\t - Updating wrfinput by "+merra_specie+" from MERRA2 \n"
-        wrfinput_f.variables[pathes.chem_map[merra_specie]][0,:]=WRF_SPECIE
 
     print "Closing wrfintput: "+pathes.wrf_input_file
     wrfinput_f.close()
@@ -109,7 +109,7 @@ if pathes.do_IC:
 
     print "FINISH INITIAL CONDITIONS"
 
-'''
+
 if pathes.do_BC:
     print "\n\nSTART BOUNDARY CONDITIONS"
 
@@ -153,8 +153,8 @@ if pathes.do_BC:
         metfile.close()
 
         sp_index=0
-        for merra_specie in pathes.chem_map:
-            print "\n\t\t - Reading "+merra_specie+" field from MERRA."# It corresponds to "+pathes.chem_map[merra_specie]+" in WRF."
+        for merra_specie in merra2wrf_mapper.get_merra_vars():
+            print "\n\t\t - Reading "+merra_specie+" field from MERRA."
             MER_SPECIE=merra2_module.get_3dfield_by_time(cur_time,merra_f,merra_specie)
 
             print "\t\tHorizontal interpolation of "+merra_specie+" on WRF boundary"
@@ -168,21 +168,26 @@ if pathes.do_BC:
             WRF_SPECIE_BND=merra2_module.ver_interpolate_3dfield_on_wrf_boubdary(MER_HOR_SPECIE_BND,MER_HOR_PRES_BND,WRF_PRES_BND,wrf_module.nz,len(wrf_module.wrf_lons))
             WRF_SPECIE_BND=np.flipud(WRF_SPECIE_BND)
 
-            print "\t\t - Multipplying "+merra_specie+" by "+str(pathes.coefficients[merra_specie])
-            WRF_SPECIE_BND=WRF_SPECIE_BND*pathes.coefficients[merra_specie]
 
-            WRF_SPECIE_LEFT_BND  =WRF_SPECIE_BND[:,0:wrf_module.ny]
-            WRF_SPECIE_TOP_BND   =WRF_SPECIE_BND[:,wrf_module.ny:wrf_module.ny+wrf_module.nx]
-            WRF_SPECIE_RIGHT_BND =WRF_SPECIE_BND[:,wrf_module.ny+wrf_module.nx:2*wrf_module.ny+wrf_module.nx]
-            WRF_SPECIE_BOT_BND   =WRF_SPECIE_BND[:,2*wrf_module.ny+wrf_module.nx:2*wrf_module.ny+2*wrf_module.nx]
+            for wrf_name_and_coef in merra2wrf_mapper.get_list_of_wrf_spec_by_merra_var(merra_specie):
+                wrf_spec=wrf_name_and_coef[0]
+                coef=wrf_name_and_coef[1]
+                wrf_mult=merra2wrf_mapper.coefficients[wrf_spec]
+                time_index=wrf_module.get_index_in_file_by_time(cur_time)
+                print "\t\t - Updating wrfbdy field "+wrf_spec+"["+str(time_index)+"]="+merra_specie+"*"+str(coef)+"*"+str(wrf_mult)+"\n"
+                WRF_SPECIE_BND=WRF_SPECIE_BND*coef*wrf_mult
 
-            wrfxs=np.repeat(WRF_SPECIE_LEFT_BND[np.newaxis,:,:], wrf_module.nw, axis=0)
-            wrfye=np.repeat(WRF_SPECIE_TOP_BND[np.newaxis,:,:], wrf_module.nw, axis=0)
-            wrfxe=np.repeat(WRF_SPECIE_RIGHT_BND[np.newaxis,:,:], wrf_module.nw, axis=0)
-            wrfys=np.repeat(WRF_SPECIE_BOT_BND[np.newaxis,:,:], wrf_module.nw, axis=0)
+                WRF_SPECIE_LEFT_BND  =WRF_SPECIE_BND[:,0:wrf_module.ny]
+                WRF_SPECIE_TOP_BND   =WRF_SPECIE_BND[:,wrf_module.ny:wrf_module.ny+wrf_module.nx]
+                WRF_SPECIE_RIGHT_BND =WRF_SPECIE_BND[:,wrf_module.ny+wrf_module.nx:2*wrf_module.ny+wrf_module.nx]
+                WRF_SPECIE_BOT_BND   =WRF_SPECIE_BND[:,2*wrf_module.ny+wrf_module.nx:2*wrf_module.ny+2*wrf_module.nx]
 
-            print "\t\t - Updating "+pathes.chem_map[merra_specie]+" in wrfbdy at index "+str(wrf_module.get_index_in_file_by_time(cur_time))
-            wrf_module.update_boundaries(wrfxs,wrfye,wrfxe,wrfys,wrfbdy_f,pathes.chem_map[merra_specie],wrf_module.get_index_in_file_by_time(cur_time),sp_index,dt)
+                wrfxs=np.repeat(WRF_SPECIE_LEFT_BND[np.newaxis,:,:], wrf_module.nw, axis=0)
+                wrfye=np.repeat(WRF_SPECIE_TOP_BND[np.newaxis,:,:], wrf_module.nw, axis=0)
+                wrfxe=np.repeat(WRF_SPECIE_RIGHT_BND[np.newaxis,:,:], wrf_module.nw, axis=0)
+                wrfys=np.repeat(WRF_SPECIE_BOT_BND[np.newaxis,:,:], wrf_module.nw, axis=0)
+
+                wrf_module.update_boundaries(wrfxs,wrfye,wrfxe,wrfys,wrfbdy_f,wrf_spec,time_index,sp_index,dt)
             sp_index=sp_index+1
 
         print("--- %s seconds ---" % (time.time() - start_time))
@@ -194,6 +199,6 @@ if pathes.do_BC:
     wrfbdy_f.close()
 
     print "FINISH BOUNDARY CONDITIONS"
-'''
+
 
 print("--- %s seconds ---" % (time.time() - start_time))

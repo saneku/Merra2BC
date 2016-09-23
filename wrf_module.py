@@ -59,17 +59,17 @@ def update_boundaries(wrfbxs,wrfbye,wrfbxe,wrfbys,wrfbdy_f,name,index,sp_index,d
     global wrfbxs_o,wrfbxe_o,wrfbys_o,wrfbye_o
 
     print "\t\t\tWriting BC for "+name
-    wrfbdy_f.variables[name+"_BXS"][index,:]=wrfbxs
-    wrfbdy_f.variables[name+"_BXE"][index,:]=wrfbxe
-    wrfbdy_f.variables[name+"_BYS"][index,:]=wrfbys
-    wrfbdy_f.variables[name+"_BYE"][index,:]=wrfbye
+    wrfbdy_f.variables[name+"_BXS"][index,:]=wrfbdy_f.variables[name+"_BXS"][index,:]+wrfbxs
+    wrfbdy_f.variables[name+"_BXE"][index,:]=wrfbdy_f.variables[name+"_BXE"][index,:]+wrfbxe
+    wrfbdy_f.variables[name+"_BYS"][index,:]=wrfbdy_f.variables[name+"_BYS"][index,:]+wrfbys
+    wrfbdy_f.variables[name+"_BYE"][index,:]=wrfbdy_f.variables[name+"_BYE"][index,:]+wrfbye
 
     if index>0:
         print "\t\t\tWriting Tendency BC for "+name
-        wrfbdy_f.variables[name+"_BTXS"][index-1,:]=(wrfbxs-wrfbxs_o[sp_index,:])/dt
-        wrfbdy_f.variables[name+"_BTXE"][index-1,:]=(wrfbxe-wrfbxe_o[sp_index,:])/dt
-        wrfbdy_f.variables[name+"_BTYS"][index-1,:]=(wrfbys-wrfbys_o[sp_index,:])/dt
-        wrfbdy_f.variables[name+"_BTYE"][index-1,:]=(wrfbye-wrfbye_o[sp_index,:])/dt
+        wrfbdy_f.variables[name+"_BTXS"][index-1,:]=wrfbdy_f.variables[name+"_BTXS"][index-1,:]+(wrfbxs-wrfbxs_o[sp_index,:])/dt
+        wrfbdy_f.variables[name+"_BTXE"][index-1,:]=wrfbdy_f.variables[name+"_BTXE"][index-1,:]+(wrfbxe-wrfbxe_o[sp_index,:])/dt
+        wrfbdy_f.variables[name+"_BTYS"][index-1,:]=wrfbdy_f.variables[name+"_BTYS"][index-1,:]+(wrfbys-wrfbys_o[sp_index,:])/dt
+        wrfbdy_f.variables[name+"_BTYE"][index-1,:]=wrfbdy_f.variables[name+"_BTYE"][index-1,:]+(wrfbye-wrfbye_o[sp_index,:])/dt
 
     wrfbxs_o[sp_index,:]=wrfbxs
     wrfbxe_o[sp_index,:]=wrfbxe

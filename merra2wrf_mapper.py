@@ -46,11 +46,9 @@ def get_merra_vars():
 def get_wrf_vars():
     return coefficients.keys()
 
-initialise()
-
+#initialise()
 #print get_wrf_vars()
 #print get_merra_vars()
-
 #print "DU001="+str(get_list_of_wrf_spec_by_merra_name("DU001"))
 #for t in get_list_of_wrf_spec_by_merra_var("DU001"):
 #    print t[0]+" * "+str(t[1])
