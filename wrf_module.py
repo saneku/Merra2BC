@@ -103,6 +103,8 @@ def initialise():
     nx=wrfbddy.dimensions['west_east'].size
     ny=wrfbddy.dimensions['south_north'].size
     nz=wrfbddy.dimensions['bottom_top'].size
+    print "WRF dimensions: [bottom_top]="+str(nz)+" [south_north]="+str(ny)+" [west_east]="+str(nx)
+
     nw=wrfbddy.dimensions['bdy_width'].size
     wrfbddy.close()
 

@@ -183,6 +183,8 @@ def initialise():
     mer_number_of_y_points=merra_f.variables['lat'].size
     mer_number_of_z_points=merra_f.variables['lev'].size
 
+    print "MERRA2 dimensions: [bottom_top]="+str(mer_number_of_z_points)+" [south_north]="+str(mer_number_of_y_points)+" [west_east]="+str(mer_number_of_x_points)
+
     merra_vars = [var for var in merra_f.variables]
 
     mera_lon  = merra_f.variables['lon'][:]

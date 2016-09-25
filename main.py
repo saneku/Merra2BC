@@ -1,4 +1,3 @@
-#TODO set option for interpolation type
 #TODO if there is a dublicate in WRF scpes in spc_map
 #TODO if there is a dublicate in MERRA specs in spc_map
 
