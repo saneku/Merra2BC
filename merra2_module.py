@@ -190,6 +190,9 @@ def initialise():
     mera_lon  = merra_f.variables['lon'][:]
     mera_lat  = merra_f.variables['lat'][:]
 
+    print "Lower left corner: lat="+str(min(mera_lat))+" long="+str(min(mera_lon))
+    print "Upper right corner: lat="+str(max(mera_lat))+" long="+str(max(mera_lon))
+
     xx, yy = np.meshgrid(mera_lon, mera_lat)
     xx=xx.ravel()
     yy=yy.ravel()

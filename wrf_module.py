@@ -103,7 +103,7 @@ def initialise():
     nx=wrfbddy.dimensions['west_east'].size
     ny=wrfbddy.dimensions['south_north'].size
     nz=wrfbddy.dimensions['bottom_top'].size
-    print "WRF dimensions: [bottom_top]="+str(nz)+" [south_north]="+str(ny)+" [west_east]="+str(nx)
+    print "\nWRF dimensions: [bottom_top]="+str(nz)+" [south_north]="+str(ny)+" [west_east]="+str(nx)
 
     nw=wrfbddy.dimensions['bdy_width'].size
     wrfbddy.close()
@@ -119,6 +119,10 @@ def initialise():
 
     wrf_lons=np.concatenate((xlon[:,0],xlon[ny-1,:],xlon[:,nx-1],xlon[0,:]), axis=0)
     wrf_lats=np.concatenate((xlat[:,0],xlat[ny-1,:],xlat[:,nx-1],xlat[0,:]), axis=0)
+
+    print "Lower left corner: lat="+str(min(wrf_lats))+" long="+str(min(wrf_lons))
+    print "Upper right corner: lat="+str(max(wrf_lats))+" long="+str(max(wrf_lons))
+
 
     spec_number=len(pathes.spc_map)
 

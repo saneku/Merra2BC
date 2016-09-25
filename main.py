@@ -11,7 +11,7 @@ import utils
 from netCDF4 import Dataset
 import numpy as np
 from datetime import datetime
-
+import multiprocessing
 
 #modules initialisation
 merra2_module.initialise()
@@ -19,7 +19,7 @@ wrf_module.initialise()
 merra2wrf_mapper.initialise()
 
 if pathes.enable_threading:
-    print "Multiprocessing is active. "+str(pathes.number_of_workers)+" threads will be used."
+    print "Multiprocessing is active. "+str(pathes.number_of_workers)+" threads out of "+str(multiprocessing.cpu_count())+" will be used."
 
 #-----------------------------
 #Sanity checks:
