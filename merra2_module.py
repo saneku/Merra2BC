@@ -95,7 +95,6 @@ def ver_interpolate_3dfield_on_wrf_boubdary(MER_HOR_SPECIE_BND,MER_HOR_PRES_BND,
 #********************************
 
 
-#TODO ASK SERGEY HOW HE INTERPOLATES ON MERRA GRID?
 #Horizontal interpolation of 3d Merra field on WRF horizontal grid
 def hor_interpolate_3dfield_on_wrf_grid(FIELD, wrf_ny, wrf_nx, wrf_lon, wrf_lat):
     FIELD_HOR=np.zeros([mer_number_of_z_points, wrf_ny, wrf_nx])

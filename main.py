@@ -152,7 +152,7 @@ if pathes.do_BC:
         #TODO UNCOMMENT IT
         metfile.close()
 
-        sp_index=0
+        time_index=wrf_module.get_index_in_file_by_time(cur_time)
         for merra_specie in merra2wrf_mapper.get_merra_vars():
             print "\n\t\t - Reading "+merra_specie+" field from MERRA."
             MER_SPECIE=merra2_module.get_3dfield_by_time(cur_time,merra_f,merra_specie)
@@ -168,27 +168,19 @@ if pathes.do_BC:
             WRF_SPECIE_BND=merra2_module.ver_interpolate_3dfield_on_wrf_boubdary(MER_HOR_SPECIE_BND,MER_HOR_PRES_BND,WRF_PRES_BND,wrf_module.nz,len(wrf_module.wrf_lons))
             WRF_SPECIE_BND=np.flipud(WRF_SPECIE_BND)
 
-
             for wrf_name_and_coef in merra2wrf_mapper.get_list_of_wrf_spec_by_merra_var(merra_specie):
                 wrf_spec=wrf_name_and_coef[0]
                 coef=wrf_name_and_coef[1]
                 wrf_mult=merra2wrf_mapper.coefficients[wrf_spec]
-                time_index=wrf_module.get_index_in_file_by_time(cur_time)
-                print "\t\t - Updating wrfbdy field "+wrf_spec+"["+str(time_index)+"]="+merra_specie+"*"+str(coef)+"*"+str(wrf_mult)+"\n"
+                print "\n\t\t - Updating wrfbdy field: "+wrf_spec+"["+str(time_index)+"]="+wrf_spec+"["+str(time_index)+"]+"+merra_specie+"*"+str(coef)+"*"+str(wrf_mult)
                 WRF_SPECIE_BND=WRF_SPECIE_BND*coef*wrf_mult
+                wrf_module.update_boundaries(WRF_SPECIE_BND,wrfbdy_f,wrf_spec,time_index)
 
-                WRF_SPECIE_LEFT_BND  =WRF_SPECIE_BND[:,0:wrf_module.ny]
-                WRF_SPECIE_TOP_BND   =WRF_SPECIE_BND[:,wrf_module.ny:wrf_module.ny+wrf_module.nx]
-                WRF_SPECIE_RIGHT_BND =WRF_SPECIE_BND[:,wrf_module.ny+wrf_module.nx:2*wrf_module.ny+wrf_module.nx]
-                WRF_SPECIE_BOT_BND   =WRF_SPECIE_BND[:,2*wrf_module.ny+wrf_module.nx:2*wrf_module.ny+2*wrf_module.nx]
+        wrf_sp_index=0
+        for wrf_spec in merra2wrf_mapper.get_wrf_vars():
+            wrf_module.update_tendency_boundaries(wrfbdy_f,wrf_spec,time_index,dt,wrf_sp_index)
+            wrf_sp_index=wrf_sp_index+1
 
-                wrfxs=np.repeat(WRF_SPECIE_LEFT_BND[np.newaxis,:,:], wrf_module.nw, axis=0)
-                wrfye=np.repeat(WRF_SPECIE_TOP_BND[np.newaxis,:,:], wrf_module.nw, axis=0)
-                wrfxe=np.repeat(WRF_SPECIE_RIGHT_BND[np.newaxis,:,:], wrf_module.nw, axis=0)
-                wrfys=np.repeat(WRF_SPECIE_BOT_BND[np.newaxis,:,:], wrf_module.nw, axis=0)
-
-                wrf_module.update_boundaries(wrfxs,wrfye,wrfxe,wrfys,wrfbdy_f,wrf_spec,time_index,sp_index,dt)
-            sp_index=sp_index+1
 
         print("--- %s seconds ---" % (time.time() - start_time))
 
