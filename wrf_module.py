@@ -94,18 +94,18 @@ def update_tendency_boundaries(wrfbdy_f,name,index,dt,wrf_sp_index):
 def initialise():
     global met_files,wrf_times,wrf_p_top,znu,xlon,xlat,nx,ny,nz,nw,wrf_lons,wrf_lats,spec_number,wrf_vars,wrfbxs_o,wrfbxe_o,wrfbys_o,wrfbye_o
 
-    met_files=sorted([f for f in os.listdir(pathes.wrf_dir) if re.match(pathes.wrf_met_files, f)], key=numericalSort1)
+    met_files=sorted([f for f in os.listdir(pathes.wrf_met_dir) if re.match(pathes.wrf_met_files, f)], key=numericalSort1)
     wrfbddy = Dataset(pathes.wrf_dir+"/"+pathes.wrf_bdy_file,'r')
     for i in range(0,len(wrfbddy.variables['Times'][:]),1):
         wrf_times.update({''.join(wrfbddy.variables['Times'][i]):i})
         met_times_files.update({''.join(wrfbddy.variables['Times'][i]):met_files[i]})
 
-    nx=wrfbddy.dimensions['west_east'].size
-    ny=wrfbddy.dimensions['south_north'].size
-    nz=wrfbddy.dimensions['bottom_top'].size
-    print "\nWRF dimensions: [bottom_top]="+str(nz)+" [south_north]="+str(ny)+" [west_east]="+str(nx)
-
-    nw=wrfbddy.dimensions['bdy_width'].size
+        
+    nx=len(wrfbddy.dimensions['west_east'])
+    ny=len(wrfbddy.dimensions['south_north'])
+    nz=len(wrfbddy.dimensions['bottom_top'])
+    nw=len(wrfbddy.dimensions['bdy_width'])
+    print "\nWRF dimensions: [bottom_top]="+str(nz)+" [south_north]="+str(ny)+" [west_east]="+str(nx)+" [bdy_width]="+str(nw)
     wrfbddy.close()
 
     #Reading "PRESSURE TOP OF THE MODEL, PA" and "eta values on half (mass) levels"

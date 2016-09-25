@@ -1,6 +1,6 @@
 #TODO if there is a dublicate in WRF scpes in spc_map
 #TODO if there is a dublicate in MERRA specs in spc_map
-
+#TODO draw map according to domain dimensions
 import pathes
 import time
 start_time = time.time()
@@ -45,6 +45,7 @@ if(len(time_intersection)!=len(wrf_module.wrf_times)):
 
 #sorting times for processing
 time_intersection=sorted(time_intersection, key=lambda x: time.mktime(time.strptime(x,"%Y-%m-%d_%H:%M:%S")))
+
 
 if pathes.do_IC:
     print "START INITIAL CONDITIONS"
