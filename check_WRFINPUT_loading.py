@@ -56,7 +56,7 @@ ash_map.drawmapboundary(linewidth=0.25)
 x, y = ash_map(wrf_module.xlon, wrf_module.xlat)
 clevs =np.linspace(0, 5e-3,num=100, endpoint=True)
 cs = ash_map.contourf(x,y,WRF_LOAD,clevs,cmap=plt.cm.Spectral_r)
-ash_map.plot(x,y,'k.', ms=1,alpha=0.25)
+ash_map.plot(x,y,'k.', ms=1,alpha=0.1)
 
 # draw parallels.
 parallels = np.arange(0.,90,10.)

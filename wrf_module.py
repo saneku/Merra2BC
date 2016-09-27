@@ -66,14 +66,13 @@ def update_boundaries(WRF_SPECIE_BND,wrfbdy_f,name,index):
     wrfbys=np.repeat(WRF_SPECIE_BOT_BND[np.newaxis,:,:], nw, axis=0)
     wrfbye=np.repeat(WRF_SPECIE_TOP_BND[np.newaxis,:,:], nw, axis=0)
 
-
     print "\t\t\tUpdating BC for "+name
     wrfbdy_f.variables[name+"_BXS"][index,:]=wrfbdy_f.variables[name+"_BXS"][index,:]+wrfbxs
     wrfbdy_f.variables[name+"_BXE"][index,:]=wrfbdy_f.variables[name+"_BXE"][index,:]+wrfbxe
     wrfbdy_f.variables[name+"_BYS"][index,:]=wrfbdy_f.variables[name+"_BYS"][index,:]+wrfbys
     wrfbdy_f.variables[name+"_BYE"][index,:]=wrfbdy_f.variables[name+"_BYE"][index,:]+wrfbye
 
-
+#TODO remove old arrays.
 def update_tendency_boundaries(wrfbdy_f,name,index,dt,wrf_sp_index):
     global wrfbxs_o,wrfbxe_o,wrfbys_o,wrfbye_o
 
@@ -100,7 +99,7 @@ def initialise():
         wrf_times.update({''.join(wrfbddy.variables['Times'][i]):i})
         met_times_files.update({''.join(wrfbddy.variables['Times'][i]):met_files[i]})
 
-        
+
     nx=len(wrfbddy.dimensions['west_east'])
     ny=len(wrfbddy.dimensions['south_north'])
     nz=len(wrfbddy.dimensions['bottom_top'])

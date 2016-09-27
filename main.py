@@ -46,6 +46,7 @@ if(len(time_intersection)!=len(wrf_module.wrf_times)):
 #sorting times for processing
 time_intersection=sorted(time_intersection, key=lambda x: time.mktime(time.strptime(x,"%Y-%m-%d_%H:%M:%S")))
 
+print time_intersection
 
 if pathes.do_IC:
     print "START INITIAL CONDITIONS"
@@ -173,8 +174,8 @@ if pathes.do_BC:
                 coef=wrf_name_and_coef[1]
                 wrf_mult=merra2wrf_mapper.coefficients[wrf_spec]
                 print "\n\t\t - Updating wrfbdy field: "+wrf_spec+"["+str(time_index)+"]="+wrf_spec+"["+str(time_index)+"]+"+merra_specie+"*"+str(coef)+"*"+str(wrf_mult)
-                WRF_SPECIE_BND=WRF_SPECIE_BND*coef*wrf_mult
-                wrf_module.update_boundaries(WRF_SPECIE_BND,wrfbdy_f,wrf_spec,time_index)
+                #WRF_SPECIE_BND=WRF_SPECIE_BND*coef*wrf_mult
+                wrf_module.update_boundaries(WRF_SPECIE_BND*coef*wrf_mult,wrfbdy_f,wrf_spec,time_index)
 
         wrf_sp_index=0
         for wrf_spec in merra2wrf_mapper.get_wrf_vars():
