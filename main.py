@@ -35,7 +35,6 @@ for var in merra2wrf_mapper.get_wrf_vars():
 #check that spatial dimensions are covered
 if((min(wrf_module.wrf_lons)<min(merra2_module.mera_lon))|(max(wrf_module.wrf_lons)>max(merra2_module.mera_lon))|(min(wrf_module.wrf_lats)<min(merra2_module.mera_lat))|(max(wrf_module.wrf_lats)>max(merra2_module.mera_lat))):
     utils.error_message("WRF area is not fully covered by MERRA2 area. Exiting...")
-#-----------------------------
 
 time_intersection=wrf_module.wrf_times.viewkeys() & merra2_module.mera_times.viewkeys()
 
@@ -43,10 +42,15 @@ time_intersection=wrf_module.wrf_times.viewkeys() & merra2_module.mera_times.vie
 if(len(time_intersection)!=len(wrf_module.wrf_times)):
     utils.error_message("WRF time range is not fully covered by MERRA2 time range. Exiting...")
 
+#-----------------------------
 #sorting times for processing
 time_intersection=sorted(time_intersection, key=lambda x: time.mktime(time.strptime(x,"%Y-%m-%d_%H:%M:%S")))
 
-print time_intersection
+print "\nTimes for processing:"
+for i in time_intersection:
+    print i
+
+#exit()
 
 if pathes.do_IC:
     print "START INITIAL CONDITIONS"
@@ -95,7 +99,7 @@ if pathes.do_IC:
             wrf_spec=wrf_name_and_coef[0]
             coef=wrf_name_and_coef[1]
             wrf_mult=merra2wrf_mapper.coefficients[wrf_spec]
-            print "\t\t - Updating wrfinput field "+wrf_spec+"[0]="+wrf_spec+"[0]+"+merra_specie+"*"+str(coef)+"*"+str(wrf_mult)+"\n"
+            print "\t\t - Updating wrfinput field "+wrf_spec+"[0]="+wrf_spec+"[0]+"+merra_specie+"*"+str(coef)+"*"+str(wrf_mult)
             wrfinput_f.variables[wrf_spec][0,:]=wrfinput_f.variables[wrf_spec][0,:]+WRF_SPECIE*coef*wrf_mult
 
 

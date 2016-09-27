@@ -17,10 +17,10 @@ xlat=[[]]
 
 wrf_vars=[]
 
-wrfbxs_o=[[[[]]]]
-wrfbxe_o=[[[[]]]]
-wrfbys_o=[[[[]]]]
-wrfbye_o=[[[[]]]]
+#wrfbxs_o=[[[[]]]]
+#wrfbxe_o=[[[[]]]]
+#wrfbys_o=[[[[]]]]
+#wrfbye_o=[[[[]]]]
 
 wrf_lons=[]
 wrf_lats=[]
@@ -66,7 +66,7 @@ def update_boundaries(WRF_SPECIE_BND,wrfbdy_f,name,index):
     wrfbys=np.repeat(WRF_SPECIE_BOT_BND[np.newaxis,:,:], nw, axis=0)
     wrfbye=np.repeat(WRF_SPECIE_TOP_BND[np.newaxis,:,:], nw, axis=0)
 
-    print "\t\t\tUpdating BC for "+name
+    #print "\t\t\tUpdating BC for "+name
     wrfbdy_f.variables[name+"_BXS"][index,:]=wrfbdy_f.variables[name+"_BXS"][index,:]+wrfbxs
     wrfbdy_f.variables[name+"_BXE"][index,:]=wrfbdy_f.variables[name+"_BXE"][index,:]+wrfbxe
     wrfbdy_f.variables[name+"_BYS"][index,:]=wrfbdy_f.variables[name+"_BYS"][index,:]+wrfbys
@@ -74,24 +74,33 @@ def update_boundaries(WRF_SPECIE_BND,wrfbdy_f,name,index):
 
 #TODO remove old arrays.
 def update_tendency_boundaries(wrfbdy_f,name,index,dt,wrf_sp_index):
-    global wrfbxs_o,wrfbxe_o,wrfbys_o,wrfbye_o
+    #global wrfbxs_o,wrfbxe_o,wrfbys_o,wrfbye_o
 
     if(index>0):
+        '''
         print "\t\t\tUpdating Tendency BC for "+name
         wrfbdy_f.variables[name+"_BTXS"][index-1,:]=(wrfbdy_f.variables[name+"_BXS"][index,:]-wrfbxs_o[wrf_sp_index,:])/dt
         wrfbdy_f.variables[name+"_BTXE"][index-1,:]=(wrfbdy_f.variables[name+"_BXE"][index,:]-wrfbxe_o[wrf_sp_index,:])/dt
         wrfbdy_f.variables[name+"_BTYS"][index-1,:]=(wrfbdy_f.variables[name+"_BYS"][index,:]-wrfbys_o[wrf_sp_index,:])/dt
         wrfbdy_f.variables[name+"_BTYE"][index-1,:]=(wrfbdy_f.variables[name+"_BYE"][index,:]-wrfbye_o[wrf_sp_index,:])/dt
+        '''
+        print "\t\t\tUpdating Tendency BC for "+name
+        wrfbdy_f.variables[name+"_BTXS"][index-1,:]=(wrfbdy_f.variables[name+"_BXS"][index,:]-wrfbdy_f.variables[name+"_BXS"][index-1,:])/dt
+        wrfbdy_f.variables[name+"_BTXE"][index-1,:]=(wrfbdy_f.variables[name+"_BXE"][index,:]-wrfbdy_f.variables[name+"_BXE"][index-1,:])/dt
+        wrfbdy_f.variables[name+"_BTYS"][index-1,:]=(wrfbdy_f.variables[name+"_BYS"][index,:]-wrfbdy_f.variables[name+"_BYS"][index-1,:])/dt
+        wrfbdy_f.variables[name+"_BTYE"][index-1,:]=(wrfbdy_f.variables[name+"_BYE"][index,:]-wrfbdy_f.variables[name+"_BYE"][index-1,:])/dt
 
+
+    '''
     wrfbxs_o[wrf_sp_index,:]=wrfbdy_f.variables[name+"_BXS"][index,:]
     wrfbxe_o[wrf_sp_index,:]=wrfbdy_f.variables[name+"_BXE"][index,:]
     wrfbys_o[wrf_sp_index,:]=wrfbdy_f.variables[name+"_BYS"][index,:]
     wrfbye_o[wrf_sp_index,:]=wrfbdy_f.variables[name+"_BYE"][index,:]
-
+    '''
 
 
 def initialise():
-    global met_files,wrf_times,wrf_p_top,znu,xlon,xlat,nx,ny,nz,nw,wrf_lons,wrf_lats,spec_number,wrf_vars,wrfbxs_o,wrfbxe_o,wrfbys_o,wrfbye_o
+    global met_files,wrf_times,wrf_p_top,znu,xlon,xlat,nx,ny,nz,nw,wrf_lons,wrf_lats,spec_number,wrf_vars#,wrfbxs_o,wrfbxe_o,wrfbys_o,wrfbye_o
 
     met_files=sorted([f for f in os.listdir(pathes.wrf_met_dir) if re.match(pathes.wrf_met_files, f)], key=numericalSort1)
     wrfbddy = Dataset(pathes.wrf_dir+"/"+pathes.wrf_bdy_file,'r')
@@ -125,7 +134,7 @@ def initialise():
 
     spec_number=len(pathes.spc_map)
 
-    wrfbxs_o=np.zeros((spec_number,nw,nz,ny))
-    wrfbxe_o=np.zeros((spec_number,nw,nz,ny))
-    wrfbys_o=np.zeros((spec_number,nw,nz,nx))
-    wrfbye_o=np.zeros((spec_number,nw,nz,nx))
+    #wrfbxs_o=np.zeros((spec_number,nw,nz,ny))
+    #wrfbxe_o=np.zeros((spec_number,nw,nz,ny))
+    #wrfbys_o=np.zeros((spec_number,nw,nz,nx))
+    #wrfbye_o=np.zeros((spec_number,nw,nz,nx))
