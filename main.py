@@ -13,6 +13,9 @@ import numpy as np
 from datetime import datetime
 import multiprocessing
 
+#to enable parallel
+#import wrfbdy_split_combine
+
 #modules initialisation
 merra2_module.initialise()
 wrf_module.initialise()
@@ -177,8 +180,7 @@ if pathes.do_BC:
                 wrf_spec=wrf_name_and_coef[0]
                 coef=wrf_name_and_coef[1]
                 wrf_mult=merra2wrf_mapper.coefficients[wrf_spec]
-                print "\n\t\t - Updating wrfbdy field: "+wrf_spec+"["+str(time_index)+"]="+wrf_spec+"["+str(time_index)+"]+"+merra_specie+"*"+str(coef)+"*"+str(wrf_mult)
-                #WRF_SPECIE_BND=WRF_SPECIE_BND*coef*wrf_mult
+                print "\t\t - Updating wrfbdy field: "+wrf_spec+"["+str(time_index)+"]="+wrf_spec+"["+str(time_index)+"]+"+merra_specie+"*"+str(coef)+"*"+str(wrf_mult)
                 wrf_module.update_boundaries(WRF_SPECIE_BND*coef*wrf_mult,wrfbdy_f,wrf_spec,time_index)
 
         wrf_sp_index=0
