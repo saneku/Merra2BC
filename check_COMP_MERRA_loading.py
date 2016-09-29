@@ -45,7 +45,10 @@ MERRA_LOAD=np.sum(MERRA_LOAD, axis=0)
 
 
 fig = plt.figure(figsize=(20,20))
-ash_map = Basemap(projection='cyl',llcrnrlat=10,urcrnrlat=60,llcrnrlon=0,urcrnrlon=50,resolution='c',area_thresh=100.)
+
+
+#ash_map = Basemap(projection='cyl',llcrnrlat=10,urcrnrlat=60,llcrnrlon=0,urcrnrlon=50,resolution='c',area_thresh=100.)
+ash_map = Basemap(projection='cyl',llcrnrlon=min(merra2_module.mera_lon), llcrnrlat=min(merra2_module.mera_lat), urcrnrlon=max(merra2_module.mera_lon), urcrnrlat=max(merra2_module.mera_lat),resolution='c',area_thresh=100.)
 ash_map.drawcoastlines(linewidth=1)
 ash_map.drawmapboundary(linewidth=0.25)
 lons,lats= np.meshgrid(merra2_module.mera_lon,merra2_module.mera_lat)

@@ -49,7 +49,11 @@ WRF_LOAD=np.sum(WRF_LOAD, axis=0)
 
 
 fig = plt.figure(figsize=(20,20))
-ash_map = Basemap(width=4400000,height=4400000,resolution='l',area_thresh=100.,projection='lcc', lat_1=30.,lat_2=40,lat_0=35,lon_0=28)
+#ash_map = Basemap(width=4400000,height=4400000,resolution='l',area_thresh=100.,projection='lcc', lat_1=30.,lat_2=40,lat_0=35,lon_0=28)
+#llcrnrlon=min(wrf_module.wrf_lons), llcrnrlat=min(wrf_module.wrf_lats), urcrnrlon=max(wrf_module.wrf_lons), urcrnrlat=max(wrf_module.wrf_lats)
+#ash_map = Basemap(width=wrf_module.dx*wrf_module.nx,height=wrf_module.dy*wrf_module.ny,resolution='l',area_thresh=100.,projection='lcc', lat_1=wrf_module.true_lat1,lat_2=wrf_module.true_lat2,lat_0=wrf_module.cen_lat,lon_0=wrf_module.cen_lon)
+ash_map = Basemap(width=wrf_module.dx*wrf_module.nx,height=wrf_module.dy*wrf_module.ny,resolution='l',area_thresh=100.,projection=wrf_module.get_BaseMapProjectionByWrfProjection(), lat_1=wrf_module.true_lat1,lat_2=wrf_module.true_lat2,lat_0=wrf_module.cen_lat,lon_0=wrf_module.cen_lon)
+
 ash_map.drawcoastlines(linewidth=1)
 ash_map.drawmapboundary(linewidth=0.25)
 

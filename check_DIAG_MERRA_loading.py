@@ -9,7 +9,7 @@ import time
 start_time = time.time()
 
 g=9.81
-path="/home/ukhova/Downloads/Merra2ForVISUVI/Diagnostic/MERRA2_300.tavg1_2d_aer_Nx.20100714.SUB.nc4"
+path="/home/ukhova/Downloads/Merra2ForVISUVI_data/Diagnostic/MERRA2_300.tavg1_2d_aer_Nx.20100714.SUB.nc4"
 
 merra_file = Dataset(path,'r')
 mer_number_of_x_points=merra_file.variables['lon'].size
@@ -22,7 +22,8 @@ lons,lats= np.meshgrid(mera_lon,mera_lat)
 
 #---------------------------
 fig = plt.figure(figsize=(20,20))
-ash_map = Basemap(projection='cyl',llcrnrlat=10,urcrnrlat=60,llcrnrlon=0,urcrnrlon=50,resolution='c',area_thresh=100.)
+#ash_map = Basemap(projection='cyl',llcrnrlat=10,urcrnrlat=60,llcrnrlon=0,urcrnrlon=50,resolution='c',area_thresh=100.)
+ash_map = Basemap(projection='cyl',llcrnrlon=min(mera_lon), llcrnrlat=min(mera_lat), urcrnrlon=max(mera_lon), urcrnrlat=max(mera_lat),resolution='c',area_thresh=100.)
 ash_map.drawcoastlines(linewidth=1)
 ash_map.drawmapboundary(linewidth=0.25)
 x, y = ash_map(lons,lats)
