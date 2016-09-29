@@ -72,7 +72,7 @@ def update_boundaries(WRF_SPECIE_BND,wrfbdy_f,name,index):
     wrfbdy_f.variables[name+"_BYS"][index,:]=wrfbdy_f.variables[name+"_BYS"][index,:]+wrfbys
     wrfbdy_f.variables[name+"_BYE"][index,:]=wrfbdy_f.variables[name+"_BYE"][index,:]+wrfbye
 
-#TODO remove old arrays.
+
 def update_tendency_boundaries(wrfbdy_f,name,index,dt,wrf_sp_index):
     #global wrfbxs_o,wrfbxe_o,wrfbys_o,wrfbye_o
 

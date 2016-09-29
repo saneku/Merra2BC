@@ -54,7 +54,12 @@ def hor_interpolate_3dfield_on_wrf_boubdary1(wrf_length, wrf_lon, wrf_lat,FIELD)
     #print 'process id: '+str(os.getpid())+" FIELD_BND.shape="+str(FIELD_BND.shape)
 
     for z_level in range(FIELD.shape[0]):
-        FIELD_BND[z_level,:]= interpolate.griddata(merra_points, FIELD[z_level,:,:].ravel(), (wrf_lon, wrf_lat), method='linear',fill_value=0)
+        #2.
+        #FIELD_BND[z_level,:]= interpolate.griddata(merra_points, FIELD[z_level,:,:].ravel(), (wrf_lon, wrf_lat), method='linear',fill_value=0)
+
+        #3.
+        f = interpolate.RectBivariateSpline(mera_lat, mera_lon, FIELD[z_level,:,:])
+        FIELD_BND[z_level,:]=f(wrf_lat,wrf_lon,grid=False)
     return FIELD_BND
 
 
@@ -80,10 +85,15 @@ def threaded_hor_interpolate_3dfield_on_wrf_boubdary(FIELD, wrf_length, wrf_lon,
 #********************************
 #Horizontal interpolation of 3d Merra field on WRF boundary
 def hor_interpolate_3dfield_on_wrf_boubdary(FIELD, wrf_length, wrf_lon, wrf_lat):
-    FIELD_HOR=np.zeros([mer_number_of_z_points, wrf_length])
+    FIELD_BND=np.zeros([mer_number_of_z_points, wrf_length])
     for z_level in range(mer_number_of_z_points):
-        FIELD_HOR[z_level,:]=interpolate.griddata(merra_points, FIELD[z_level,:,:].ravel(), (wrf_lon, wrf_lat), method='linear',fill_value=0)
-    return FIELD_HOR
+        #2.
+        #FIELD_HOR[z_level,:]=interpolate.griddata(merra_points, FIELD[z_level,:,:].ravel(), (wrf_lon, wrf_lat), method='linear',fill_value=0)
+
+        #3.
+        f = interpolate.RectBivariateSpline(mera_lat, mera_lon, FIELD[z_level,:,:])
+        FIELD_BND[z_level,:]=f(wrf_lat,wrf_lon,grid=False)
+    return FIELD_BND
 
 #Vertical interpolation of Merra boundary on WRF boundary
 def ver_interpolate_3dfield_on_wrf_boubdary(MER_HOR_SPECIE_BND,MER_HOR_PRES_BND,WRF_PRES_BND,wrf_nz, wrf_length):
@@ -98,10 +108,19 @@ def ver_interpolate_3dfield_on_wrf_boubdary(MER_HOR_SPECIE_BND,MER_HOR_PRES_BND,
 #Horizontal interpolation of 3d Merra field on WRF horizontal grid
 def hor_interpolate_3dfield_on_wrf_grid(FIELD, wrf_ny, wrf_nx, wrf_lon, wrf_lat):
     FIELD_HOR=np.zeros([mer_number_of_z_points, wrf_ny, wrf_nx])
+
+
     for z_level in range(mer_number_of_z_points):
-        #f = interpolate.interp2d(mera_lon, mera_lat, MER_Pres[z_level,:,:], kind='linear')
+        #1. f = interpolate.interp2d(mera_lon, mera_lat, MER_Pres[z_level,:,:], kind='linear')
         #MER_HOR_Pres[z_level,:,:]=f(wrf_lon[0,:], wrf_lat[0,:])
-        FIELD_HOR[z_level,:,:]= interpolate.griddata(merra_points, FIELD[z_level,:,:].ravel(), (wrf_lon, wrf_lat), method='linear',fill_value=0)
+
+        #2.
+        #FIELD_HOR1[z_level,:,:]= interpolate.griddata(merra_points, FIELD[z_level,:,:].ravel(), (wrf_lon, wrf_lat), method='linear',fill_value=0)
+
+        #3.
+        f = interpolate.RectBivariateSpline(mera_lat, mera_lon, FIELD[z_level,:,:])
+        FIELD_HOR[z_level,:,:]=f(wrf_lat,wrf_lon,grid=False).reshape(wrf_ny, wrf_nx)
+
     return FIELD_HOR
 
 
@@ -115,7 +134,12 @@ def hor_interpolate_3dfield_on_wrf_grid1(wrf_ny, wrf_nx, wrf_lon, wrf_lat,FIELD)
     #print 'process id: '+str(os.getpid())+" FIELD_HOR.shape="+str(FIELD_HOR.shape)
 
     for z_level in range(FIELD.shape[0]):
-        FIELD_HOR[z_level,:,:]= interpolate.griddata(merra_points, FIELD[z_level,:,:].ravel(), (wrf_lon, wrf_lat), method='linear',fill_value=0)
+        #2.
+        #FIELD_HOR[z_level,:,:]= interpolate.griddata(merra_points, FIELD[z_level,:,:].ravel(), (wrf_lon, wrf_lat), method='linear',fill_value=0)
+
+        #3.
+        f = interpolate.RectBivariateSpline(mera_lat, mera_lon, FIELD[z_level,:,:])
+        FIELD_HOR[z_level,:,:]=f(wrf_lat,wrf_lon,grid=False).reshape(wrf_ny, wrf_nx)
     return FIELD_HOR
 
 

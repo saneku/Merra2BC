@@ -5,11 +5,11 @@ wrf_bdy_file="wrfbdy_d01"
 wrf_met_dir="/home/ukhova/Downloads/"
 wrf_met_files="met_em.d01.2010*"
 
-mera_dir="/home/ukhova/Downloads/Merra2ForVISUVI/"
+mera_dir="/home/ukhova/Downloads/Merra2ForVISUVI_data/"
 mera_files="svc_MERRA2_300.inst3_3d_aer_Nv.20100*"
 
 number_of_workers=18 #depending on the number of availble cores recomended values are: 2,4,6,8,12,18,24
-enable_threading=True
+enable_threading=False
 
 do_IC=True
 do_BC=True
@@ -20,7 +20,6 @@ spc_map = [ 'DUST_1 -> 1*[DU001];1.e9',
             'DUST_3 -> 1.*[DU003];1.e9',
             'DUST_4 -> 1*[DU004];1.e9',
             'DUST_5 -> 1.0*[DU005];1.e9']
-
 
 
 #CBMZ-MOSAIC_8bins  DUST only
