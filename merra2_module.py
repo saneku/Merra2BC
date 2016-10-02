@@ -20,9 +20,8 @@ mer_number_of_x_points=0
 mer_number_of_y_points=0
 mer_number_of_z_points=0
 
-times_per_file=0
-
-merra_points=0
+#times_per_file=0
+#merra_points=0
 
 numbers = re.compile(r'(\d+)')
 def numericalSort(value):
@@ -199,13 +198,19 @@ def get_pressure_by_time(time,merra_file):
 
 
 def initialise():
-    global merra_files,mer_number_of_x_points,mer_number_of_y_points,mer_number_of_z_points,mera_lon,mera_lat,times_per_file,merra_points,merra_vars
+    global merra_files,mer_number_of_x_points,mer_number_of_y_points,mer_number_of_z_points,mera_lon,mera_lat,merra_vars
 
     merra_files=sorted([f for f in os.listdir(pathes.mera_dir) if re.match(pathes.mera_files, f)], key=numericalSort)
     merra_f = Dataset(pathes.mera_dir+"/"+merra_files[0],'r')
     mer_number_of_x_points=merra_f.variables['lon'].size
     mer_number_of_y_points=merra_f.variables['lat'].size
-    mer_number_of_z_points=merra_f.variables['lev'].size
+    #not all merra2 files (loading diagnostic) have 'lev' variable
+    try:
+        mer_number_of_z_points=merra_f.variables['lev'].size
+    except Exception:
+        pass
+
+
 
     print "MERRA2 dimensions: [bottom_top]="+str(mer_number_of_z_points)+" [south_north]="+str(mer_number_of_y_points)+" [west_east]="+str(mer_number_of_x_points)
 
@@ -217,10 +222,10 @@ def initialise():
     print "Lower left corner: lat="+str(min(mera_lat))+" long="+str(min(mera_lon))
     print "Upper right corner: lat="+str(max(mera_lat))+" long="+str(max(mera_lon))
 
-    xx, yy = np.meshgrid(mera_lon, mera_lat)
-    xx=xx.ravel()
-    yy=yy.ravel()
-    merra_points=(xx, yy)
+    #xx, yy = np.meshgrid(mera_lon, mera_lat)
+    #xx=xx.ravel()
+    #yy=yy.ravel()
+    #merra_points=(xx, yy)
 
     #number of times in  mera file
     times_per_file=merra_f.variables['time'].size
