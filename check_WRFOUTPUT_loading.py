@@ -9,8 +9,8 @@ import pathes
 import wrf_module
 
 
-dust_array=['oin_a02','oin_a03','oin_a04','oin_a05','oin_a06','oin_a07','oin_a08']
-
+#dust_array=['oin_a02','oin_a03','oin_a04','oin_a05','oin_a06','oin_a07','oin_a08']
+dust_array=['DUST_1','DUST_2','DUST_3','DUST_4','DUST_5']
 wrf_module.wrf_dir="/home/ukhova/Apps/WRF/V3.7.1/WRFV3.7.1/run_visuvi_tutorial"
 wrf_module.initialise()
 
