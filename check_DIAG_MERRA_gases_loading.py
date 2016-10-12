@@ -8,8 +8,14 @@ import time
 
 start_time = time.time()
 
-gas_spec_array=['SO2CMASS','SO4CMASS']
-#molar_mass_map={'air':29,'so2':64,'sulf':96}  #g mole-1
+gas_spec_array=['SO2CMASS','SO4CMASS','TO3']
+gas_spec_array=['TO3']
+x_limit={'SO2CMASS':7e-5,'SO4CMASS':7e-5,'TO3':4e-3}
+
+coefficient={'SO2CMASS':1.0,'SO4CMASS':1.0,'TO3':2.1e-5}
+#1 DU = 2.6867×10^20 molecules/m^2 or 0.4462×10^-3 moles/m^2
+#for Ozone 0.4462×10^-3 * 48 g/mole=21.4176×10^-3 g/m^2
+# => 1 DU=2.1*10^-5 kg/m^2
 
 import pathes
 pathes.mera_dir="/home/ukhova/Downloads/Merra2ForVISUVI_data/Diagnostic"
@@ -42,8 +48,10 @@ for mf in merra_files:
         for gas in gas_spec_array:
             MERRA_LOAD = merra_file.variables[gas][mera_time_idx,:,:];
 
-            clevs =np.linspace(0, 7e-5,num=100, endpoint=True)
-            cs = ash_map.contourf(x,y,MERRA_LOAD,clevs,cmap=plt.cm.Spectral_r)
+            MERRA_LOAD=MERRA_LOAD*coefficient.get(gas)
+
+            clevs =np.linspace(0, x_limit.get(gas),num=100, endpoint=True)
+            cs = ash_map.contourf(x,y,MERRA_LOAD,100,cmap=plt.cm.Spectral_r)
 
             ash_map.drawcoastlines(linewidth=1)
             ash_map.drawmapboundary(linewidth=0.25)

@@ -7,8 +7,11 @@ import numpy as np
 
 import wrf_module
 
-gas_spec_array=['so2','sulf']
-molar_mass_map={'air':29.0,'so2':64.0,'sulf':96.0}  #g mole-1
+gas_spec_array=['so2','sulf','o3']
+molar_mass_map={'air':29.0,'so2':64.0,'sulf':96.0,'o3':48.0}  #g mole-1
+
+x_limit={'so2':7e-5,'sulf':7e-5,'o3':4e-3}
+
 
 wrf_module.wrf_dir="/home/ukhova/Apps/WRF/V3.7.1/WRFV3.7.1/run_visuvi_tutorial/with_BCS"
 wrf_module.initialise()
@@ -49,7 +52,7 @@ for time_idx in range(0,len(times),1):
         ash_map.drawcoastlines(linewidth=1)
         ash_map.drawmapboundary(linewidth=0.25)
 
-        clevs =np.linspace(0, 7e-5,num=100, endpoint=True)
+        clevs =np.linspace(0, x_limit.get(gas),num=100, endpoint=True)
         cs = ash_map.contourf(x,y,WRF_LOAD,clevs,cmap=plt.cm.Spectral_r)
         #cs = ash_map.contourf(x,y,WRF_LOAD,100,cmap=plt.cm.Spectral_r)
 
