@@ -36,7 +36,7 @@ spc_map = [ 'DUST_1 -> 1*[DU001];1.e9',
             'BC1 -> 0.4143*[BCPHOBIC];1.e9', 'BC2 -> 0.4143*[BCPHILIC];1.e9',
             'OC1 -> 0.4143*[OCPHOBIC];1.e9', 'OC2 -> 0.4143*[OCPHILIC];1.e9',
             'o3 -> 0.604*[O3];1.e6',
-            'co -> 0.965*[CO];1.e6']
+            'co -> 1*[CO];1.e6']
 
 #DMS and MSA ?
 
