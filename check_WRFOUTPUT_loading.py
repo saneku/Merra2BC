@@ -62,7 +62,7 @@ for time_idx in range(0,len(times),1):
     parallels = np.arange(0.,90,10.)
     ash_map.drawparallels(parallels,labels=[1,0,0,0],fontsize=10)
     # draw meridians
-    meridians = np.arange(0.,60.,10.)
+    meridians = np.arange(0.,180.,10.)
     ash_map.drawmeridians(meridians,labels=[0,0,0,1],fontsize=10)
 
 	#cs = ash_map.contourf(x,y,aod,100,cmap=plt.cm.Spectral_r)

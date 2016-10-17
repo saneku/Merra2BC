@@ -69,7 +69,8 @@ plt.title("MERRA2 Total dust vertical crossection at %s"%cur_time)
 ############################
 
 
-plt.show()
+#plt.show()
+plt.savefig('merra_comp_profile_%d.png'%(0))
 plt.close()
 merra_f.close()
 

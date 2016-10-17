@@ -14,7 +14,7 @@ import numpy as np
 
 g=9.81
 
-gas_spec_array=['so2']#,'sulf']
+gas_spec_array=['so2','sulf']
 molar_mass_map={'air':29.0,'so2':64.0,'sulf':96.0}  #g mole-1
 
 merra2_module.initialise()
@@ -62,7 +62,7 @@ for gas in gas_spec_array:
     parallels = np.arange(0.,90,10.)
     ash_map.drawparallels(parallels,labels=[1,0,0,0],fontsize=10)
     # draw meridians
-    meridians = np.arange(0.,60.,10.)
+    meridians = np.arange(0.,180.,10.)
     ash_map.drawmeridians(meridians,labels=[0,0,0,1],fontsize=10)
 
     cbar = plt.colorbar(cs, orientation='horizontal')

@@ -15,8 +15,8 @@ import numpy as np
 g=9.81
 
 #dust bins from wrfinput
-#dust_array=['DUST_1','DUST_2','DUST_3','DUST_4','DUST_5']
-dust_array=['oin_a02','oin_a03','oin_a04','oin_a05','oin_a06','oin_a07','oin_a08']
+dust_array=['DUST_1','DUST_2','DUST_3','DUST_4','DUST_5']
+#dust_array=['oin_a02','oin_a03','oin_a04','oin_a05','oin_a06','oin_a07','oin_a08']
 
 merra2_module.initialise()
 wrf_module.initialise()
@@ -66,7 +66,7 @@ ash_map.plot(x,y,'k.', ms=1,alpha=0.1)
 parallels = np.arange(0.,90,10.)
 ash_map.drawparallels(parallels,labels=[1,0,0,0],fontsize=10)
 # draw meridians
-meridians = np.arange(0.,60.,10.)
+meridians = np.arange(0.,180.,10.)
 ash_map.drawmeridians(meridians,labels=[0,0,0,1],fontsize=10)
 
 cbar = plt.colorbar(cs, orientation='horizontal')
@@ -79,7 +79,8 @@ plt.xlabel('Longitude',fontsize=15)
 plt.ylabel('Lattitude',fontsize=15)
 plt.title("WRF IC. Total dust mass Loading (kg m-2) at %s"%cur_time)
 
-plt.show()
+#plt.show()
+plt.savefig('wrfinput_dust_loading.png')
 plt.close()
 
 

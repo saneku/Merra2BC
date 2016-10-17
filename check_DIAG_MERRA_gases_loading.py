@@ -8,8 +8,7 @@ import time
 
 start_time = time.time()
 
-gas_spec_array=['SO2CMASS','SO4CMASS','TO3']
-gas_spec_array=['TO3']
+gas_spec_array=['SO2CMASS','SO4CMASS']#,'TO3']
 x_limit={'SO2CMASS':7e-5,'SO4CMASS':7e-5,'TO3':4e-3}
 
 coefficient={'SO2CMASS':1.0,'SO4CMASS':1.0,'TO3':2.1e-5}
@@ -42,7 +41,7 @@ for mf in merra_files:
     mera_start_time=datetime.strptime(mera_start_time, '%Y-%m-%d')
     mera_times =merra_file.variables['time'][:] #time in minutes since mera_start_time
 
-    for mera_time_idx in range(0,len(mera_times),1):
+    for mera_time_idx in range(0,len(mera_times),3):
         mera_cur_time=str(mera_start_time+timedelta(minutes=mera_times[mera_time_idx]))
 
         for gas in gas_spec_array:
@@ -51,7 +50,7 @@ for mf in merra_files:
             MERRA_LOAD=MERRA_LOAD*coefficient.get(gas)
 
             clevs =np.linspace(0, x_limit.get(gas),num=100, endpoint=True)
-            cs = ash_map.contourf(x,y,MERRA_LOAD,100,cmap=plt.cm.Spectral_r)
+            cs = ash_map.contourf(x,y,MERRA_LOAD,clevs,cmap=plt.cm.Spectral_r)
 
             ash_map.drawcoastlines(linewidth=1)
             ash_map.drawmapboundary(linewidth=0.25)
@@ -60,7 +59,7 @@ for mf in merra_files:
             parallels = np.arange(0.,90,10.)
             ash_map.drawparallels(parallels,labels=[1,0,0,0],fontsize=10)
             # draw meridians
-            meridians = np.arange(0.,60.,10.)
+            meridians = np.arange(0.,180.,10.)
             ash_map.drawmeridians(meridians,labels=[0,0,0,1],fontsize=10)
             ash_map.plot(x,y,'k.', ms=1,alpha=.25)
 
@@ -74,11 +73,10 @@ for mf in merra_files:
             plt.ylabel('Lattitude',fontsize=15)
             plt.title("Merra diag. "+gas+" Mass Loading (kg m-2) at %s"%mera_cur_time)
 
-            print "\t " + mera_cur_time
-
-            plt.savefig('merra_diag_'+gas+'_loading_%d.png'%(index))
+            plt.savefig('merra_diag_%s_loading_%d.png'%(gas,index))
             plt.clf()
         index=index+1
+        print "\t " + mera_cur_time
 
     merra_file.close()
 
