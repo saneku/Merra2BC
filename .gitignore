@@ -1,6 +1,7 @@
 #mine
 ._*.py
 *.png
+Proc.*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

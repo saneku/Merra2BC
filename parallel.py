@@ -7,6 +7,7 @@ import os
 
 wrf_out_files_mask="wrfout_d01_2010-0*"
 number_of_hours_per_wrfout=72
+number_of_hours_per_aod_diag=24
 
 
 numbers = re.compile(r'(\d+)')
