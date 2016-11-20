@@ -24,8 +24,6 @@ import parallel
 merra_files=parallel.get_wrfout_files(pathes.mera_files,pathes.mera_dir)
 print merra_files
 
-#exit()
-
 
 #---------------------------
 fig = plt.figure(figsize=(20,20))
@@ -72,7 +70,7 @@ for file_index,mf in merra_files.items():
         parallels = np.arange(0.,90,10.)
         ash_map.drawparallels(parallels,labels=[1,0,0,0],fontsize=10)
         # draw meridians
-        meridians = np.arange(0.,60.,10.)
+        meridians = np.arange(0.,180.,10.)
         ash_map.drawmeridians(meridians,labels=[0,0,0,1],fontsize=10)
 
         #xpt,ypt = ash_map(14.42,40.82) # Location of visuvi

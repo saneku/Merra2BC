@@ -61,7 +61,7 @@ for mf in merra_files:
         parallels = np.arange(0.,90,10.)
         ash_map.drawparallels(parallels,labels=[1,0,0,0],fontsize=10)
         # draw meridians
-        meridians = np.arange(0.,60.,10.)
+        meridians = np.arange(0.,180.,10.)
         ash_map.drawmeridians(meridians,labels=[0,0,0,1],fontsize=10)
 
         #xpt,ypt = ash_map(14.42,40.82) # Location of visuvi

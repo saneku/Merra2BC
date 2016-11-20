@@ -14,7 +14,7 @@ dust_array=['DUST_1','DUST_2','DUST_3','DUST_4','DUST_5']
 wrf_module.wrf_dir="/home/ukhova/Apps/WRF/V3.7.1/WRFV3.7.1/run_visuvi_tutorial"
 wrf_module.initialise()
 
-nc_fid = nc.MFDataset(wrf_module.wrf_dir+'/wrfout*')
+nc_fid = nc.MFDataset(pathes.wrf_dir+'/wrfout*')
 times =nc_fid.variables['Times'][:]
 znu=nc_fid.variables['ZNU'][0,:]
 wrf_p_top=nc_fid.variables['P_TOP'][0]
