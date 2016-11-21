@@ -112,28 +112,5 @@ for index in range(0,len(list1),2):
     pic_index=pic_index+1
 
 
-#print wrf_module.wrf_p_top
-
-exit()
-
-
-
-'''
-for gas in gas_spec_array:
-#WRF_GAS = np.zeros([wrf_module.nz,wrf_module.ny,wrf_module.nx])
-WRF_GAS=nc_fid.variables[gas][time_idx,:]
-
-WRF_GAS=np.delete(WRF_GAS, 0, axis=0)
-WRF_GAS=np.flipud(WRF_GAS)
-
-#converting to kg/kg from ppmv
-WRF_GAS=WRF_GAS*1e-6*molar_mass_map[gas]/molar_mass_map['air']
-
-WRF_LOAD=WRF_DELP*WRF_GAS/g
-WRF_LOAD=np.sum(WRF_LOAD, axis=0)
-'''
-
-
-
 plt.close()
 nc_fid.close()

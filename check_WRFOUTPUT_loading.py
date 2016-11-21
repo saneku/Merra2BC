@@ -11,7 +11,7 @@ import wrf_module
 
 #dust_array=['oin_a02','oin_a03','oin_a04','oin_a05','oin_a06','oin_a07','oin_a08']
 dust_array=['DUST_1','DUST_2','DUST_3','DUST_4','DUST_5']
-wrf_module.wrf_dir="/home/ukhova/Apps/WRF/V3.7.1/WRFV3.7.1/run_visuvi_tutorial"
+#wrf_module.wrf_dir="/home/ukhova/Apps/WRF/V3.7.1/WRFV3.7.1/run_visuvi_tutorial"
 wrf_module.initialise()
 
 nc_fid = nc.MFDataset(pathes.wrf_dir+'/wrfout*')
@@ -55,7 +55,7 @@ for time_idx in range(0,len(times),1):
     ash_map.drawcoastlines(linewidth=1)
     ash_map.drawmapboundary(linewidth=0.25)
 
-    clevs =np.linspace(0, 5e-3,num=100, endpoint=True)
+    clevs =np.linspace(0, 3e-3,num=100, endpoint=True)
     cs = ash_map.contourf(x,y,WRF_LOAD,clevs,cmap=plt.cm.Spectral_r)
 
     # draw parallels.

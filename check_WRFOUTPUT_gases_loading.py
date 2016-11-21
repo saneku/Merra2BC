@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import wrf_module
+import pathes
 
 gas_spec_array=['so2','sulf','o3']
 molar_mass_map={'air':29.0,'so2':64.0,'sulf':96.0,'o3':48.0}  #g mole-1
@@ -13,10 +14,10 @@ molar_mass_map={'air':29.0,'so2':64.0,'sulf':96.0,'o3':48.0}  #g mole-1
 x_limit={'so2':7e-5,'sulf':7e-5,'o3':4e-3}
 
 
-wrf_module.wrf_dir="/home/ukhova/Apps/WRF/V3.7.1/WRFV3.7.1/run_visuvi_tutorial/with_BCS"
+#wrf_module.wrf_dir="/home/ukhova/Apps/WRF/V3.7.1/WRFV3.7.1/run_visuvi_tutorial/with_BCS"
 wrf_module.initialise()
 
-nc_fid = nc.MFDataset(wrf_module.wrf_dir+'/wrfout*')
+nc_fid = nc.MFDataset(pathes.wrf_dir+'/wrfout*')
 times =nc_fid.variables['Times'][:]
 znu=nc_fid.variables['ZNU'][0,:]
 wrf_p_top=nc_fid.variables['P_TOP'][0]
@@ -66,7 +67,7 @@ for time_idx in range(0,len(times),1):
 	#cs = ash_map.contourf(x,y,aod,100,cmap=plt.cm.Spectral_r)
 
         cbar = plt.colorbar(cs, orientation='horizontal')
-        cbar.set_label("wrfoutput dust loading (kg m-2)")
+        cbar.set_label("wrfoutput "+gas+" loading (kg m-2)")
         cbar.formatter.set_powerlimits((0, 0))
         cbar.update_ticks()
 

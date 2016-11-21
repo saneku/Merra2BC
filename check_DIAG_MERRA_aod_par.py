@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 from netCDF4 import Dataset
+
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+
 import numpy as np
 from datetime import datetime, timedelta
 import os

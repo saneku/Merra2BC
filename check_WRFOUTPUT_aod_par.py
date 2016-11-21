@@ -5,7 +5,11 @@ import time
 start_time = time.time()
 
 from mpl_toolkits.basemap import Basemap
+
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+
 import numpy as np
 
 import pathes
