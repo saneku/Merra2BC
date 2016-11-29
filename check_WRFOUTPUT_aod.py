@@ -8,7 +8,7 @@ import numpy as np
 import pathes
 import wrf_module
 
-#pathes.wrf_dir="/home/ukhova/Apps/WRF/V3.7.1/WRFV3.7.1/run_visuvi_tutorial"
+
 wrf_module.initialise()
 
 nc_fid = nc.MFDataset(pathes.wrf_dir+'/wrfout_d01*')

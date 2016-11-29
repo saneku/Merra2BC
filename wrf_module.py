@@ -101,7 +101,7 @@ def initialise():
     ny=len(wrfbddy.dimensions['south_north'])
     nz=len(wrfbddy.dimensions['bottom_top'])
     nw=len(wrfbddy.dimensions['bdy_width'])
-    print "\nWRF dimensions: [bottom_top]="+str(nz)+" [south_north]="+str(ny)+" [west_east]="+str(nx)+" [bdy_width]="+str(nw)
+    #print "\nWRF dimensions: [bottom_top]="+str(nz)+" [south_north]="+str(ny)+" [west_east]="+str(nx)+" [bdy_width]="+str(nw)
     wrfbddy.close()
 
     #Reading "PRESSURE TOP OF THE MODEL, PA" and "eta values on half (mass) levels"
@@ -125,6 +125,10 @@ def initialise():
 
     wrf_lons=np.concatenate((xlon[:,0],xlon[ny-1,:],xlon[:,nx-1],xlon[0,:]), axis=0)
     wrf_lats=np.concatenate((xlat[:,0],xlat[ny-1,:],xlat[:,nx-1],xlat[0,:]), axis=0)
+
+
+    print "\nWRF dimensions: [bottom_top]="+str(nz)+" [south_north]="+str(ny)+" [west_east]="+str(nx)+" [bdy_width]="+str(nw)
+    print "P_TOP="+str(wrf_p_top)+" Pa"
 
     print "Lower left corner: lat="+str(min(wrf_lats))+" long="+str(min(wrf_lons))
     print "Upper right corner: lat="+str(max(wrf_lats))+" long="+str(max(wrf_lons))
