@@ -14,7 +14,7 @@ wrf_module.initialise()
 nc_fid = nc.MFDataset(pathes.wrf_dir+'/wrfout_d01*')
 times =nc_fid.variables['Times'][:]
 
-fig = plt.figure(figsize=(20,20))
+fig = plt.figure(figsize=(8,8))
 
 ash_map = Basemap(width=wrf_module.dx*wrf_module.nx,height=wrf_module.dy*wrf_module.ny,resolution='l',area_thresh=100.,projection=wrf_module.get_BaseMapProjectionByWrfProjection(), lat_1=wrf_module.true_lat1,lat_2=wrf_module.true_lat2,lat_0=wrf_module.cen_lat,lon_0=wrf_module.cen_lon)
 x, y = ash_map(wrf_module.xlon, wrf_module.xlat)

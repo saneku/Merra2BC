@@ -39,13 +39,13 @@ spc_map = [ 'DUST_1 -> 1.0*[DU001];1.e9',
             'sulf -> 0.302*[SO4];1.e6',
             'BC1 -> 0.4143*[BCPHOBIC];1.e9', 'BC2 -> 0.4143*[BCPHILIC];1.e9',
             'OC1 -> 0.4143*[OCPHOBIC];1.e9', 'OC2 -> 0.4143*[OCPHILIC];1.e9',
-            'dms -> 0.467*[DMS];1.e6','msa -> 0.302*[MSA];1.e6']            
+            'dms -> 0.467*[DMS];1.e6','msa -> 0.302*[MSA];1.e6']
             #'o3 -> 0.604*[O3];1.e6',
             #'co -> 1*[CO];1.e6']
 
 spc_map = [ 'o3 -> 0.604*[O3];1.e6','co -> 1*[CO];1.e6']
 
-#spc_map = [ 'so2 -> 0.453*[SO2];1.e6','sulf -> 0.302*[SO4];1.e6']
+spc_map = [ 'so2 -> 0.453*[SO2];1.e6','sulf -> 0.302*[SO4];1.e6']
 
 '''
 #CBMZ-MOSAIC_8bins  DUST only

@@ -1,6 +1,7 @@
 #TODO if there is a dublicate in WRF scpes in spc_map
 #TODO if there is a dublicate in MERRA specs in spc_map
 
+#TODO rename wrf_lons and wrf_lats to boundary_ ...
 import pathes
 import time
 start_time = time.time()

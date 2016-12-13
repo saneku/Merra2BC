@@ -8,14 +8,15 @@ import merra2_module
 start_time = time.time()
 
 from mpl_toolkits.basemap import Basemap
+from mpl_toolkits.basemap import shiftgrid
 import matplotlib.pyplot as plt
 from netCDF4 import Dataset
 import numpy as np
 
 g=9.81
 
-gas_spec_array=['so2','sulf']
-molar_mass_map={'air':29.0,'so2':64.0,'sulf':96.0}  #g mole-1
+gas_spec_array=['so2','sulf','o3','co']
+molar_mass_map={'air':29.0,'so2':64.0,'sulf':96.0,'o3':48.0,'co':28.0}  #g mole-1
 
 merra2_module.initialise()
 wrf_module.initialise()
@@ -35,6 +36,8 @@ WRF_DELP=np.diff(WRF_Pres,axis=0)
 fig = plt.figure(figsize=(20,20))
 ash_map = Basemap(width=wrf_module.dx*wrf_module.nx,height=wrf_module.dy*wrf_module.ny,resolution='l',area_thresh=100.,projection=wrf_module.get_BaseMapProjectionByWrfProjection(), lat_1=wrf_module.true_lat1,lat_2=wrf_module.true_lat2,lat_0=wrf_module.cen_lat,lon_0=wrf_module.cen_lon)
 
+temp_xlon=wrf_module.xlon
+
 for gas in gas_spec_array:
     #WRF_GAS = np.zeros([wrf_module.nz,wrf_module.ny,wrf_module.nx])
     WRF_GAS=wrfinput.variables[gas][0,:]
@@ -50,6 +53,13 @@ for gas in gas_spec_array:
     WRF_LOAD=WRF_DELP*WRF_GAS/g
     WRF_LOAD=np.sum(WRF_LOAD, axis=0)
 
+    #-------------------------
+    #SHIFTING DATA
+    wrf_module.xlon=temp_xlon
+    wrf_module.xlon, WRF_LOAD = ash_map.shiftdata(wrf_module.xlon, datain = WRF_LOAD, lon_0=0)
+    #WRF_LOAD,wrf_module.xlon=shiftgrid(-180., WRF_LOAD, wrf_module.xlon, start=True)
+    #-------------------------
+	
     ash_map.drawcoastlines(linewidth=1)
     ash_map.drawmapboundary(linewidth=0.25)
 
@@ -59,10 +69,10 @@ for gas in gas_spec_array:
     ash_map.plot(x,y,'k.', ms=1,alpha=0.1)
 
     # draw parallels.
-    parallels = np.arange(0.,90,10.)
+    parallels = np.arange(-90.,90.,10.)
     ash_map.drawparallels(parallels,labels=[1,0,0,0],fontsize=10)
     # draw meridians
-    meridians = np.arange(0.,180.,10.)
+    meridians = np.arange(0.,360.,10.)
     ash_map.drawmeridians(meridians,labels=[0,0,0,1],fontsize=10)
 
     cbar = plt.colorbar(cs, orientation='horizontal')

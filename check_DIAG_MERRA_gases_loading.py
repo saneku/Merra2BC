@@ -56,12 +56,12 @@ for mf in merra_files:
             ash_map.drawmapboundary(linewidth=0.25)
 
             # draw parallels.
-            parallels = np.arange(0.,90,10.)
+            parallels = np.arange(-90.,90.,10.)
             ash_map.drawparallels(parallels,labels=[1,0,0,0],fontsize=10)
             # draw meridians
-            meridians = np.arange(0.,180.,10.)
+            meridians = np.arange(0.,360.,10.)
             ash_map.drawmeridians(meridians,labels=[0,0,0,1],fontsize=10)
-            ash_map.plot(x,y,'k.', ms=1,alpha=.25)
+            #ash_map.plot(x,y,'k.', ms=1,alpha=.25)
 
             cbar = plt.colorbar(cs, orientation='horizontal')
             cbar.set_label("Merra diag. "+gas+" Mass Loading (kg m-2)")

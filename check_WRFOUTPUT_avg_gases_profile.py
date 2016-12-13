@@ -18,7 +18,7 @@ znu=nc_fid.variables['ZNU'][0,:]
 wrf_p_top=nc_fid.variables['P_TOP'][0]
 
 
-fig = plt.figure(figsize=(20,20))
+fig = plt.figure(figsize=(8,8))
 
 for time_idx in range(0,len(times),3):
     cur_time=''.join(times[time_idx])

@@ -12,6 +12,10 @@ from functools import partial
 Ptop_mera=1 #Pa   (=0.01 hPa)
 mera_lat=0
 mera_lon=0
+
+shifted_lons=False
+shift_index=0
+
 merra_files=[]
 mera_times={}                           #map between time and index in file
 mera_times_files={}                     #map between time and file index
@@ -171,7 +175,12 @@ def ver_interpolate_3dfield_on_wrf_grid(MER_HOR_SPECIE, MER_HOR_PRES,WRF_PRES,wr
 #extracts 3d field from merra2 file from given time
 def get_3dfield_by_time(time,merra_file,field_name):
     mera_time_idx=get_index_in_file_by_time(time)
-    return np.flipud(merra_file.variables[field_name][mera_time_idx,:])
+    field=merra_file.variables[field_name][mera_time_idx,:]
+
+    if shifted_lons:
+        field=np.roll(field,shift_index,axis=2)
+
+    return np.flipud(field)
 
 
 def get_pressure_by_time(time,merra_file):
@@ -192,13 +201,16 @@ def get_pressure_by_time(time,merra_file):
     for z_level in range(mer_number_of_z_points-1):
         MER_Pres[z_level+1]=MER_Pres[z_level]+DELP[z_level]
 
+    if shifted_lons:
+        MER_Pres=np.roll(MER_Pres,shift_index,axis=2)
+
     MER_Pres=np.flipud(MER_Pres)
     return MER_Pres
 
 
 
 def initialise():
-    global merra_files,mer_number_of_x_points,mer_number_of_y_points,mer_number_of_z_points,mera_lon,mera_lat,merra_vars
+    global merra_files,mer_number_of_x_points,mer_number_of_y_points,mer_number_of_z_points,mera_lon,mera_lat,merra_vars,shifted_lons,shift_index
 
     merra_files=sorted([f for f in os.listdir(pathes.mera_dir) if re.match(pathes.mera_files, f)], key=numericalSort)
     merra_f = Dataset(pathes.mera_dir+"/"+merra_files[0],'r')
@@ -218,6 +230,20 @@ def initialise():
 
     mera_lon  = merra_f.variables['lon'][:]
     mera_lat  = merra_f.variables['lat'][:]
+
+    if(max(mera_lon)>180):
+        print "###########################"
+        print "ATTENTION!!!:"
+        print "SHIFTING LONGITUDES"
+        index=0
+        for lon in mera_lon:
+            if lon >180:
+                mera_lon[index]=mera_lon[index]-360.0
+            index=index+1
+        shift_index=len(mera_lon)/2
+        mera_lon=np.roll(mera_lon,shift_index)
+        shifted_lons=True
+        print "###########################"
 
     print "Lower left corner: lat="+str(min(mera_lat))+" long="+str(min(mera_lon))
     print "Upper right corner: lat="+str(max(mera_lat))+" long="+str(max(mera_lon))

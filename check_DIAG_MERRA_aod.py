@@ -19,7 +19,7 @@ import merra2_module
 merra2_module.initialise()
 
 #---------------------------
-fig = plt.figure(figsize=(20,20))
+fig = plt.figure(figsize=(8,8))
 #ash_map = Basemap(projection='merc',llcrnrlat=10,urcrnrlat=60,llcrnrlon=0,urcrnrlon=50,resolution='c',area_thresh=100.)
 #ash_map = Basemap(width=4400000,height=4400000,resolution='l',area_thresh=100.,projection='lcc', lat_1=30.,lat_2=40,lat_0=35,lon_0=25)
 ash_map = Basemap(projection='cyl',llcrnrlon=min(merra2_module.mera_lon), llcrnrlat=min(merra2_module.mera_lat), urcrnrlon=max(merra2_module.mera_lon), urcrnrlat=max(merra2_module.mera_lat),resolution='l',area_thresh=100.)
