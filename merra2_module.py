@@ -24,16 +24,10 @@ mer_number_of_x_points=0
 mer_number_of_y_points=0
 mer_number_of_z_points=0
 
-#times_per_file=0
-#merra_points=0
-
 numbers = re.compile(r'(\d+)')
 def numericalSort(value):
     parts = numbers.split(value)
     return parts[9]
-
-#def get_ordered_mera_files_in_mera_dir():
-#   return merra_files
 
 def get_file_index_by_time(time):
     return mera_times_files.get(time)
@@ -43,33 +37,6 @@ def get_index_in_file_by_time(time):
 
 def get_file_name_by_index(index):
     return merra_files[index]
-
-
-#*******************************
-def hor_interpolate_3dfield_on_wrf_boubdary1(wrf_length, wrf_lon, wrf_lat,FIELD):
-    FIELD_BND=np.zeros([FIELD.shape[0], wrf_length])
-    #print 'process id: '+str(os.getpid())+"  FIELD.shape="+str(FIELD.shape)#+" wrf_ny="+str(wrf_ny)+" wrf_nx="+str(wrf_nx)#+" shape="+FIELD.shape
-    #print 'process id: '+str(os.getpid())+" FIELD_BND.shape="+str(FIELD_BND.shape)
-
-    for z_level in range(FIELD.shape[0]):
-        f = interpolate.RectBivariateSpline(mera_lat, mera_lon, FIELD[z_level,:,:])
-        FIELD_BND[z_level,:]=f(wrf_lat,wrf_lon,grid=False)
-    return FIELD_BND
-
-
-def threaded_hor_interpolate_3dfield_on_wrf_boubdary(FIELD, wrf_length, wrf_lon, wrf_lat):
-    # Make the Pool of number_of_workers workers
-    N=pathes.number_of_workers
-    pool = Pool(N)
-    result=np.zeros([mer_number_of_z_points, wrf_length])
-    func = partial(hor_interpolate_3dfield_on_wrf_boubdary1, wrf_length, wrf_lon, wrf_lat)
-    result=pool.map(func, np.array_split(FIELD, N))
-    pool.close()
-    pool.join()
-
-    return np.concatenate(result)
-
-#*******************************
 
 
 
@@ -89,8 +56,6 @@ def ver_interpolate_3dfield_on_wrf_boubdary(MER_HOR_SPECIE_BND,MER_HOR_PRES_BND,
         f = interpolate.interp1d(MER_HOR_PRES_BND[:,i], MER_HOR_SPECIE_BND[:,i], kind='linear',bounds_error=False,fill_value=0)
         WRF_SPECIE_BND[:,i]=f(WRF_PRES_BND[:,i])
     return WRF_SPECIE_BND
-#********************************
-
 
 #Horizontal interpolation of 3d Merra field on WRF horizontal grid
 def hor_interpolate_3dfield_on_wrf_grid(FIELD, wrf_ny, wrf_nx, wrf_lon, wrf_lat):
@@ -102,39 +67,7 @@ def hor_interpolate_3dfield_on_wrf_grid(FIELD, wrf_ny, wrf_nx, wrf_lon, wrf_lat)
 
     return FIELD_HOR
 
-
-
-#*******************************
-def hor_interpolate_3dfield_on_wrf_grid1(wrf_ny, wrf_nx, wrf_lon, wrf_lat,FIELD):
-    FIELD_HOR=np.zeros([FIELD.shape[0], wrf_ny, wrf_nx])
-    #print 'process id: '+str(os.getpid())+"  FIELD.shape="+str(FIELD.shape)#+" wrf_ny="+str(wrf_ny)+" wrf_nx="+str(wrf_nx)#+" shape="+FIELD.shape
-    #print 'process id: '+str(os.getpid())+" FIELD_HOR.shape="+str(FIELD_HOR.shape)
-
-    for z_level in range(FIELD.shape[0]):
-        #2.
-        #FIELD_HOR[z_level,:,:]= interpolate.griddata(merra_points, FIELD[z_level,:,:].ravel(), (wrf_lon, wrf_lat), method='linear',fill_value=0)
-
-        #3.
-        f = interpolate.RectBivariateSpline(mera_lat, mera_lon, FIELD[z_level,:,:])
-        FIELD_HOR[z_level,:,:]=f(wrf_lat,wrf_lon,grid=False).reshape(wrf_ny, wrf_nx)
-    return FIELD_HOR
-
-
-def threaded_hor_interpolate_3dfield_on_wrf_grid(FIELD, wrf_ny, wrf_nx, wrf_lon, wrf_lat):
-    # Make the Pool of number_of_workers workers
-    N=pathes.number_of_workers
-    pool = Pool(N)
-    result=np.zeros([mer_number_of_z_points, wrf_ny, wrf_nx])
-    func = partial(hor_interpolate_3dfield_on_wrf_grid1, wrf_ny, wrf_nx, wrf_lon, wrf_lat)
-    result=pool.map(func, np.array_split(FIELD, N))
-    pool.close()
-    pool.join()
-
-    return np.concatenate(result)
-
-#*******************************
-
-
+#Vertical interpolation on WRF grid
 def ver_interpolate_3dfield_on_wrf_grid(MER_HOR_SPECIE, MER_HOR_PRES,WRF_PRES,wrf_nz, wrf_ny, wrf_nx):
     WRF_SPECIE = np.zeros([wrf_nz,wrf_ny,wrf_nx])  # Required SPEC on WRF grid
     for x in range(0,wrf_nx,1):
@@ -142,7 +75,7 @@ def ver_interpolate_3dfield_on_wrf_grid(MER_HOR_SPECIE, MER_HOR_PRES,WRF_PRES,wr
             f = interpolate.interp1d(MER_HOR_PRES[:,y,x], MER_HOR_SPECIE[:,y,x], kind='linear',bounds_error=False,fill_value=0)
             WRF_SPECIE[:,y,x]=f(WRF_PRES[:,y,x])
     return WRF_SPECIE
-
+#********************************
 
 #extracts 3d field from merra2 file from given time
 def get_3dfield_by_time(time,merra_file,field_name):
@@ -188,7 +121,6 @@ def initialise():
         mer_number_of_z_points=merra_f.variables['lev'].size
     except Exception:
         pass
-
 
     print "MERRA2 dimensions: [bottom_top]="+str(mer_number_of_z_points)+" [south_north]="+str(mer_number_of_y_points)+" [west_east]="+str(mer_number_of_x_points)
 

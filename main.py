@@ -1,7 +1,6 @@
 #TODO if there is a dublicate in WRF scpes in spc_map
 #TODO if there is a dublicate in MERRA specs in spc_map
 
-#TODO when ATTENTION is written need to show previous lons and then new lons
 import config
 import time
 start_time = time.time()
@@ -12,18 +11,11 @@ import utils
 from netCDF4 import Dataset
 import numpy as np
 from datetime import datetime
-import multiprocessing
-
-#to enable parallel
-#import wrfbdy_split_combine
 
 #modules initialisation
 merra2_module.initialise()
 wrf_module.initialise()
 merra2wrf_mapper.initialise()
-
-if pathes.enable_threading:
-    print "Multiprocessing is active. "+str(pathes.number_of_workers)+" threads out of "+str(multiprocessing.cpu_count())+" will be used."
 
 #-----------------------------
 #Sanity checks:
@@ -64,14 +56,8 @@ if pathes.do_IC:
     merra_f = Dataset(pathes.mera_dir+"/"+merra2_module.get_file_name_by_index(index_of_opened_mera_file),'r')
     MERA_PRES=merra2_module.get_pressure_by_time(cur_time,merra_f)
 
-
-    if pathes.enable_threading:
-        #Threaded Horizontal interpolation of Merra pressure on WRF horizontal grid
-        MER_HOR_PRES=merra2_module.threaded_hor_interpolate_3dfield_on_wrf_grid(MERA_PRES,wrf_module.ny,wrf_module.nx,wrf_module.xlon,wrf_module.xlat)
-    else:
-        #Horizontal interpolation of Merra pressure on WRF horizontal grid
-        MER_HOR_PRES=merra2_module.hor_interpolate_3dfield_on_wrf_grid(MERA_PRES,wrf_module.ny,wrf_module.nx,wrf_module.xlon,wrf_module.xlat)
-
+    #Horizontal interpolation of Merra pressure on WRF horizontal grid
+    MER_HOR_PRES=merra2_module.hor_interpolate_3dfield_on_wrf_grid(MERA_PRES,wrf_module.ny,wrf_module.nx,wrf_module.xlon,wrf_module.xlat)
 
     print "Opening metfile: "+wrf_module.get_met_file_by_time(cur_time)
     metfile= Dataset(pathes.wrf_met_dir+"/"+wrf_module.get_met_file_by_time(cur_time),'r')
@@ -85,16 +71,8 @@ if pathes.do_IC:
         MER_SPECIE=merra2_module.get_3dfield_by_time(cur_time,merra_f,merra_specie)
 
         print "\t\t - Horisontal interpolation of "+merra_specie+" on WRF horizontal grid"
+        MER_HOR_SPECIE=merra2_module.hor_interpolate_3dfield_on_wrf_grid(MER_SPECIE,wrf_module.ny,wrf_module.nx,wrf_module.xlon,wrf_module.xlat)
 
-        if pathes.enable_threading:
-            #Threaded Horizontal interpolation of Merra specie on WRF horizontal grid
-            MER_HOR_SPECIE=merra2_module.threaded_hor_interpolate_3dfield_on_wrf_grid(MER_SPECIE,wrf_module.ny,wrf_module.nx,wrf_module.xlon,wrf_module.xlat)
-        else:
-            #Horizontal interpolation of Merra specie on WRF horizontal grid
-            MER_HOR_SPECIE=merra2_module.hor_interpolate_3dfield_on_wrf_grid(MER_SPECIE,wrf_module.ny,wrf_module.nx,wrf_module.xlon,wrf_module.xlat)
-
-
-        #Vertical interpolation of MER_HOR_SPECIE on WRF vertical grid
         print "\t\t - Vertical interpolation of "+merra_specie+" on WRF vertical grid"
         WRF_SPECIE=merra2_module.ver_interpolate_3dfield_on_wrf_grid(MER_HOR_SPECIE,MER_HOR_PRES,WRF_PRES,wrf_module.nz,wrf_module.ny,wrf_module.nx)
         WRF_SPECIE=np.flipud(WRF_SPECIE)
@@ -105,7 +83,6 @@ if pathes.do_IC:
             wrf_mult=merra2wrf_mapper.coefficients[wrf_spec]
             print "\t\t - Updating wrfinput field "+wrf_spec+"[0]="+wrf_spec+"[0]+"+merra_specie+"*"+str(coef)+"*"+str(wrf_mult)
             wrfinput_f.variables[wrf_spec][0,:]=wrfinput_f.variables[wrf_spec][0,:]+WRF_SPECIE*coef*wrf_mult
-
 
     print "Closing wrfintput: "+pathes.wrf_input_file
     wrfinput_f.close()
@@ -148,17 +125,12 @@ if pathes.do_BC:
         MERA_PRES=merra2_module.get_pressure_by_time(cur_time,merra_f)
 
         print "\tHorizontal interpolation of MERRA Pressure on WRF boundary"
-        if pathes.enable_threading:
-            MER_HOR_PRES_BND=merra2_module.threaded_hor_interpolate_3dfield_on_wrf_boubdary(MERA_PRES,len(wrf_module.wrf_bnd_lons),wrf_module.wrf_bnd_lons,wrf_module.wrf_bnd_lats)
-        else:
-            MER_HOR_PRES_BND=merra2_module.hor_interpolate_3dfield_on_wrf_boubdary(MERA_PRES,len(wrf_module.wrf_bnd_lons),wrf_module.wrf_bnd_lons,wrf_module.wrf_bnd_lats)
-
+        MER_HOR_PRES_BND=merra2_module.hor_interpolate_3dfield_on_wrf_boubdary(MERA_PRES,len(wrf_module.wrf_bnd_lons),wrf_module.wrf_bnd_lons,wrf_module.wrf_bnd_lats)
 
         print "\tReading WRF Pressure from: "+wrf_module.get_met_file_by_time(cur_time)
         metfile= Dataset(pathes.wrf_met_dir+"/"+wrf_module.get_met_file_by_time(cur_time),'r')
         WRF_PRES=wrf_module.get_pressure_from_metfile(metfile)
         WRF_PRES_BND=np.concatenate((WRF_PRES[:,:,0],WRF_PRES[:,wrf_module.ny-1,:],WRF_PRES[:,:,wrf_module.nx-1],WRF_PRES[:,0,:]), axis=1)
-        #TODO UNCOMMENT IT
         metfile.close()
 
         time_index=wrf_module.get_index_in_file_by_time(cur_time)
@@ -167,11 +139,7 @@ if pathes.do_BC:
             MER_SPECIE=merra2_module.get_3dfield_by_time(cur_time,merra_f,merra_specie)
 
             print "\t\tHorizontal interpolation of "+merra_specie+" on WRF boundary"
-            if pathes.enable_threading:
-                MER_HOR_SPECIE_BND=merra2_module.threaded_hor_interpolate_3dfield_on_wrf_boubdary(MER_SPECIE,len(wrf_module.wrf_bnd_lons),wrf_module.wrf_bnd_lons,wrf_module.wrf_bnd_lats)
-            else:
-                MER_HOR_SPECIE_BND=merra2_module.hor_interpolate_3dfield_on_wrf_boubdary(MER_SPECIE,len(wrf_module.wrf_bnd_lons),wrf_module.wrf_bnd_lons,wrf_module.wrf_bnd_lats)
-
+            MER_HOR_SPECIE_BND=merra2_module.hor_interpolate_3dfield_on_wrf_boubdary(MER_SPECIE,len(wrf_module.wrf_bnd_lons),wrf_module.wrf_bnd_lons,wrf_module.wrf_bnd_lats)
 
             print "\t\tVertical interpolation of "+merra_specie+" on WRF boundary"
             WRF_SPECIE_BND=merra2_module.ver_interpolate_3dfield_on_wrf_boubdary(MER_HOR_SPECIE_BND,MER_HOR_PRES_BND,WRF_PRES_BND,wrf_module.nz,len(wrf_module.wrf_bnd_lons))
@@ -188,7 +156,6 @@ if pathes.do_BC:
         for wrf_spec in merra2wrf_mapper.get_wrf_vars():
             wrf_module.update_tendency_boundaries(wrfbdy_f,wrf_spec,time_index,dt,wrf_sp_index)
             wrf_sp_index=wrf_sp_index+1
-
 
         print("--- %s seconds ---" % (time.time() - start_time))
 
