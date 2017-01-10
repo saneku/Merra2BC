@@ -101,7 +101,6 @@ def initialise():
     ny=len(wrfbddy.dimensions['south_north'])
     nz=len(wrfbddy.dimensions['bottom_top'])
     nw=len(wrfbddy.dimensions['bdy_width'])
-    #print "\nWRF dimensions: [bottom_top]="+str(nz)+" [south_north]="+str(ny)+" [west_east]="+str(nx)+" [bdy_width]="+str(nw)
     wrfbddy.close()
 
     #Reading "PRESSURE TOP OF THE MODEL, PA" and "eta values on half (mass) levels"

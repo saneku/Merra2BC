@@ -2,6 +2,7 @@
 #TODO if there is a dublicate in MERRA specs in spc_map
 
 #TODO rename wrf_lons and wrf_lats to boundary_ ...
+#TODO when ATTENTION is written need to show previous lons and then new lons
 import pathes
 import time
 start_time = time.time()
