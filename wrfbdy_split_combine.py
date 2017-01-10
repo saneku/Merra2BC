@@ -1,4 +1,4 @@
-import pathes
+import config
 from netCDF4 import Dataset
 import numpy as np
 import os
@@ -6,8 +6,6 @@ import os
 #from parutils import pprint
 from mpi4py import MPI
 comm = MPI.COMM_WORLD
-
-
 
 def split_wrfbdy(size):
     wrf_times=[]
@@ -45,12 +43,7 @@ comm.Barrier()
 size=comm.size
 rank=comm.rank
 
-#pprint("-"*78)
-#pprint(" Rank %d from %d running in total..." % (comm.rank, comm.size))
-#pprint("-"*78)
-
 print(" Rank [%d] from %d running in total..." % (comm.rank, comm.size))
-
 
 if rank==0:
     split_wrfbdy(size)

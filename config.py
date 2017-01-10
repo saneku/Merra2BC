@@ -9,9 +9,6 @@ mera_dir="/home/ukhova/Downloads/Merra2ForVISUVI_data/"
 mera_files="svc_MERRA2_300.inst3_3d_aer_Nv.2010*"
 
 
-
-
-
 number_of_workers=18 #depending on the number of availble cores recomended values are: 2,4,6,8,12,18,24
 enable_threading=False
 

@@ -1,7 +1,6 @@
 
-
 import re
-import pathes
+import config
 
 #mapping between MERRA2 species and WRF species
 chem_map={}                         #merra to wrf spec map

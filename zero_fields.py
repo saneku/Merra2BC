@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import pathes
+import config
 import time
 
 start_time = time.time()

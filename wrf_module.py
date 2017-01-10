@@ -1,4 +1,4 @@
-import pathes
+import config
 import re
 import os
 from netCDF4 import Dataset
@@ -25,8 +25,8 @@ wrf_vars=[]
 #mapping for basemap projections
 projections={"Lambert Conformal":"lcc","Mercator":"merc"}
 
-wrf_lons=[]
-wrf_lats=[]
+wrf_bnd_lons=[]
+wrf_bnd_lats=[]
 
 def get_pressure_from_metfile(metfile):
     PSFC=metfile.variables['PSFC'][:]
@@ -34,12 +34,6 @@ def get_pressure_from_metfile(metfile):
     for z_level in reversed(range(nz)):
         WRF_Pres[nz-1-z_level,:]=PSFC*znu[0,z_level]+ (1.0 - znu[0,z_level])*wrf_p_top
     return WRF_Pres
-
-def get_sfcp_from_met_file(filename):
-    metfile= Dataset(pathes.wrf_met_dir+"/"+filename,'r')
-    PSFC=metfile.variables['PSFC'][:]
-    metfile.close()
-    return PSFC
 
 def get_met_file_by_time(time):
     return met_times_files.get(time)
@@ -88,7 +82,7 @@ def update_tendency_boundaries(wrfbdy_f,name,index,dt,wrf_sp_index):
 
 
 def initialise():
-    global met_files,wrf_times,wrf_p_top,znu,xlon,xlat,nx,ny,nz,nw,wrf_lons,wrf_lats,spec_number,wrf_vars,cen_lat,cen_lon,projection,dx,dy,true_lat2,true_lat1
+    global met_files,wrf_times,wrf_p_top,znu,xlon,xlat,nx,ny,nz,nw,wrf_bnd_lons,wrf_bnd_lats,spec_number,wrf_vars,cen_lat,cen_lon,projection,dx,dy,true_lat2,true_lat1
 
     met_files=sorted([f for f in os.listdir(pathes.wrf_met_dir) if re.match(pathes.wrf_met_files, f)], key=numericalSort1)
     wrfbddy = Dataset(pathes.wrf_dir+"/"+pathes.wrf_bdy_file,'r')
@@ -122,15 +116,15 @@ def initialise():
 
     wrfinput.close()
 
-    wrf_lons=np.concatenate((xlon[:,0],xlon[ny-1,:],xlon[:,nx-1],xlon[0,:]), axis=0)
-    wrf_lats=np.concatenate((xlat[:,0],xlat[ny-1,:],xlat[:,nx-1],xlat[0,:]), axis=0)
+    wrf_bnd_lons=np.concatenate((xlon[:,0],xlon[ny-1,:],xlon[:,nx-1],xlon[0,:]), axis=0)
+    wrf_bnd_lats=np.concatenate((xlat[:,0],xlat[ny-1,:],xlat[:,nx-1],xlat[0,:]), axis=0)
 
 
     print "\nWRF dimensions: [bottom_top]="+str(nz)+" [south_north]="+str(ny)+" [west_east]="+str(nx)+" [bdy_width]="+str(nw)
     print "P_TOP="+str(wrf_p_top)+" Pa"
 
-    print "Lower left corner: lat="+str(min(wrf_lats))+" long="+str(min(wrf_lons))
-    print "Upper right corner: lat="+str(max(wrf_lats))+" long="+str(max(wrf_lons))
+    print "Lower left corner: lat="+str(min(wrf_bnd_lats))+" long="+str(min(wrf_bnd_lons))
+    print "Upper right corner: lat="+str(max(wrf_bnd_lats))+" long="+str(max(wrf_bnd_lons))
 
 
     spec_number=len(pathes.spc_map)

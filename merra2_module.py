@@ -1,4 +1,4 @@
-import pathes
+import config
 import re
 import os
 from netCDF4 import Dataset
@@ -32,8 +32,8 @@ def numericalSort(value):
     parts = numbers.split(value)
     return parts[9]
 
-def get_ordered_mera_files_in_mera_dir():
-    return merra_files
+#def get_ordered_mera_files_in_mera_dir():
+#   return merra_files
 
 def get_file_index_by_time(time):
     return mera_times_files.get(time)
@@ -45,11 +45,6 @@ def get_file_name_by_index(index):
     return merra_files[index]
 
 
-
-
-
-#*******************************
-#*******************************
 #*******************************
 def hor_interpolate_3dfield_on_wrf_boubdary1(wrf_length, wrf_lon, wrf_lat,FIELD):
     FIELD_BND=np.zeros([FIELD.shape[0], wrf_length])
@@ -57,10 +52,6 @@ def hor_interpolate_3dfield_on_wrf_boubdary1(wrf_length, wrf_lon, wrf_lat,FIELD)
     #print 'process id: '+str(os.getpid())+" FIELD_BND.shape="+str(FIELD_BND.shape)
 
     for z_level in range(FIELD.shape[0]):
-        #2.
-        #FIELD_BND[z_level,:]= interpolate.griddata(merra_points, FIELD[z_level,:,:].ravel(), (wrf_lon, wrf_lat), method='linear',fill_value=0)
-
-        #3.
         f = interpolate.RectBivariateSpline(mera_lat, mera_lon, FIELD[z_level,:,:])
         FIELD_BND[z_level,:]=f(wrf_lat,wrf_lon,grid=False)
     return FIELD_BND
@@ -79,9 +70,6 @@ def threaded_hor_interpolate_3dfield_on_wrf_boubdary(FIELD, wrf_length, wrf_lon,
     return np.concatenate(result)
 
 #*******************************
-#*******************************
-#*******************************
-
 
 
 
@@ -90,10 +78,6 @@ def threaded_hor_interpolate_3dfield_on_wrf_boubdary(FIELD, wrf_length, wrf_lon,
 def hor_interpolate_3dfield_on_wrf_boubdary(FIELD, wrf_length, wrf_lon, wrf_lat):
     FIELD_BND=np.zeros([mer_number_of_z_points, wrf_length])
     for z_level in range(mer_number_of_z_points):
-        #2.
-        #FIELD_HOR[z_level,:]=interpolate.griddata(merra_points, FIELD[z_level,:,:].ravel(), (wrf_lon, wrf_lat), method='linear',fill_value=0)
-
-        #3.
         f = interpolate.RectBivariateSpline(mera_lat, mera_lon, FIELD[z_level,:,:])
         FIELD_BND[z_level,:]=f(wrf_lat,wrf_lon,grid=False)
     return FIELD_BND
@@ -112,15 +96,7 @@ def ver_interpolate_3dfield_on_wrf_boubdary(MER_HOR_SPECIE_BND,MER_HOR_PRES_BND,
 def hor_interpolate_3dfield_on_wrf_grid(FIELD, wrf_ny, wrf_nx, wrf_lon, wrf_lat):
     FIELD_HOR=np.zeros([mer_number_of_z_points, wrf_ny, wrf_nx])
 
-
     for z_level in range(mer_number_of_z_points):
-        #1. f = interpolate.interp2d(mera_lon, mera_lat, MER_Pres[z_level,:,:], kind='linear')
-        #MER_HOR_Pres[z_level,:,:]=f(wrf_lon[0,:], wrf_lat[0,:])
-
-        #2.
-        #FIELD_HOR1[z_level,:,:]= interpolate.griddata(merra_points, FIELD[z_level,:,:].ravel(), (wrf_lon, wrf_lat), method='linear',fill_value=0)
-
-        #3.
         f = interpolate.RectBivariateSpline(mera_lat, mera_lon, FIELD[z_level,:,:])
         FIELD_HOR[z_level,:,:]=f(wrf_lat,wrf_lon,grid=False).reshape(wrf_ny, wrf_nx)
 
@@ -128,8 +104,6 @@ def hor_interpolate_3dfield_on_wrf_grid(FIELD, wrf_ny, wrf_nx, wrf_lon, wrf_lat)
 
 
 
-#*******************************
-#*******************************
 #*******************************
 def hor_interpolate_3dfield_on_wrf_grid1(wrf_ny, wrf_nx, wrf_lon, wrf_lat,FIELD):
     FIELD_HOR=np.zeros([FIELD.shape[0], wrf_ny, wrf_nx])
@@ -159,8 +133,6 @@ def threaded_hor_interpolate_3dfield_on_wrf_grid(FIELD, wrf_ny, wrf_nx, wrf_lon,
     return np.concatenate(result)
 
 #*******************************
-#*******************************
-#*******************************
 
 
 def ver_interpolate_3dfield_on_wrf_grid(MER_HOR_SPECIE, MER_HOR_PRES,WRF_PRES,wrf_nz, wrf_ny, wrf_nx):
@@ -188,16 +160,11 @@ def get_pressure_by_time(time,merra_file):
     MER_Pres = np.zeros([mer_number_of_z_points,mer_number_of_y_points,mer_number_of_x_points])
     #filling top layer with Ptop_mera
     MER_Pres[0,:,:]=Ptop_mera
-    #OR
-    #MER_Pres[mer_number_of_z_points-1,:,:]=Ptop_mera
 
-    # Extract delta P from NetCDF file at index defined by time
+    # Extract deltaP from NetCDF file at index defined by time
     mera_time_idx=get_index_in_file_by_time(time)
     DELP = merra_file.variables['DELP'][mera_time_idx,:]  #Pa
 
-    #for z_level in reversed(range(mer_number_of_z_points-1)):
-    #    MER_Pres[z_level,:,:]=MER_Pres[z_level+1,:,:]+DELP[z_level+1,:,:]
-    #OR
     for z_level in range(mer_number_of_z_points-1):
         MER_Pres[z_level+1]=MER_Pres[z_level]+DELP[z_level]
 
@@ -223,7 +190,6 @@ def initialise():
         pass
 
 
-
     print "MERRA2 dimensions: [bottom_top]="+str(mer_number_of_z_points)+" [south_north]="+str(mer_number_of_y_points)+" [west_east]="+str(mer_number_of_x_points)
 
     merra_vars = [var for var in merra_f.variables]
@@ -231,6 +197,7 @@ def initialise():
     mera_lon  = merra_f.variables['lon'][:]
     mera_lat  = merra_f.variables['lat'][:]
 
+    #if data is given in range of 0_360, then we need to shift lons and data to the -180_180
     if(max(mera_lon)>180):
         print "###########################"
         print "ATTENTION!!!:"
@@ -247,11 +214,6 @@ def initialise():
 
     print "Lower left corner: lat="+str(min(mera_lat))+" long="+str(min(mera_lon))
     print "Upper right corner: lat="+str(max(mera_lat))+" long="+str(max(mera_lon))
-
-    #xx, yy = np.meshgrid(mera_lon, mera_lat)
-    #xx=xx.ravel()
-    #yy=yy.ravel()
-    #merra_points=(xx, yy)
 
     #number of times in  mera file
     times_per_file=merra_f.variables['time'].size

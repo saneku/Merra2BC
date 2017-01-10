@@ -1,9 +1,8 @@
 #TODO if there is a dublicate in WRF scpes in spc_map
 #TODO if there is a dublicate in MERRA specs in spc_map
 
-#TODO rename wrf_lons and wrf_lats to boundary_ ...
 #TODO when ATTENTION is written need to show previous lons and then new lons
-import pathes
+import config
 import time
 start_time = time.time()
 import merra2_module
@@ -38,7 +37,7 @@ for var in merra2wrf_mapper.get_wrf_vars():
         utils.error_message("Could not find variable "+var+" in WRF input file. Exiting...")
 
 #check that spatial dimensions are covered
-if((min(wrf_module.wrf_lons)<min(merra2_module.mera_lon))|(max(wrf_module.wrf_lons)>max(merra2_module.mera_lon))|(min(wrf_module.wrf_lats)<min(merra2_module.mera_lat))|(max(wrf_module.wrf_lats)>max(merra2_module.mera_lat))):
+if((min(wrf_module.wrf_bnd_lons)<min(merra2_module.mera_lon))|(max(wrf_module.wrf_bnd_lons)>max(merra2_module.mera_lon))|(min(wrf_module.wrf_bnd_lats)<min(merra2_module.mera_lat))|(max(wrf_module.wrf_bnd_lats)>max(merra2_module.mera_lat))):
     utils.error_message("WRF area is not fully covered by MERRA2 area. Exiting...")
 
 time_intersection=wrf_module.wrf_times.viewkeys() & merra2_module.mera_times.viewkeys()
@@ -150,9 +149,9 @@ if pathes.do_BC:
 
         print "\tHorizontal interpolation of MERRA Pressure on WRF boundary"
         if pathes.enable_threading:
-            MER_HOR_PRES_BND=merra2_module.threaded_hor_interpolate_3dfield_on_wrf_boubdary(MERA_PRES,len(wrf_module.wrf_lons),wrf_module.wrf_lons,wrf_module.wrf_lats)
+            MER_HOR_PRES_BND=merra2_module.threaded_hor_interpolate_3dfield_on_wrf_boubdary(MERA_PRES,len(wrf_module.wrf_bnd_lons),wrf_module.wrf_bnd_lons,wrf_module.wrf_bnd_lats)
         else:
-            MER_HOR_PRES_BND=merra2_module.hor_interpolate_3dfield_on_wrf_boubdary(MERA_PRES,len(wrf_module.wrf_lons),wrf_module.wrf_lons,wrf_module.wrf_lats)
+            MER_HOR_PRES_BND=merra2_module.hor_interpolate_3dfield_on_wrf_boubdary(MERA_PRES,len(wrf_module.wrf_bnd_lons),wrf_module.wrf_bnd_lons,wrf_module.wrf_bnd_lats)
 
 
         print "\tReading WRF Pressure from: "+wrf_module.get_met_file_by_time(cur_time)
@@ -169,13 +168,13 @@ if pathes.do_BC:
 
             print "\t\tHorizontal interpolation of "+merra_specie+" on WRF boundary"
             if pathes.enable_threading:
-                MER_HOR_SPECIE_BND=merra2_module.threaded_hor_interpolate_3dfield_on_wrf_boubdary(MER_SPECIE,len(wrf_module.wrf_lons),wrf_module.wrf_lons,wrf_module.wrf_lats)
+                MER_HOR_SPECIE_BND=merra2_module.threaded_hor_interpolate_3dfield_on_wrf_boubdary(MER_SPECIE,len(wrf_module.wrf_bnd_lons),wrf_module.wrf_bnd_lons,wrf_module.wrf_bnd_lats)
             else:
-                MER_HOR_SPECIE_BND=merra2_module.hor_interpolate_3dfield_on_wrf_boubdary(MER_SPECIE,len(wrf_module.wrf_lons),wrf_module.wrf_lons,wrf_module.wrf_lats)
+                MER_HOR_SPECIE_BND=merra2_module.hor_interpolate_3dfield_on_wrf_boubdary(MER_SPECIE,len(wrf_module.wrf_bnd_lons),wrf_module.wrf_bnd_lons,wrf_module.wrf_bnd_lats)
 
 
             print "\t\tVertical interpolation of "+merra_specie+" on WRF boundary"
-            WRF_SPECIE_BND=merra2_module.ver_interpolate_3dfield_on_wrf_boubdary(MER_HOR_SPECIE_BND,MER_HOR_PRES_BND,WRF_PRES_BND,wrf_module.nz,len(wrf_module.wrf_lons))
+            WRF_SPECIE_BND=merra2_module.ver_interpolate_3dfield_on_wrf_boubdary(MER_HOR_SPECIE_BND,MER_HOR_PRES_BND,WRF_PRES_BND,wrf_module.nz,len(wrf_module.wrf_bnd_lons))
             WRF_SPECIE_BND=np.flipud(WRF_SPECIE_BND)
 
             for wrf_name_and_coef in merra2wrf_mapper.get_list_of_wrf_spec_by_merra_var(merra_specie):
