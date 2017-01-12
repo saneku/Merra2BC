@@ -8,7 +8,7 @@ coefficients={}                     #wrf multiplier map
 
 def initialise():
 
-    for a in pathes.spc_map:
+    for a in config.spc_map:
         m=re.split('->|;',a)
         #print m
         ar=re.findall(r'(-?\ *\.?[0-9]+\.?[0-9]*(?:[Ee]\ *-?\ *[0-9]+)?)\*\[?(\w+)\]?', m[1])

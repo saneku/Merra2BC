@@ -48,23 +48,23 @@ for i in time_intersection:
 
 #exit()
 
-if pathes.do_IC:
+if config.do_IC:
     print "START INITIAL CONDITIONS"
     cur_time=time_intersection[0]
     index_of_opened_mera_file=merra2_module.get_file_index_by_time(cur_time)
     print "Opening mera file: "+merra2_module.get_file_name_by_index(index_of_opened_mera_file)+" with initial time: "+cur_time
-    merra_f = Dataset(pathes.mera_dir+"/"+merra2_module.get_file_name_by_index(index_of_opened_mera_file),'r')
+    merra_f = Dataset(config.mera_dir+"/"+merra2_module.get_file_name_by_index(index_of_opened_mera_file),'r')
     MERA_PRES=merra2_module.get_pressure_by_time(cur_time,merra_f)
 
     #Horizontal interpolation of Merra pressure on WRF horizontal grid
     MER_HOR_PRES=merra2_module.hor_interpolate_3dfield_on_wrf_grid(MERA_PRES,wrf_module.ny,wrf_module.nx,wrf_module.xlon,wrf_module.xlat)
 
     print "Opening metfile: "+wrf_module.get_met_file_by_time(cur_time)
-    metfile= Dataset(pathes.wrf_met_dir+"/"+wrf_module.get_met_file_by_time(cur_time),'r')
+    metfile= Dataset(config.wrf_met_dir+"/"+wrf_module.get_met_file_by_time(cur_time),'r')
     WRF_PRES=wrf_module.get_pressure_from_metfile(metfile)
 
-    print "Opening wrfintput: "+pathes.wrf_input_file
-    wrfinput_f=Dataset(pathes.wrf_dir+"/"+pathes.wrf_input_file,'r+')
+    print "Opening wrfintput: "+config.wrf_input_file
+    wrfinput_f=Dataset(config.wrf_dir+"/"+config.wrf_input_file,'r+')
 
     for merra_specie in merra2wrf_mapper.get_merra_vars():
         print "\t\t - Reading "+merra_specie+" field from Merra2."
@@ -84,7 +84,7 @@ if pathes.do_IC:
             print "\t\t - Updating wrfinput field "+wrf_spec+"[0]="+wrf_spec+"[0]+"+merra_specie+"*"+str(coef)+"*"+str(wrf_mult)
             wrfinput_f.variables[wrf_spec][0,:]=wrfinput_f.variables[wrf_spec][0,:]+WRF_SPECIE*coef*wrf_mult
 
-    print "Closing wrfintput: "+pathes.wrf_input_file
+    print "Closing wrfintput: "+config.wrf_input_file
     wrfinput_f.close()
 
     print "Closing mera file "+merra2_module.get_file_name_by_index(index_of_opened_mera_file)
@@ -96,11 +96,11 @@ if pathes.do_IC:
     print "FINISH INITIAL CONDITIONS"
 
 
-if pathes.do_BC:
+if config.do_BC:
     print "\n\nSTART BOUNDARY CONDITIONS"
 
-    print "Opening "+pathes.wrf_bdy_file
-    wrfbdy_f=Dataset(pathes.wrf_dir+"/"+pathes.wrf_bdy_file,'r+')
+    print "Opening "+config.wrf_bdy_file
+    wrfbdy_f=Dataset(config.wrf_dir+"/"+config.wrf_bdy_file,'r+')
 
     #difference betweeen two given times
     dt=(datetime.strptime(time_intersection[1], '%Y-%m-%d_%H:%M:%S')-datetime.strptime(time_intersection[0], '%Y-%m-%d_%H:%M:%S')).total_seconds()
@@ -108,7 +108,7 @@ if pathes.do_BC:
     cur_time=time_intersection[0]
     index_of_opened_mera_file=merra2_module.get_file_index_by_time(cur_time)
     print "\nOpening MERRA2 file: "+merra2_module.get_file_name_by_index(index_of_opened_mera_file)+" file which has index "+str(index_of_opened_mera_file)
-    merra_f = Dataset(pathes.mera_dir+"/"+merra2_module.get_file_name_by_index(index_of_opened_mera_file),'r')
+    merra_f = Dataset(config.mera_dir+"/"+merra2_module.get_file_name_by_index(index_of_opened_mera_file),'r')
 
     for cur_time in time_intersection:
         if (merra2_module.get_file_index_by_time(cur_time)!=index_of_opened_mera_file):
@@ -117,7 +117,7 @@ if pathes.do_BC:
 
             index_of_opened_mera_file=merra2_module.get_file_index_by_time(cur_time)
             print "\nOpening MERRA2 file: "+merra2_module.get_file_name_by_index(index_of_opened_mera_file)+" file which has index "+str(index_of_opened_mera_file)
-            merra_f = Dataset(pathes.mera_dir+"/"+merra2_module.get_file_name_by_index(index_of_opened_mera_file),'r')
+            merra_f = Dataset(config.mera_dir+"/"+merra2_module.get_file_name_by_index(index_of_opened_mera_file),'r')
 
 
         print "\n\tCur_time="+cur_time
@@ -128,7 +128,7 @@ if pathes.do_BC:
         MER_HOR_PRES_BND=merra2_module.hor_interpolate_3dfield_on_wrf_boubdary(MERA_PRES,len(wrf_module.wrf_bnd_lons),wrf_module.wrf_bnd_lons,wrf_module.wrf_bnd_lats)
 
         print "\tReading WRF Pressure from: "+wrf_module.get_met_file_by_time(cur_time)
-        metfile= Dataset(pathes.wrf_met_dir+"/"+wrf_module.get_met_file_by_time(cur_time),'r')
+        metfile= Dataset(config.wrf_met_dir+"/"+wrf_module.get_met_file_by_time(cur_time),'r')
         WRF_PRES=wrf_module.get_pressure_from_metfile(metfile)
         WRF_PRES_BND=np.concatenate((WRF_PRES[:,:,0],WRF_PRES[:,wrf_module.ny-1,:],WRF_PRES[:,:,wrf_module.nx-1],WRF_PRES[:,0,:]), axis=1)
         metfile.close()
@@ -162,7 +162,7 @@ if pathes.do_BC:
     print "Closing prev. opened MERRA2 file with index "+str(index_of_opened_mera_file)
     merra_f.close()
 
-    print "Closing "+pathes.wrf_bdy_file
+    print "Closing "+config.wrf_bdy_file
     wrfbdy_f.close()
 
     print "FINISH BOUNDARY CONDITIONS"

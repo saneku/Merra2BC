@@ -14,7 +14,7 @@ fields_to_zero=['so2','sulf']
 
 print "SETTING TO ZERO INITIAL CONDITIONS"
 #INITIAL CONDITIONS
-wrfinput = Dataset(pathes.wrf_dir+"/"+pathes.wrf_input_file,'r+')
+wrfinput = Dataset(config.wrf_dir+"/"+config.wrf_input_file,'r+')
 for field in fields_to_zero:
 	print "Setting to zero IC for ",field
 	wrfinput.variables[field][:]=zero
@@ -23,7 +23,7 @@ wrfinput.close()
 
 print "\n\nSETTING TO ZERO BOUNDARY CONDITIONS AND TENDENCIES"
 #BOUNDARY CONDITIONS
-wrfbddy = Dataset(pathes.wrf_dir+"/"+pathes.wrf_bdy_file,'r+')
+wrfbddy = Dataset(config.wrf_dir+"/"+config.wrf_bdy_file,'r+')
 for field in fields_to_zero:
 	print "Setting to zero BC for ",field
 	wrfbddy.variables[field+"_BXS"][:]=zero

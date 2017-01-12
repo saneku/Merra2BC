@@ -84,8 +84,8 @@ def update_tendency_boundaries(wrfbdy_f,name,index,dt,wrf_sp_index):
 def initialise():
     global met_files,wrf_times,wrf_p_top,znu,xlon,xlat,nx,ny,nz,nw,wrf_bnd_lons,wrf_bnd_lats,spec_number,wrf_vars,cen_lat,cen_lon,projection,dx,dy,true_lat2,true_lat1
 
-    met_files=sorted([f for f in os.listdir(pathes.wrf_met_dir) if re.match(pathes.wrf_met_files, f)], key=numericalSort1)
-    wrfbddy = Dataset(pathes.wrf_dir+"/"+pathes.wrf_bdy_file,'r')
+    met_files=sorted([f for f in os.listdir(config.wrf_met_dir) if re.match(config.wrf_met_files, f)], key=numericalSort1)
+    wrfbddy = Dataset(config.wrf_dir+"/"+config.wrf_bdy_file,'r')
     for i in range(0,len(wrfbddy.variables['Times'][:]),1):
         wrf_times.update({''.join(wrfbddy.variables['Times'][i]):i})
         met_times_files.update({''.join(wrfbddy.variables['Times'][i]):met_files[i]})
@@ -98,7 +98,7 @@ def initialise():
     wrfbddy.close()
 
     #Reading "PRESSURE TOP OF THE MODEL, PA" and "eta values on half (mass) levels"
-    wrfinput=Dataset(pathes.wrf_dir+"/"+pathes.wrf_input_file,'r')
+    wrfinput=Dataset(config.wrf_dir+"/"+config.wrf_input_file,'r')
     wrf_p_top=wrfinput.variables['P_TOP'][:]
     znu=wrfinput.variables['ZNU'][:]
     xlon=wrfinput.variables['XLONG'][0,:]
@@ -127,4 +127,4 @@ def initialise():
     print "Upper right corner: lat="+str(max(wrf_bnd_lats))+" long="+str(max(wrf_bnd_lons))
 
 
-    spec_number=len(pathes.spc_map)
+    spec_number=len(config.spc_map)
