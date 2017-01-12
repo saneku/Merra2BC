@@ -7,8 +7,7 @@ start_time = time.time()
 from netCDF4 import Dataset
 
 zero=1e-16
-fields_to_zero=['o3','co']
-fields_to_zero=['so2','sulf']
+fields_to_zero=['o3','co','so2','sulf']
 
 #---------------------------------------
 

@@ -90,16 +90,21 @@ def get_3dfield_by_time(time,merra_file,field_name):
 
 def get_pressure_by_time(time,merra_file):
     global Ptop_mera
-    MER_Pres = np.zeros([mer_number_of_z_points,mer_number_of_y_points,mer_number_of_x_points])
-    #filling top layer with Ptop_mera
+    #MER_Pres will be restored on 73 edges
+    MER_Pres = np.zeros([mer_number_of_z_points+1,mer_number_of_y_points,mer_number_of_x_points])
+    #filling top edge with Ptop_mera
     MER_Pres[0,:,:]=Ptop_mera
 
     # Extract deltaP from NetCDF file at index defined by time
     mera_time_idx=get_index_in_file_by_time(time)
     DELP = merra_file.variables['DELP'][mera_time_idx,:]  #Pa
 
-    for z_level in range(mer_number_of_z_points-1):
+    for z_level in range(mer_number_of_z_points):
         MER_Pres[z_level+1]=MER_Pres[z_level]+DELP[z_level]
+
+    #BUT! we need pressure on 72 levels
+    #=> averaging pressure values on adjacent edges
+    MER_Pres = (MER_Pres[0:mer_number_of_z_points:1][:,:] + MER_Pres[1::1][:,:]) / 2
 
     if shifted_lons:
         MER_Pres=np.roll(MER_Pres,shift_index,axis=2)
