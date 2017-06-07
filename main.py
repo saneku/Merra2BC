@@ -34,8 +34,13 @@ if((min(wrf_module.wrf_bnd_lons)<min(merra2_module.mera_lon))|(max(wrf_module.wr
 
 time_intersection=wrf_module.wrf_times.viewkeys() & merra2_module.mera_times.viewkeys()
 
-#check that wrf time is covered by merra2 time
+#check that merra2 time is covered by wrf time
 if(len(time_intersection)!=len(wrf_module.wrf_times)):
+    print 'These datetimes are missing in MERRA2 dataset:'
+    time_intersection = dict.fromkeys(time_intersection, 0)
+    for key in wrf_module.wrf_times.keys():
+        if not key in time_intersection:
+            print key
     utils.error_message("WRF time range is not fully covered by MERRA2 time range. Exiting...")
 
 #-----------------------------
