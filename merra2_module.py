@@ -118,6 +118,7 @@ def initialise():
     global merra_files,mer_number_of_x_points,mer_number_of_y_points,mer_number_of_z_points,mera_lon,mera_lat,merra_vars,shifted_lons,shift_index
 
     merra_files=sorted([f for f in os.listdir(config.mera_dir) if re.match(config.mera_files, f)], key=numericalSort)
+    #print "Open "+config.mera_dir+"/"+merra_files[0]
     merra_f = Dataset(config.mera_dir+"/"+merra_files[0],'r')
     mer_number_of_x_points=merra_f.variables['lon'].size
     mer_number_of_y_points=merra_f.variables['lat'].size

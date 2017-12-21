@@ -35,8 +35,12 @@ def get_pressure_from_metfile(metfile):
         WRF_Pres[nz-1-z_level,:]=PSFC*znu[0,z_level]+ (1.0 - znu[0,z_level])*wrf_p_top
     return WRF_Pres
 
-def get_met_file_by_time(time):
+def get_met_file_by_time_old(time):
     return met_times_files.get(time)
+
+def get_met_file_by_time(time):
+    return "met_em.d01."+time+".nc"
+
 
 def get_index_in_file_by_time(time):
     return wrf_times.get(time)

@@ -58,6 +58,7 @@ if config.do_IC:
     cur_time=time_intersection[0]
     index_of_opened_mera_file=merra2_module.get_file_index_by_time(cur_time)
     print "Opening mera file: "+merra2_module.get_file_name_by_index(index_of_opened_mera_file)+" with initial time: "+cur_time
+    print config.mera_dir+"/"+merra2_module.get_file_name_by_index(index_of_opened_mera_file)
     merra_f = Dataset(config.mera_dir+"/"+merra2_module.get_file_name_by_index(index_of_opened_mera_file),'r')
     MERA_PRES=merra2_module.get_pressure_by_time(cur_time,merra_f)
 
@@ -95,7 +96,7 @@ if config.do_IC:
     print "Closing mera file "+merra2_module.get_file_name_by_index(index_of_opened_mera_file)
     merra_f.close()
 
-    print "Closing metfile file "+wrf_module.get_met_file_by_time(cur_time)
+    print "Closing metfile "+wrf_module.get_met_file_by_time(cur_time)
     metfile.close()
 
     print "FINISH INITIAL CONDITIONS"
