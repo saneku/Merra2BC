@@ -11,7 +11,8 @@ def initialise():
     for a in config.spc_map:
         m=re.split('->|;',a)
         #print m
-        ar=re.findall(r'(-?\ *\.?[0-9]+\.?[0-9]*(?:[Ee]\ *-?\ *[0-9]+)?)\*\[?(\w+)\]?', m[1])
+        ar=re.findall(r'(-?\ *\.?[0-9]+\.?[0-9]*(?:[Ee]\ *?[-+]?\ *[0-9]+)?)\*\[?(\w+)\]?', m[1])
+	#ar=re.findall(r'(-?\ *\.?[0-9]+\.?[0-9]*(?:[Ee]\ *-?\ *[0-9]+)?)\*\[?(\w+)\]?', m[1])
         #m=re.findall(r'(\w+) (\-\>)((-?\ *\.?[0-9]+\.?[0-9]*(?:[Ee]\ *-?\ *[0-9]+)?)\*\[?(\w+)\]?', a[0])
         #http://stackoverflow.com/questions/18152597/extract-scientific-number-from-string
         m[0]=m[0].strip()
