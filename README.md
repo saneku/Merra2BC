@@ -12,6 +12,6 @@ NetCDF4 interface to work with [netCDF](https://github.com/Unidata/netcdf4-pytho
 3. run *git clone https://github.com/saneku/Merra2BC.git*
 4. edit *config.py*
 5. run *python zero_fields.py* to zero required fields (since utility will add values to the existing)
-6. run *python main.py*
+6. run *python main.py* or (python *./main.py >& output.log &* to run in background)
 7. modify *namelist.input* file at section *&chem* (*have_bcs_chem = .true.* for BC *chem_in_opt = 1* for IC )
 8. run *wrf.exe*
