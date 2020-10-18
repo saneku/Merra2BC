@@ -20,6 +20,8 @@ saltfrc_goc8bin_ln=np.zeros((nsalt,nbin_o))
 na_frc_goc8bin_ln=np.zeros((nsalt,nbin_o))
 cl_frc_goc8bin_ln=np.zeros((nsalt,nbin_o))
 
+#See Sulfate_redistribution.py script
+fr8b_sulf_mosaic=[5.75408980e-02, 1.16135472e-01, 2.64759054e-01, 2.46168555e-01,9.11155077e-02, 1.33280318e-02, 7.61932320e-04, 1.68197832e-05]
 
 ########
 dlo_sectm=np.zeros(nbin_o)
@@ -27,11 +29,12 @@ dhi_sectm=np.zeros(nbin_o)
 dcen_sect=np.zeros(nbin_o)
 dust_mass1part=np.zeros(nbin_o)
 salt_mass1part=np.zeros(nbin_o)
+sulf_mass1part=np.zeros(nbin_o)
 
 dlo=0.0390625
 dhi=10.0
 
-print "MOZAIC bins (diameter), (mu)\t Center of the bin, (cm)\t Mass of dust particle, (kg)\t Mass of sea salt particle, (kg)"
+print "MOZAIC bins (diameter), (mu)\t Center of the bin, (cm)\t Mass of dust particle, (kg)\t Mass of sea salt particle, (kg)\t Mass of sulf particle, (kg)"
 xlo = np.log( dlo )
 xhi = np.log( dhi )
 dxbin = (xhi - xlo)/nbin_o
@@ -48,8 +51,12 @@ for n in range(1,nbin_o+1):
         densdust=2.65
 
     #sea salt dry particle density (g/cm3)
-    #effect of water uptake by salt is not accounted
+    #effect of water uptake is not accounted
     saltdens = 2.165
+
+    #Sulf particle density (g/cm3)
+    #effect of water uptake is not accounted
+    sulfdens = 1.8
 
 
     #mass of a single dust particle in kg, density of dust ~2.5 g cm-3               
@@ -58,9 +65,10 @@ for n in range(1,nbin_o+1):
     #mass of a single sea salt particle in kg, density 2.165 g cm-3               
     salt_mass1part[n-1]=0.523598*(dcen_sect[n-1]**3)*saltdens*1.0e-3
 
+    #mass of a single sulf particle in kg, density 1.8 g cm-3               
+    sulf_mass1part[n-1]=0.523598*(dcen_sect[n-1]**3)*sulfdens*1.0e-3
 
-
-    print '{:0.3f}'.format(dlo_sectm[n-1])+"-"+'{:0.3f}'.format(dhi_sectm[n-1])+"\t\t\t\t"+'{:0.3e}'.format(dcen_sect[n-1])+"\t\t\t"+'{:0.3e}'.format(dust_mass1part[n-1])+"\t\t\t"+'{:0.3e}'.format(salt_mass1part[n-1])
+    print '{:0.3f}'.format(dlo_sectm[n-1])+"-"+'{:0.3f}'.format(dhi_sectm[n-1])+"\t\t\t\t"+'{:0.3e}'.format(dcen_sect[n-1])+"\t\t\t"+'{:0.3e}'.format(dust_mass1part[n-1])+"\t\t\t"+'{:0.3e}'.format(salt_mass1part[n-1])+"\t\t\t\t"+'{:0.3e}'.format(sulf_mass1part[n-1])
 
 
 #these are MOZAIC SIZES!!!
@@ -180,6 +188,18 @@ for n in range(0,nbin_o):
 #print DataFrame(cl_frc_goc8bin_ln)
 #print "----------------"
 
+print "\nSulfate mass redistribution"
+for n in range(0,nbin_o):
+    s=""
+    s=s+"{:.6f}".format(fr8b_sulf_mosaic[n])+"*[SO4]"
+    print "'sulf_a0"+str(n+1)+"->"+s+";1.e9',"
+
+#print "Sulf number"
+#print "----------------"
+
+for n in range(0,nbin_o):
+    fr8b_sulf_mosaic[n]=fr8b_sulf_mosaic[n]/sulf_mass1part[n]
+
 
 print "\nTotal number redistribution"
 #Total number concentration (#/kg)
@@ -196,6 +216,9 @@ for n in range(0,nbin_o):
             if s!="":
                 s=s+"+"
             s=s+"{0:1.3e}".format(na_frc_goc8bin_ln[m,n]+cl_frc_goc8bin_ln[m,n])+"*[SS00"+str(m+1)+"]"
+
+    s=s+"+"
+    s=s+"{0:1.3e}".format(fr8b_sulf_mosaic[n])+"*[SO4]"
 
         #if cl_frc_goc8bin_ln[m,n]>0:
         #    if s!="":
