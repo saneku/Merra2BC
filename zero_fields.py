@@ -11,11 +11,12 @@ zero=1e-16
 fields_to_zero=['o3','co','so2','sulf','SEAS_1','SEAS_2','SEAS_3','SEAS_4','BC1','BC2','OC1','OC2','dms']
 
 #For MOSAIC 8 bins
-fields_to_zero=['o3','co','so2','sulf',
+fields_to_zero=['o3','co','so2',
 				'oin_a01','oin_a02','oin_a03','oin_a04','oin_a05','oin_a06','oin_a07','oin_a08',
 				'num_a01','num_a02','num_a03','num_a04','num_a05','num_a06','num_a07','num_a08',
 				'na_a01' ,'na_a02' ,'na_a03' ,'na_a04' ,'na_a05' ,'na_a06' ,'na_a07' ,'na_a08' ,
-				'cl_a01' ,'cl_a02' ,'cl_a03' ,'cl_a04' ,'cl_a05' ,'cl_a06' ,'cl_a07' ,'cl_a08' ]
+				'cl_a01' ,'cl_a02' ,'cl_a03' ,'cl_a04' ,'cl_a05' ,'cl_a06' ,'cl_a07' ,'cl_a08',
+			        'so4_a01','so4_a02','so4_a03','so4_a04','so4_a05','so4_a06','so4_a07','so4_a08' ]
 
 #---------------------------------------
 
