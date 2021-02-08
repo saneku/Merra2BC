@@ -19,4 +19,5 @@ NetCDF4 interface to work with [netCDF](https://github.com/Unidata/netcdf4-pytho
 
 ## How to cite
 If you find this code useful in your research, please consider citing:
+
 Ukhov, A., Ahmadov, R., Grell, G., and Stenchikov, G.: Improving dust simulations in WRF-Chem v4.1.3 coupled with the GOCART aerosol module, Geosci. Model Dev., 14, 473–493, https://doi.org/10.5194/gmd-14-473-2021, 2021.
