@@ -1,11 +1,11 @@
-wrf_dir="/home/ukhova/Apps/WRF/V3.7.1/WRFV3.7.1/run_visuvi_tutorial/"
+wrf_dir="/home/WRFV4.1.3/run_tutorial/"
 wrf_input_file="wrfinput_d01"
 wrf_bdy_file="wrfbdy_d01"
 
-wrf_met_dir="/home/ukhova/Apps/WRF/V3.7.1/WRFV3.7.1/run_visuvi_tutorial/"
+wrf_met_dir="/home/WPSV4.1.3/run_tutorial/"
 wrf_met_files="met_em.d01.2010*"
 
-mera_dir="/home/ukhova/Downloads/Merra2ForVISUVI_data/"
+mera_dir="/home/Merra2_data/"
 mera_files="svc_MERRA2_300.inst3_3d_aer_Nv.2010*"
 
 do_IC=True
