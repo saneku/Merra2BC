@@ -93,6 +93,12 @@ for m in range(0,ndust):  # loop over dust size bins
 	for n in range(0,nbin_o):
 		dustfrc_goc8bin_ln[m,n]=max(0.0,min(np.log(dhi_sectm[n]),np.log(dhigoc)) - max(np.log(dlogoc),np.log(dlo_sectm[n])))/(np.log(dhigoc)-np.log(dlogoc))
 
+# Need to fill oin_a01 and oin_a02.
+# Let's assume that oin_a01 is 15 times less than oin_a03
+# and oin_a02 is 5 times less than oin_a03
+dustfrc_goc8bin_ln[0,0]=dustfrc_goc8bin_ln[0,2]/15.0
+dustfrc_goc8bin_ln[0,1]=dustfrc_goc8bin_ln[0,2]/5.0
+
 print "----------------"
 print "\nDust mass redistribution"
 #print DataFrame(dustfrc_goc8bin_ln)
