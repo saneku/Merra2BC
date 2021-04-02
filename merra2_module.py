@@ -45,7 +45,7 @@ def get_file_name_by_index(index):
 def hor_interpolate_3dfield_on_wrf_boubdary(FIELD, wrf_length, wrf_lon, wrf_lat):
     FIELD_BND=np.zeros([mer_number_of_z_points, wrf_length])
     for z_level in range(mer_number_of_z_points):
-        f = interpolate.RectBivariateSpline(mera_lat, mera_lon, FIELD[z_level,:,:])
+        f = interpolate.RectBivariateSpline(mera_lat, mera_lon, FIELD[z_level,:,:],kx=1, ky=1)
         FIELD_BND[z_level,:]=f(wrf_lat,wrf_lon,grid=False)
     return FIELD_BND
 
@@ -62,7 +62,7 @@ def hor_interpolate_3dfield_on_wrf_grid(FIELD, wrf_ny, wrf_nx, wrf_lon, wrf_lat)
     FIELD_HOR=np.zeros([mer_number_of_z_points, wrf_ny, wrf_nx])
 
     for z_level in range(mer_number_of_z_points):
-        f = interpolate.RectBivariateSpline(mera_lat, mera_lon, FIELD[z_level,:,:])
+        f = interpolate.RectBivariateSpline(mera_lat, mera_lon, FIELD[z_level,:,:],kx=1, ky=1)
         FIELD_HOR[z_level,:,:]=f(wrf_lat,wrf_lon,grid=False).reshape(wrf_ny, wrf_nx)
 
     return FIELD_HOR
