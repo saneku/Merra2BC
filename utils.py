@@ -1,4 +1,4 @@
 
 def error_message(msg):
-    print msg
+    print (msg)
     exit()

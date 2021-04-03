@@ -3,6 +3,7 @@ import re
 import os
 from netCDF4 import Dataset
 import numpy as np
+import codecs
 
 met_files=[]
 met_times_files={}
@@ -69,7 +70,7 @@ def update_boundaries(WRF_SPECIE_BND,wrfbdy_f,name,index):
     wrfbys=np.repeat(WRF_SPECIE_BOT_BND[np.newaxis,:,:], nw, axis=0)
     wrfbye=np.repeat(WRF_SPECIE_TOP_BND[np.newaxis,:,:], nw, axis=0)
 
-    #print "\t\t\tUpdating BC for "+name
+    #print ("\t\t\tUpdating BC for "+name)
     wrfbdy_f.variables[name+"_BXS"][index,:]=wrfbdy_f.variables[name+"_BXS"][index,:]+wrfbxs
     wrfbdy_f.variables[name+"_BXE"][index,:]=wrfbdy_f.variables[name+"_BXE"][index,:]+wrfbxe
     wrfbdy_f.variables[name+"_BYS"][index,:]=wrfbdy_f.variables[name+"_BYS"][index,:]+wrfbys
@@ -78,7 +79,7 @@ def update_boundaries(WRF_SPECIE_BND,wrfbdy_f,name,index):
 
 def update_tendency_boundaries(wrfbdy_f,name,index,dt,wrf_sp_index):
     if(index>0):
-        print "\t\t\tUpdating Tendency BC for "+name
+        print ("\t\t\tUpdating Tendency BC for "+name)
         wrfbdy_f.variables[name+"_BTXS"][index-1,:]=(wrfbdy_f.variables[name+"_BXS"][index,:]-wrfbdy_f.variables[name+"_BXS"][index-1,:])/dt
         wrfbdy_f.variables[name+"_BTXE"][index-1,:]=(wrfbdy_f.variables[name+"_BXE"][index,:]-wrfbdy_f.variables[name+"_BXE"][index-1,:])/dt
         wrfbdy_f.variables[name+"_BTYS"][index-1,:]=(wrfbdy_f.variables[name+"_BYS"][index,:]-wrfbdy_f.variables[name+"_BYS"][index-1,:])/dt
@@ -91,8 +92,9 @@ def initialise():
     met_files=sorted([f for f in os.listdir(config.wrf_met_dir) if re.match(config.wrf_met_files, f)], key=numericalSort1)
     wrfbddy = Dataset(config.wrf_dir+"/"+config.wrf_bdy_file,'r')
     for i in range(0,len(wrfbddy.variables['Times'][:]),1):
-        wrf_times.update({''.join(wrfbddy.variables['Times'][i]):i})
-        met_times_files.update({''.join(wrfbddy.variables['Times'][i]):met_files[i]})
+        wrftime = codecs.utf_8_decode(b''.join(wrfbddy.variables['Times'][i]))[0]
+        wrf_times.update({wrftime:i})
+        met_times_files.update({wrftime:met_files[i]})
 
 
     nx=len(wrfbddy.dimensions['west_east'])
@@ -124,11 +126,11 @@ def initialise():
     wrf_bnd_lats=np.concatenate((xlat[:,0],xlat[ny-1,:],xlat[:,nx-1],xlat[0,:]), axis=0)
 
 
-    print "\nWRF dimensions: [bottom_top]="+str(nz)+" [south_north]="+str(ny)+" [west_east]="+str(nx)+" [bdy_width]="+str(nw)
-    print "P_TOP="+str(wrf_p_top)+" Pa"
+    print ("\nWRF dimensions: [bottom_top]="+str(nz)+" [south_north]="+str(ny)+" [west_east]="+str(nx)+" [bdy_width]="+str(nw))
+    print ("P_TOP="+str(wrf_p_top)+" Pa")
 
-    print "Lower left corner: lat="+str(min(wrf_bnd_lats))+" long="+str(min(wrf_bnd_lons))
-    print "Upper right corner: lat="+str(max(wrf_bnd_lats))+" long="+str(max(wrf_bnd_lons))
+    print ("Lower left corner: lat="+str(min(wrf_bnd_lats))+" long="+str(min(wrf_bnd_lons)))
+    print ("Upper right corner: lat="+str(max(wrf_bnd_lats))+" long="+str(max(wrf_bnd_lons)))
 
 
     spec_number=len(config.spc_map)

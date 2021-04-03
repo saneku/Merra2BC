@@ -43,7 +43,7 @@ dxbin = (xhi - xlo)/nbin_o
 for n in range(1,nbin_o+1):
     dlo_sectm[n-1] = np.exp( xlo + dxbin*(n-1))
     dhi_sectm[n-1] = np.exp( xlo + dxbin*n )
-    #print "{:.6f}".format(dlo_sectm[n-1]),"{:.4f}".format(dhi_sectm[n-1])
+    #print ("{:.6f}".format(dlo_sectm[n-1]),"{:.4f}".format(dhi_sectm[n-1]))
 
 #============================================================
 # Mass fractions for Aitken mode
@@ -57,8 +57,8 @@ for n in range(0,nbin_o):
   integ, err = quad(integrand, dlo_sectm[n], dhi_sectm[n])
   fr8b_aem_mosaic_i[n]=integ/total_volume
 
-#print "\nSulfate Aitken mode mass redistribution:"
-#print fr8b_aem_mosaic_i*mass_so4i
+#print ("\nSulfate Aitken mode mass redistribution:")
+#print (fr8b_aem_mosaic_i*mass_so4i)
 
 #============================================================
 # Mass fractions for Aitken mode
@@ -72,10 +72,10 @@ for n in range(0,nbin_o):
   integ, err = quad(integrand, dlo_sectm[n], dhi_sectm[n])
   fr8b_aem_mosaic_j[n]=integ/total_volume
 
-#print "\nSulfate accumulation mode mass redistribution:"
-#print fr8b_aem_mosaic_j*mass_so4j
+#print ("\nSulfate accumulation mode mass redistribution:")
+#print (fr8b_aem_mosaic_j*mass_so4j)
 
 
-print "\nSulfate mass redistribution"
+print ("\nSulfate mass redistribution")
 fr8b_sulf_mosaic=fr8b_aem_mosaic_i*mass_so4i+fr8b_aem_mosaic_j*mass_so4j
-print fr8b_sulf_mosaic
+print (fr8b_sulf_mosaic)

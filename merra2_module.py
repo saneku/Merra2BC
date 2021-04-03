@@ -118,7 +118,7 @@ def initialise():
     global merra_files,mer_number_of_x_points,mer_number_of_y_points,mer_number_of_z_points,mera_lon,mera_lat,merra_vars,shifted_lons,shift_index
 
     merra_files=sorted([f for f in os.listdir(config.mera_dir) if re.match(config.mera_files, f)], key=numericalSort)
-    #print "Open "+config.mera_dir+"/"+merra_files[0]
+    #print ("Open "+config.mera_dir+"/"+merra_files[0])
     merra_f = Dataset(config.mera_dir+"/"+merra_files[0],'r')
     mer_number_of_x_points=merra_f.variables['lon'].size
     mer_number_of_y_points=merra_f.variables['lat'].size
@@ -128,7 +128,7 @@ def initialise():
     except Exception:
         pass
 
-    print "MERRA2 dimensions: [bottom_top]="+str(mer_number_of_z_points)+" [south_north]="+str(mer_number_of_y_points)+" [west_east]="+str(mer_number_of_x_points)
+    print ("MERRA2 dimensions: [bottom_top]="+str(mer_number_of_z_points)+" [south_north]="+str(mer_number_of_y_points)+" [west_east]="+str(mer_number_of_x_points))
 
     merra_vars = [var for var in merra_f.variables]
 
@@ -137,9 +137,9 @@ def initialise():
 
     #if data is given in range of 0_360, then we need to shift lons and data to the -180_180
     if(max(mera_lon)>180):
-        print "###########################"
-        print "ATTENTION!!!:"
-        print "SHIFTING LONGITUDES"
+        print ("###########################")
+        print ("ATTENTION!!!:")
+        print ("SHIFTING LONGITUDES")
         index=0
         for lon in mera_lon:
             if lon >180:
@@ -148,10 +148,10 @@ def initialise():
         shift_index=len(mera_lon)/2
         mera_lon=np.roll(mera_lon,shift_index)
         shifted_lons=True
-        print "###########################"
+        print ("###########################")
 
-    print "Lower left corner: lat="+str(min(mera_lat))+" long="+str(min(mera_lon))
-    print "Upper right corner: lat="+str(max(mera_lat))+" long="+str(max(mera_lon))
+    print ("Lower left corner: lat="+str(min(mera_lat))+" long="+str(min(mera_lon)))
+    print ("Upper right corner: lat="+str(max(mera_lat))+" long="+str(max(mera_lon)))
 
     #number of times in  mera file
     times_per_file=merra_f.variables['time'].size

@@ -34,7 +34,7 @@ sulf_mass1part=np.zeros(nbin_o)
 dlo=0.0390625
 dhi=10.0
 
-print "MOZAIC bins (diameter), (mu)\t Center of the bin, (cm)\t Mass of dust particle, (kg)\t Mass of sea salt particle, (kg)\t Mass of sulf particle, (kg)"
+print ("MOZAIC bins (diameter), (mu)\t Center of the bin, (cm)\t Mass of dust particle, (kg)\t Mass of sea salt particle, (kg)\t Mass of sulf particle, (kg)")
 xlo = np.log( dlo )
 xhi = np.log( dhi )
 dxbin = (xhi - xlo)/nbin_o
@@ -68,7 +68,7 @@ for n in range(1,nbin_o+1):
     #mass of a single sulf particle in kg, density 1.8 g cm-3               
     sulf_mass1part[n-1]=0.523598*(dcen_sect[n-1]**3)*sulfdens*1.0e-3
 
-    print '{:0.3f}'.format(dlo_sectm[n-1])+"-"+'{:0.3f}'.format(dhi_sectm[n-1])+"\t\t\t\t"+'{:0.3e}'.format(dcen_sect[n-1])+"\t\t\t"+'{:0.3e}'.format(dust_mass1part[n-1])+"\t\t\t"+'{:0.3e}'.format(salt_mass1part[n-1])+"\t\t\t\t"+'{:0.3e}'.format(sulf_mass1part[n-1])
+    print ('{:0.3f}'.format(dlo_sectm[n-1])+"-"+'{:0.3f}'.format(dhi_sectm[n-1])+"\t\t\t\t"+'{:0.3e}'.format(dcen_sect[n-1])+"\t\t\t"+'{:0.3e}'.format(dust_mass1part[n-1])+"\t\t\t"+'{:0.3e}'.format(salt_mass1part[n-1])+"\t\t\t\t"+'{:0.3e}'.format(sulf_mass1part[n-1]))
 
 
 #these are MOZAIC SIZES!!!
@@ -99,10 +99,10 @@ for m in range(0,ndust):  # loop over dust size bins
 dustfrc_goc8bin_ln[0,0]=dustfrc_goc8bin_ln[0,2]/15.0
 dustfrc_goc8bin_ln[0,1]=dustfrc_goc8bin_ln[0,2]/5.0
 
-print "----------------"
-print "\nDust mass redistribution"
+print ("----------------")
+print ("\nDust mass redistribution")
 #print DataFrame(dustfrc_goc8bin_ln)
-#print "----------------"
+#print ("----------------")
 
 for n in range(0,nbin_o):
     s=""
@@ -113,17 +113,17 @@ for n in range(0,nbin_o):
             s=s+"{:.5f}".format(dustfrc_goc8bin_ln[m,n])+"*[DU00"+str(m+1)+"]"
 
     if s!="":
-        print "'oin_a0"+str(n+1)+"->"+s+";1.e9',"
+        print ("'oin_a0"+str(n+1)+"->"+s+";1.e9',")
     else:
-        print "'oin_a0"+str(n+1)+"->0.0*[DU001];1.e9',"
+        print ("'oin_a0"+str(n+1)+"->0.0*[DU001];1.e9',")
 
 
 for n in range(0,nbin_o):
     dustfrc_goc8bin_ln[:,n]=dustfrc_goc8bin_ln[:,n]/dust_mass1part[n]
 
-#print "Dust number"
-#print DataFrame(dustfrc_goc8bin_ln)
-#print "----------------"
+#print ("Dust number")
+#print (DataFrame(dustfrc_goc8bin_ln))
+#print ("----------------")
 
 
 
@@ -135,16 +135,16 @@ for m in range(0,nsalt):  # loop over salt size bins
 	for n in range(0,nbin_o):
 		saltfrc_goc8bin_ln[m,n]=max(0.0,min(np.log(dhi_sectm[n]),np.log(dhigoc)) - max(np.log(dlogoc),np.log(dlo_sectm[n])))/(np.log(dhigoc)-np.log(dlogoc))
 
-#print "Sea salt mass redistribution"
-#print DataFrame(saltfrc_goc8bin_ln)
-#print "----------------"
+#print ("Sea salt mass redistribution")
+#print (DataFrame(saltfrc_goc8bin_ln))
+#print ("----------------")
 
 cl_frc_goc8bin_ln=fraccl*saltfrc_goc8bin_ln
 na_frc_goc8bin_ln=fracna*saltfrc_goc8bin_ln
 
-print "\nNa mass redistribution"
-#print DataFrame(na_frc_goc8bin_ln)
-#print "----------------"
+print ("\nNa mass redistribution")
+#print (DataFrame(na_frc_goc8bin_ln))
+#print ("----------------")
 
 for n in range(0,nbin_o):
     s=""
@@ -155,24 +155,24 @@ for n in range(0,nbin_o):
             s=s+"{:.6f}".format(na_frc_goc8bin_ln[m,n])+"*[SS00"+str(m+1)+"]"
 
     if s!="":
-        print "'na_a0"+str(n+1)+"->"+s+";1.e9',"
+        print ("'na_a0"+str(n+1)+"->"+s+";1.e9',")
     else:
-        print "'na_a0"+str(n+1)+"->0.0*[SS001];1.e9',"
+        print ("'na_a0"+str(n+1)+"->0.0*[SS001];1.e9',")
 
 
 for n in range(0,nbin_o):
     na_frc_goc8bin_ln[:,n]=na_frc_goc8bin_ln[:,n]/salt_mass1part[n]
 
 
-#print "Na number"
-#print DataFrame(na_frc_goc8bin_ln)
-#print "----------------"
+#print ("Na number")
+#print (DataFrame(na_frc_goc8bin_ln))
+#print ("----------------")
 
 
 
-print "\nCl mass redistribution"
-#print DataFrame(cl_frc_goc8bin_ln)
-#print "----------------"
+print ("\nCl mass redistribution")
+#print (DataFrame(cl_frc_goc8bin_ln))
+#print ("----------------")
 
 for n in range(0,nbin_o):
     s=""
@@ -183,31 +183,31 @@ for n in range(0,nbin_o):
             s=s+"{:.6f}".format(cl_frc_goc8bin_ln[m,n])+"*[SS00"+str(m+1)+"]"
 
     if s!="":
-        print "'cl_a0"+str(n+1)+"->"+s+";1.e9',"
+        print ("'cl_a0"+str(n+1)+"->"+s+";1.e9',")
     else:
-        print "'cl_a0"+str(n+1)+"->0.0*[SS001];1.e9',"
+        print ("'cl_a0"+str(n+1)+"->0.0*[SS001];1.e9',")
 
 for n in range(0,nbin_o):
     cl_frc_goc8bin_ln[:,n]=cl_frc_goc8bin_ln[:,n]/salt_mass1part[n]
 
-#print "Cl number"
-#print DataFrame(cl_frc_goc8bin_ln)
-#print "----------------"
+#print ("Cl number")
+#print (DataFrame(cl_frc_goc8bin_ln))
+#print ("----------------")
 
-print "\nSulfate mass redistribution"
+print ("\nSulfate mass redistribution")
 for n in range(0,nbin_o):
     s=""
     s=s+"{:.6f}".format(fr8b_sulf_mosaic[n])+"*[SO4]"
-    print "'sulf_a0"+str(n+1)+"->"+s+";1.e9',"
+    print ("'sulf_a0"+str(n+1)+"->"+s+";1.e9',")
 
-#print "Sulf number"
-#print "----------------"
+#print ("Sulf number")
+#print ("----------------")
 
 for n in range(0,nbin_o):
     fr8b_sulf_mosaic[n]=fr8b_sulf_mosaic[n]/sulf_mass1part[n]
 
 
-print "\nTotal number redistribution"
+print ("\nTotal number redistribution")
 #Total number concentration (#/kg)
 for n in range(0,nbin_o):
     s=""
@@ -231,4 +231,4 @@ for n in range(0,nbin_o):
         #        s=s+"+"
         #    s=s+"{0:1.3e}".format(cl_frc_goc8bin_ln[m,n])+"*[SS00"+str(m+1)+"]"
 
-    print "'num_a0"+str(n+1)+"->"+s+";1',"
+    print ("'num_a0"+str(n+1)+"->"+s+";1',")
