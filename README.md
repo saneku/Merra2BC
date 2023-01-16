@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/183694240.svg)](https://zenodo.org/badge/latestdoi/183694240)
+
 # Merra2BC
 Merra2BC is an interpolation utility, which creates for a WRF-Chem simulation initial and time-varying chemical boundary conditions (IC&BC) based on MERRA-2 reanalysis.
 
