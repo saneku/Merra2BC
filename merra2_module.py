@@ -67,6 +67,14 @@ def hor_interpolate_3dfield_on_wrf_grid(FIELD, wrf_ny, wrf_nx, wrf_lon, wrf_lat)
 
     return FIELD_HOR
 
+
+#Horizontal interpolation of 2d Merra field on WRF horizontal grid
+def hor_interpolate_2dfield_on_wrf_grid(FIELD, wrf_ny, wrf_nx, wrf_lon, wrf_lat):
+    FIELD_HOR=np.zeros([wrf_ny, wrf_nx])
+    f = interpolate.RectBivariateSpline(mera_lat, mera_lon, FIELD[:,:],kx=1, ky=1)
+    FIELD_HOR[:,:]=f(wrf_lat,wrf_lon,grid=False).reshape(wrf_ny, wrf_nx)
+    return FIELD_HOR
+
 #Vertical interpolation on WRF grid
 def ver_interpolate_3dfield_on_wrf_grid(MER_HOR_SPECIE, MER_HOR_PRES,WRF_PRES,wrf_nz, wrf_ny, wrf_nx):
     WRF_SPECIE = np.zeros([wrf_nz,wrf_ny,wrf_nx])  # Required SPEC on WRF grid
@@ -87,6 +95,16 @@ def get_3dfield_by_time(time,merra_file,field_name):
 
     return np.flipud(field)
 
+
+#extracts 2d field from merra2 file from given time
+def get_2dfield_by_time(time,merra_file,field_name):
+    mera_time_idx=get_index_in_file_by_time(time)
+    field=merra_file.variables[field_name][mera_time_idx,:]
+
+    if shifted_lons:
+        field=np.roll(field,shift_index,axis=2)
+
+    return field
 
 def get_pressure_by_time(time,merra_file):
     global Ptop_mera

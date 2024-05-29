@@ -37,7 +37,7 @@ if sys.version_info[0] < 3:
     time_intersection=wrf_module.wrf_times.viewkeys() & merra2_module.mera_times.viewkeys()
 else:    
     time_intersection=wrf_module.wrf_times.keys() & merra2_module.mera_times.keys()
-
+'''
 #check that merra2 time is covered by wrf time
 if(len(time_intersection)!=len(wrf_module.wrf_times)):
     print('These datetimes are missing in MERRA2 dataset:')
@@ -46,7 +46,7 @@ if(len(time_intersection)!=len(wrf_module.wrf_times)):
         if not key in time_intersection:
             print (key)
     utils.error_message("WRF time range is not fully covered by MERRA2 time range. Exiting...")
-
+'''
 #-----------------------------
 #sorting times for processing
 time_intersection=sorted(time_intersection, key=lambda x: time.mktime(time.strptime(x,"%Y-%m-%d_%H:%M:%S")))
@@ -174,6 +174,56 @@ if config.do_BC:
     wrfbdy_f.close()
 
     print("FINISH BOUNDARY CONDITIONS")
+
+
+if config.do_emissions:
+    print ("\n\nSTART EMISSIONS")
+
+    print ("Opening "+config.wrf_emis_file)
+    wrf_emis=Dataset(config.wrf_dir+"/"+config.wrf_emis_file,'r+')
+
+    #difference betweeen two given times
+    dt=(datetime.strptime(time_intersection[1], '%Y-%m-%d_%H:%M:%S')-datetime.strptime(time_intersection[0], '%Y-%m-%d_%H:%M:%S')).total_seconds()
+
+    cur_time=time_intersection[0]
+    index_of_opened_mera_file=merra2_module.get_file_index_by_time(cur_time)
+    print ("\nOpening MERRA2 file: "+merra2_module.get_file_name_by_index(index_of_opened_mera_file)+" file which has index "+str(index_of_opened_mera_file))
+    merra_f = Dataset(config.mera_dir+"/"+merra2_module.get_file_name_by_index(index_of_opened_mera_file),'r')
+
+    for cur_time in time_intersection:
+        if (merra2_module.get_file_index_by_time(cur_time)!=index_of_opened_mera_file):
+            print ("Closing prev. opened MERRA2 file with index "+str(index_of_opened_mera_file))
+            merra_f.close()
+
+            index_of_opened_mera_file=merra2_module.get_file_index_by_time(cur_time)
+            print ("\nOpening MERRA2 file: "+merra2_module.get_file_name_by_index(index_of_opened_mera_file)+" file which has index "+str(index_of_opened_mera_file))
+            merra_f = Dataset(config.mera_dir+"/"+merra2_module.get_file_name_by_index(index_of_opened_mera_file),'r')
+
+        print ("\n\tCur_time="+cur_time)
+        time_index=wrf_module.get_index_in_file_by_time(cur_time)
+        for merra_specie in merra2wrf_mapper.get_merra_vars():
+            print ("\n\t\t - Reading "+merra_specie+" field from MERRA2.")
+            MER_SPECIE=merra2_module.get_2dfield_by_time(cur_time,merra_f,merra_specie)
+
+            print ("\t\tHorizontal interpolation of "+merra_specie+" on WRF grid")
+            WRF_SPECIE=merra2_module.hor_interpolate_2dfield_on_wrf_grid(MER_SPECIE,wrf_module.ny,wrf_module.nx,wrf_module.xlon,wrf_module.xlat)
+
+            for wrf_name_and_coef in merra2wrf_mapper.get_list_of_wrf_spec_by_merra_var(merra_specie):
+                wrf_spec=wrf_name_and_coef[0]
+                coef=wrf_name_and_coef[1]
+                wrf_mult=merra2wrf_mapper.coefficients[wrf_spec]
+                print ("\t\t - Updating emission field: "+wrf_spec+"["+str(time_index)+"]="+wrf_spec+"["+str(time_index)+"]+"+merra_specie+"*"+str(coef)+"*"+str(wrf_mult))
+                wrf_emis.variables[wrf_spec][time_index,:] = wrf_emis.variables[wrf_spec][time_index,:] + WRF_SPECIE*coef*wrf_mult
+
+        print("--- %s seconds ---" % (time.time() - start_time))
+
+    print ("Closing prev. opened MERRA2 file with index "+str(index_of_opened_mera_file))
+    merra_f.close()
+
+    print ("Closing "+config.wrf_emis_file)
+    wrf_emis.close()
+
+    print("FINISH EMISSIONS")
 
 
 print("--- %s seconds ---" % (time.time() - start_time))

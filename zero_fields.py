@@ -19,8 +19,23 @@ fields_to_zero=['o3','co','so2',
 			        'so4_a01','so4_a02','so4_a03','so4_a04','so4_a05','so4_a06','so4_a07','so4_a08' ]
 
 #---------------------------------------
+#for Thompson microphysics option mp_physics=28
+fields_to_zero=['QNIFA2D','QNWFA2D']
 
-print ("SETTING TO ZERO INITIAL CONDITIONS")
+print ("SETTING TO ZERO EMISSIONS")
+#EMISSIONS
+wrfinput = Dataset(config.wrf_dir+"/"+config.wrf_emis_file,'r+')
+for field in fields_to_zero:
+	print ("Setting to zero ",field)
+	wrfinput.variables[field][:]=zero
+wrfinput.close()
+
+'''
+#for Thompson microphysics option mp_physics=28
+fields_to_zero=['QNIFA','QNWFA']
+
+
+print ("\n\nSETTING TO ZERO INITIAL CONDITIONS")
 #INITIAL CONDITIONS
 wrfinput = Dataset(config.wrf_dir+"/"+config.wrf_input_file,'r+')
 for field in fields_to_zero:
@@ -46,3 +61,4 @@ for field in fields_to_zero:
 	wrfbddy.variables[field+"_BTYE"][:]=zero
 wrfbddy.close()
 print("--- %s seconds ---" % (time.time() - start_time))
+'''
