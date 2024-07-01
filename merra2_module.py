@@ -6,8 +6,8 @@ from datetime import datetime, timedelta
 import numpy as np
 from scipy import interpolate
 
-from multiprocessing import Pool
-from functools import partial
+#from multiprocessing import Pool
+#from functools import partial
 
 Ptop_mera=1 #Pa   (=0.01 hPa)
 mera_lat=0

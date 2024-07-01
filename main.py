@@ -1,5 +1,7 @@
-#TODO if there is a dublicate in WRF scpes in spc_map
-#TODO if there is a dublicate in MERRA specs in spc_map
+#Example:
+#python zero_fields.py --wrf_dir='/lustre2/project/k10022/ukhova/WRF-Climate/run_microphysics/' --wrf_input_file='wrfinput_d01' --wrf_bdy_file='wrfbdy_d01' --wrf_emis_file='wrfqnainp_d01' --wrf_met_dir='/lustre2/project/k10022/ukhova/WPS-4.5/AirQuality_100km/' --wrf_met_files='met_em.d01.*' --mera_dir='/scratch/ukhova/merra2/emissions/' --mera_files='MERRA2_400.tavg1_2d_adg_Nx.2016*'
+#python main.py --wrf_dir='/lustre2/project/k10022/ukhova/WRF-Climate/run_microphysics/' --wrf_input_file='wrfinput_d01' --wrf_bdy_file='wrfbdy_d01' --wrf_emis_file='wrfqnainp_d01' --wrf_met_dir='/lustre2/project/k10022/ukhova/WPS-4.5/AirQuality_100km/' --wrf_met_files='met_em.d01.*' --mera_dir='/scratch/ukhova/merra2/emissions/' --mera_files='MERRA2_400.tavg1_2d_adg_Nx.2016*'
+
 
 import sys
 import config
@@ -175,7 +177,8 @@ if config.do_BC:
 
     print("FINISH BOUNDARY CONDITIONS")
 
-
+#todo: emissions every hour
+#todo: multiprocess interpolation
 if config.do_emissions:
     print ("\n\nSTART EMISSIONS")
 
