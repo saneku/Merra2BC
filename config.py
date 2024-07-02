@@ -86,19 +86,21 @@ diam_bc = 0.04 * 2 * 1.0e-4 # cm
 bcmass = 0.001 * (3.141592/6.) * dens_bc * diam_bc**3 #kg
 ###################################
 
-#spc_map = [f'QNIFA->{1./dustmas[0]}*[DU001]+{1./dustmas[1]}*[DU002]+{1./dustmas[2]}*[DU003]+{1./dustmas[3]}*[DU004]+{1./dustmas[4]}*[DU005]+{1./bcmass}*[BCPHOBIC]+{1./ocmass}*[OCPHOBIC];1',
-#           f'QNWFA->{1./saltmas[0]}*[SS001]+{1./saltmas[1]}*[SS002]+{1./saltmas[2]}*[SS003]+{1./saltmas[3]}*[SS004]+{1./saltmas[4]}*[SS005]+{1./bcmass}*[BCPHILIC]+{1./ocmass}*[OCPHILIC]+{1.0/sulfmass}*[SO4];1']
+#for IC and BC
+if do_IC==True or do_BC==True:    
+    spc_map = [f'QNIFA->{1./dustmas[0]}*[DU001]+{1./dustmas[1]}*[DU002]+{1./dustmas[2]}*[DU003]+{1./dustmas[3]}*[DU004]+{1./dustmas[4]}*[DU005]+{1./bcmass}*[BCPHOBIC]+{1./ocmass}*[OCPHOBIC];1',
+               f'QNWFA->{1./saltmas[0]}*[SS001]+{1./saltmas[1]}*[SS002]+{1./saltmas[2]}*[SS003]+{1./saltmas[3]}*[SS004]+{1./saltmas[4]}*[SS005]+{1./bcmass}*[BCPHILIC]+{1./ocmass}*[OCPHILIC]+{1.0/sulfmass}*[SO4];1']
 
-
-
-#https://gmao.gsfc.nasa.gov/pubs/docs/Bosilovich785.pdf
-#DUEM001:units = "kg m-2 s-1" ;
-#QNWFA2D:units = "kg-1 s-1" ;
-air_density=1.2 #kg/m3
-dz=130          #height of the 1st layer, meters
-coef = 1.0/(dz*air_density)
-spc_map = [f'QNIFA2D->{1./dustmas[0]}*[DUEM001]+{1./dustmas[1]}*[DUEM002]+{1./dustmas[2]}*[DUEM003]+{1./dustmas[3]}*[DUEM004]+{1./dustmas[4]}*[DUEM005];{coef}',
-           f'QNWFA2D->{1./saltmas[0]}*[SSEM001]+{1./saltmas[1]}*[SSEM002]+{1./saltmas[2]}*[SSEM003]+{1./saltmas[3]}*[SSEM004]+{1./saltmas[4]}*[SSEM005]+{1./bcmass}*[BCEM001]+{1./ocmass}*[OCEM001]+{1.0/sulfmass}*[SUEM001];{coef}']
+#for emissions
+if do_emissions==True:
+    #https://gmao.gsfc.nasa.gov/pubs/docs/Bosilovich785.pdf
+    #DUEM001:units = "kg m-2 s-1" ;
+    #QNWFA2D:units = "kg-1 s-1" ;
+    air_density=1.2 #kg/m3
+    dz=130          #height of the 1st layer, meters
+    coef = 1.0/(dz*air_density)
+    spc_map = [f'QNIFA2D->{1./dustmas[0]}*[DUEM001]+{1./dustmas[1]}*[DUEM002]+{1./dustmas[2]}*[DUEM003]+{1./dustmas[3]}*[DUEM004]+{1./dustmas[4]}*[DUEM005];{coef}',
+            f'QNWFA2D->{1./saltmas[0]}*[SSEM001]+{1./saltmas[1]}*[SSEM002]+{1./saltmas[2]}*[SSEM003]+{1./saltmas[3]}*[SSEM004]+{1./saltmas[4]}*[SSEM005]+{1./bcmass}*[BCEM001]+{1./ocmass}*[OCEM001]+{1.0/sulfmass}*[SUEM001];{coef}']
 
 '''
 FOR EMISSIONS
