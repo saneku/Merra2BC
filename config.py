@@ -73,15 +73,15 @@ saltmas = [0.001 * (3.141592/6.) * den_salt[i] * diam_salt[i]**3 for i in range(
 ###################################
 #from table 2 in "Tropospheric Aerosol Optical Thickness from the GOCART Model and Comparisons with Satellite and Sun Photometer Measurements" by M. Chin
 #from  supplementary of Randles 2017, The MERRA-2 Aerosol Reanalysis, 1980 Onward. Part I: System Description and Data Assimilation Evaluation 
-dens_sulf = 1.8 * 1.0e-3 #in g/cm3
+dens_sulf = 1.8 #* 1.0e-3 #in g/cm3
 diam_sulf = 0.16*2 * 1.0e-4 # cm
 sulfmass = 0.001 * (3.141592/6.) * dens_sulf * diam_sulf**3 #kg
 
-dens_oc = 1.8 * 1.0e-3 #in g/cm3
+dens_oc = 1.8 #* 1.0e-3 #in g/cm3
 diam_oc = 0.09 * 2 * 1.0e-4 # cm
 ocmass = 0.001 * (3.141592/6.) * dens_oc * diam_oc**3 #kg
 
-dens_bc = 1.0 * 1.0e-3 #in g/cm3
+dens_bc = 1.8 #* 1.0e-3 #in g/cm3
 diam_bc = 0.04 * 2 * 1.0e-4 # cm
 bcmass = 0.001 * (3.141592/6.) * dens_bc * diam_bc**3 #kg
 ###################################
