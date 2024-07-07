@@ -6,7 +6,7 @@ wrf_bdy_file="wrfbdy_d01"
 wrf_emis_file="wrfqnainp_d01"
 
 wrf_met_dir="/lustre2/project/k10022/ukhova/WPS-4.5/AirQuality_100km/"
-wrf_met_files="met_em.d01.*"
+wrf_met_files="met_em.d01.*" # or "met_em.d02.*" THIS FORMAT IS MANDATORY!
 
 #for IC and BC
 mera_dir="/scratch/ukhova/merra2/ICBC/"

@@ -40,7 +40,8 @@ def get_met_file_by_time_old(time):
     return met_times_files.get(time)
 
 def get_met_file_by_time(time):
-    return "met_em.d01."+time+".nc"
+    #return "met_em.d01."+time+".nc"
+    return config.wrf_met_files[:-1]+time+".nc"
 
 
 def get_index_in_file_by_time(time):
@@ -96,10 +97,6 @@ def initialise():
         wrf_times.update({wrftime:i})
         met_times_files.update({wrftime:met_files[i]})
 
-
-    nx=len(wrfbddy.dimensions['west_east'])
-    ny=len(wrfbddy.dimensions['south_north'])
-    nz=len(wrfbddy.dimensions['bottom_top'])
     nw=len(wrfbddy.dimensions['bdy_width'])
     wrfbddy.close()
 
@@ -110,6 +107,10 @@ def initialise():
     xlon=wrfinput.variables['XLONG'][0,:]
     xlat=wrfinput.variables['XLAT'][0,:]
     wrf_vars=[var for var in wrfinput.variables]
+    
+    nx=len(wrfinput.dimensions['west_east'])
+    ny=len(wrfinput.dimensions['south_north'])
+    nz=len(wrfinput.dimensions['bottom_top'])
 
     projection=wrfinput.getncattr('MAP_PROJ_CHAR')
     cen_lat=wrfinput.getncattr('CEN_LAT')

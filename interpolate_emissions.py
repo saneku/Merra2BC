@@ -26,9 +26,9 @@ if differences[0]!=required_emission_dt.total_seconds():
 		new_time_list.append(current_time)
 		current_time += timedelta(hours=1)
 
-	os.system(f"cp {config.wrf_dir+"/"+config.wrf_emis_file} {config.wrf_dir+"/"+config.wrf_emis_file}_new")
+	os.system(f'cp {config.wrf_dir+"/"+config.wrf_emis_file} {config.wrf_dir+"/"+config.wrf_emis_file}_new')
  
-	wrfemissions_new = Dataset(f"{config.wrf_dir+"/"+config.wrf_emis_file}_new", 'a')
+	wrfemissions_new = Dataset(f'{config.wrf_dir+"/"+config.wrf_emis_file}_new', 'a')
 	aux_times = np.chararray((len(new_time_list), 19), itemsize=1)	
 	for i, t in enumerate(new_time_list):
 		aux_times[i] = list(t.strftime("%Y-%m-%d_%H:%M:%S"))
@@ -52,11 +52,11 @@ if differences[0]!=required_emission_dt.total_seconds():
  
 	wrfemissions_new.close()
 	
-	os.system(f"rm {config.wrf_dir+"/"+config.wrf_emis_file}")
-	os.system(f"mv {config.wrf_dir+"/"+config.wrf_emis_file}_new {config.wrf_dir+"/"+config.wrf_emis_file}")
+	os.system(f'rm {config.wrf_dir+"/"+config.wrf_emis_file}')
+	os.system(f'mv {config.wrf_dir+"/"+config.wrf_emis_file}_new {config.wrf_dir+"/"+config.wrf_emis_file}')
 
 else:
-    print(f"dt in emission file is {required_emission_dt.total_seconds()} seconds, which is needed. Exiting...")
+    print(f'dt in emission file is {required_emission_dt.total_seconds()} seconds, which is needed. Exiting...')
 
 print ("DONE!")
 wrf_emis.close()
