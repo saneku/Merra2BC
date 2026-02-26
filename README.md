@@ -39,7 +39,9 @@ At runtime, command-line flags can override these defaults without editing the f
 
 ## Quick Start
 1. Run `real.exe` to generate `wrfinput_d01` and `wrfbdy_d01`.
-2. Download required MERRA-2 collections from [GES DISC](https://disc.gsfc.nasa.gov/daac-bin/FTPSubset2.pl).
+2. Download required MERRA-2 collections:
+   - [M2I3NVAER_5.12.4](https://disc.gsfc.nasa.gov/datasets/M2I3NVAER_5.12.4/summary)
+   - [M2I3NVCHM_5.12.4](https://disc.gsfc.nasa.gov/datasets/M2I3NVCHM_5.12.4/summary)
 3. Update `config.py` defaults (especially `spc_map`, paths, and masks).
 4. Zero relevant chemistry fields before interpolation:
    ```bash
@@ -91,7 +93,6 @@ python3 main.py --no_do_IC --do_BC
 ## Notes
 - Interpolated values are added to existing WRF-Chem fields.
 - Running `zero_fields.py` before `main.py` is recommended to avoid double counting.
-- `config.py` parsing uses `parse_known_args()`, so unknown flags are ignored by configuration parsing.
 
 ## Citation
 If this utility is useful in your research, please cite:
