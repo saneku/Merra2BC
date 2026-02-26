@@ -1,3 +1,5 @@
+import argparse
+
 wrf_dir="/home/WRFV4.1.3/run_tutorial/"
 wrf_input_file="wrfinput_d01"
 wrf_bdy_file="wrfbdy_d01"
@@ -10,6 +12,79 @@ mera_files="svc_MERRA2_300.inst3_3d_aer_Nv.2010*"
 
 do_IC=True
 do_BC=True
+
+
+def _apply_cli_overrides():
+    global wrf_dir, wrf_input_file, wrf_bdy_file
+    global wrf_met_dir, wrf_met_files
+    global mera_dir, mera_files
+    global do_IC, do_BC
+
+    parser = argparse.ArgumentParser(
+        description="MERRA2 to WRF boundary/initial condition interpolator settings"
+    )
+
+    parser.add_argument("--wrf_dir", default=wrf_dir, type=str, help="WRF directory")
+    parser.add_argument(
+        "--wrf_input_file", default=wrf_input_file, type=str, help="WRF input filename"
+    )
+    parser.add_argument(
+        "--wrf_bdy_file", default=wrf_bdy_file, type=str, help="WRF boundary filename"
+    )
+    parser.add_argument(
+        "--wrf_met_dir", default=wrf_met_dir, type=str, help="WPS met_em directory"
+    )
+    parser.add_argument(
+        "--wrf_met_files", default=wrf_met_files, type=str, help="WPS met_em file mask"
+    )
+    parser.add_argument(
+        "--mera_dir", default=mera_dir, type=str, help="MERRA2 directory"
+    )
+    parser.add_argument(
+        "--mera_files", default=mera_files, type=str, help="MERRA2 filename regex"
+    )
+
+    parser.add_argument(
+        "--do_IC",
+        dest="do_IC",
+        action="store_true",
+        default=do_IC,
+        help="Enable initial-condition update",
+    )
+    parser.add_argument(
+        "--no_do_IC",
+        dest="do_IC",
+        action="store_false",
+        help="Disable initial-condition update",
+    )
+    parser.add_argument(
+        "--do_BC",
+        dest="do_BC",
+        action="store_true",
+        default=do_BC,
+        help="Enable boundary-condition update",
+    )
+    parser.add_argument(
+        "--no_do_BC",
+        dest="do_BC",
+        action="store_false",
+        help="Disable boundary-condition update",
+    )
+
+    args, _ = parser.parse_known_args()
+
+    wrf_dir = args.wrf_dir
+    wrf_input_file = args.wrf_input_file
+    wrf_bdy_file = args.wrf_bdy_file
+    wrf_met_dir = args.wrf_met_dir
+    wrf_met_files = args.wrf_met_files
+    mera_dir = args.mera_dir
+    mera_files = args.mera_files
+    do_IC = args.do_IC
+    do_BC = args.do_BC
+
+
+_apply_cli_overrides()
 
 ###########################################
 #GOCART DUST ONLY
