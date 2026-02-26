@@ -24,7 +24,7 @@
 
 The {Merra2BC} interpolator creates initial and boundary conditions based on MERRA-2 reanalysis \citep{randles2017merra} for a WRF-Chem simulation by interpolating chemical species mixing ratios defined on the MERRA-2 grid to WRF-Chem grid. For the initial conditions, interpolated values are written to each node of the WRF-Chem grid. For the boundary conditions, only boundary nodes are affected.
 
-{Merra2BC} is written in Python. The utility requires additional modules that need to be installed in the Python environment: NetCDF4 (netcdf4) interface to work with NetCDF files and SciPy (scipy) package.
+{Merra2BC} is written in Python. The utility requires additional modules that need to be installed in the Python environment: NumPy (numpy), NetCDF4 (netcdf4) interface to work with NetCDF files, and SciPy (scipy) package.
 
 The full MERRA-2 reanalysis data set including aerosol and gaseous collections is publicly available online:
 \begin{itemize}
@@ -50,7 +50,7 @@ In WRF-Chem, the pressure field is not given in \textit{wrfinput\_d01} and \text
 
 \subsection{Mapping chemical species between MERRA-2 and WRF-Chem}
 
-{Merra2BC} file \textit{config.py} contains multiplication factors to convert MERRA-2 mass mixing ratios of gases given in kg\,kg$^{-1}$ into \unit{ppmv}. Aerosols are converted from kg\,kg$^{-1}$ to \unit{\mu}g\,kg$^{-1}$. When using the GOCART aerosol module in WRF-Chem simulation, all MERRA-2 aerosols and gases are matched with those from WRF-Chem. We simply multiply by a factor of $10^9$ to convert MERRA-2 aerosol mixing ratios given in kg\,kg$^{-1}$ into \unit{\mu}g\,kg$^{-1}$. In the case of gases, we need to multiply MERRA-2 mass mixing ratios by a ratio of molar masses $M_{air}/M_{gas}$ multiplied by $10^6$ to convert kg\,kg$^{-1}$ into \unit{ppmv}, where $M_{gas}$ and $M_{air}$ are molar masses (g\,mol$^{-1}$) of the required gas and air (28.97\,g\,mol$^{-1}$), respectively. If another aerosol module is chosen in WRF-Chem, then different multiplication factors should be used.
+{Merra2BC} file \textit{src/config.py} contains multiplication factors to convert MERRA-2 mass mixing ratios of gases given in kg\,kg$^{-1}$ into \unit{ppmv}. Aerosols are converted from kg\,kg$^{-1}$ to \unit{\mu}g\,kg$^{-1}$. When using the GOCART aerosol module in WRF-Chem simulation, all MERRA-2 aerosols and gases are matched with those from WRF-Chem. We simply multiply by a factor of $10^9$ to convert MERRA-2 aerosol mixing ratios given in kg\,kg$^{-1}$ into \unit{\mu}g\,kg$^{-1}$. In the case of gases, we need to multiply MERRA-2 mass mixing ratios by a ratio of molar masses $M_{air}/M_{gas}$ multiplied by $10^6$ to convert kg\,kg$^{-1}$ into \unit{ppmv}, where $M_{gas}$ and $M_{air}$ are molar masses (g\,mol$^{-1}$) of the required gas and air (28.97\,g\,mol$^{-1}$), respectively. If another aerosol module is chosen in WRF-Chem, then different multiplication factors should be used.
 
 \subsection{Interpolation procedure}
 
@@ -103,13 +103,13 @@ Here are the steps describing how to work with the {Merra2BC} interpolator:
 \item Run \textit{real.exe}, which will produce initial \textit{wrfinput\_d01} and boundary conditions \textit{wrfbdy\_d01} files required by the WRF-Chem simulation.
 \item Download required MERRA-2 files from \url{https://disc.gsfc.nasa.gov/datasets/M2I3NVAER_5.12.4/summary} and \url{https://disc.gsfc.nasa.gov/datasets/M2I3NVCHM_5.12.4/summary};
 \item Download {Merra2BC} from \url{https://github.com/saneku/Merra2BC}.
-\item Set defaults in \textit{config.py} file, which contains
+\item Set defaults in \textit{src/config.py} file, which contains
 \begin{itemize}
 \item[a.] mapping of chemical species and aerosols between MERRA-2 and WRF-Chem;
 \item[b.] paths to \textit{wrfinput\_d01}, \textit{wrfbdy\_d01}, and \textit{met\_em\_...*} files;
 \item[c.] a path to the downloaded MERRA-2 files.
 \end{itemize}
-\item Runtime arguments can override configuration values without editing \textit{config.py}:
+\item Runtime arguments can override configuration values without editing \textit{src/config.py}:
 \texttt{--wrf\_dir}, \texttt{--wrf\_input\_file}, \texttt{--wrf\_bdy\_file},
 \texttt{--wrf\_met\_dir}, \texttt{--wrf\_met\_files}, \texttt{--mera\_dir},
 \texttt{--mera\_files}, \texttt{--do\_IC}/\texttt{--no\_do\_IC}, and

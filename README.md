@@ -30,7 +30,7 @@ conda activate merra2bc
 ```
 
 ## Configuration Model
-Defaults are defined in `config.py`:
+Defaults are defined in `src/config.py`:
 - species mapping (`spc_map`)
 - file paths and filename masks
 - whether to process IC/BC by default (`do_IC`, `do_BC`)
@@ -42,7 +42,7 @@ At runtime, command-line flags can override these defaults without editing the f
 2. Download required MERRA-2 collections:
    - [M2I3NVAER_5.12.4](https://disc.gsfc.nasa.gov/datasets/M2I3NVAER_5.12.4/summary)
    - [M2I3NVCHM_5.12.4](https://disc.gsfc.nasa.gov/datasets/M2I3NVCHM_5.12.4/summary)
-3. Update `config.py` defaults (especially `spc_map`, paths, and masks).
+3. Update `src/config.py` defaults (especially `spc_map`, paths, and masks).
 4. Zero relevant chemistry fields before interpolation:
    ```bash
    python3 zero_fields.py
