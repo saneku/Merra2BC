@@ -1,4 +1,4 @@
-import config
+from . import config
 import re
 import os
 from netCDF4 import Dataset

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import config
+from src import config
 import time
 
 start_time = time.time()

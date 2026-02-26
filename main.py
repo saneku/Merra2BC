@@ -2,13 +2,13 @@
 #TODO if there is a dublicate in MERRA specs in spc_map
 
 import sys
-import config
+from src import config
 import time
 start_time = time.time()
-import merra2_module
-import wrf_module
-import merra2wrf_mapper
-import utils
+from src import merra2_module
+from src import wrf_module
+from src import merra2wrf_mapper
+from src import utils
 from netCDF4 import Dataset
 import numpy as np
 from datetime import datetime
