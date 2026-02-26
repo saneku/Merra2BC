@@ -5,11 +5,15 @@
 \usepackage[noend]{algpseudocode}
 
 \title{Merra2BC User manual}
-\author{Alexander Ukhov}
-\date{January 2021}
+\author{Alexander Ukhov, KAUST}
+\date{February, 2026}
 
 \usepackage{natbib}
 \usepackage{graphicx}
+\usepackage{url}
+\newcommand{\unit}[1]{\ensuremath{\mathrm{#1}}}
+\newcommand{\multiline}[1]{#1}
+\newcommand{\hack}[1]{#1}
 
 \begin{document}
 
@@ -22,7 +26,12 @@ The {Merra2BC} interpolator creates initial and boundary conditions based on MER
 
 {Merra2BC} is written in Python. The utility requires additional modules that need to be installed in the Python environment: NetCDF4 (netcdf4) interface to work with NetCDF files and SciPy (scipy) package.
 
-The full MERRA-2 reanalysis data set including aerosol and gaseous collections is publicly available online (\url{https://disc.gsfc.nasa.gov/daac-bin/FTPSubset2.pl}). Depending on the requirements, all or one of the following aerosol and gaseous collections need to be downloaded:
+The full MERRA-2 reanalysis data set including aerosol and gaseous collections is publicly available online:
+\begin{itemize}
+\item \url{https://disc.gsfc.nasa.gov/datasets/M2I3NVAER_5.12.4/summary}
+\item \url{https://disc.gsfc.nasa.gov/datasets/M2I3NVCHM_5.12.4/summary}
+\end{itemize}
+Depending on the requirements, all or one of the following aerosol and gaseous collections need to be downloaded:
 \textit{inst3\_3d\_aer\_Nv} -- gaseous and aerosol mass mixing ratios, (kg\,kg$^{-1}$) and
 \textit{inst3\_3d\_chm\_Nv} -- carbon monoxide and ozone mass mixing ratios, (kg\,kg$^{-1}$). Besides downloaded mass mixing ratios, pressure thickness \textit{DELP} and surface pressure \textit{PS} fields also need to be downloaded. Spatial coverage of the MERRA-2 files should include the area of the simulation domain. The time span of the downloaded files should match  the start and duration of the simulation. More information regarding MERRA-2 files' specification is provided in \citep{bosilovich2016merra}.
 
@@ -92,22 +101,38 @@ Horizontal interpolation of MERRA-2 pressure on WRF-Chem latitude, longitude nod
 Here are the steps describing how to work with the {Merra2BC} interpolator:
 \begin{enumerate}
 \item Run \textit{real.exe}, which will produce initial \textit{wrfinput\_d01} and boundary conditions \textit{wrfbdy\_d01} files required by the WRF-Chem simulation.
-\item Download required MERRA-2 files from \url{https://disc.gsfc.nasa.gov/daac-bin/FTPSubset2.pl};
+\item Download required MERRA-2 files from \url{https://disc.gsfc.nasa.gov/datasets/M2I3NVAER_5.12.4/summary} and \url{https://disc.gsfc.nasa.gov/datasets/M2I3NVCHM_5.12.4/summary};
 \item Download {Merra2BC} from \url{https://github.com/saneku/Merra2BC}.
-\item Edit the \textit{config.py} file which contains
+\item Set defaults in \textit{config.py} file, which contains
 \begin{itemize}
 \item[a.] mapping of chemical species and aerosols between MERRA-2 and WRF-Chem;
 \item[b.] paths to \textit{wrfinput\_d01}, \textit{wrfbdy\_d01}, and \textit{met\_em\_...*} files;
 \item[c.] a path to the downloaded MERRA-2 files.
 \end{itemize}
-\item \textit{real.exe} sets default boundary and initial conditions for some chemical species.  {Merra2BC} adds interpolated values to the existing values, which may cause incorrect concentration values. To avoid this, run ``python \textit{zero\_fileds.py}'', which will zero the required fields.
-\item Run ``python \textit{main.py}'', which will do the interpolation. As a result, files \textit{wrfinput\_d01} and \textit{wrfbdy\_d01} will be updated by the interpolated from MERRA-2 values.
+\item Runtime arguments can override configuration values without editing \textit{config.py}:
+\texttt{--wrf\_dir}, \texttt{--wrf\_input\_file}, \texttt{--wrf\_bdy\_file},
+\texttt{--wrf\_met\_dir}, \texttt{--wrf\_met\_files}, \texttt{--mera\_dir},
+\texttt{--mera\_files}, \texttt{--do\_IC}/\texttt{--no\_do\_IC}, and
+\texttt{--do\_BC}/\texttt{--no\_do\_BC}. Use ``python \textit{main.py} --help'' to print all options.
+\item \textit{real.exe} sets default boundary and initial conditions for some chemical species.  {Merra2BC} adds interpolated values to the existing values, which may cause incorrect concentration values. To avoid this, run ``python \textit{zero\_fields.py}'', which will zero the required fields.
+\item Run ``python \textit{main.py}'', which will do the interpolation. As a result, files \textit{wrfinput\_d01} and \textit{wrfbdy\_d01} will be updated by interpolated MERRA-2 values. Example:
+``python \textit{main.py} --wrf\_dir /path/to/wrf/run --wrf\_met\_dir /path/to/wps/run --mera\_dir /path/to/merra --do\_IC --do\_BC''.
 \item Modify the WRF-Chem \textit{namelist.input} file at section \textit{\&chem}: set \textit{have\_bcs\_chem = .true.} to activate updated boundary conditions and, if needed, \textit{chem\_in\_opt = 1} to activate updated initial conditions.
 \item Run \textit{wrf.exe}.
 \end{enumerate}
 
 \hack{\newpage}
-\bibliographystyle{plain}
+\begin{thebibliography}{99}
+\bibitem[Randles et~al.(2017)Randles, da Silva, Buchard, Colarco, Darmenov, Govindaraju, Smirnov, Holben, Ferrare, Hair, et~al.]{randles2017merra}
+Randles, C.~A., da Silva, A.~M., Buchard, V., Colarco, P.~R., Darmenov, A.,
+Govindaraju, R., Smirnov, A., Holben, B., Ferrare, R., Hair, J., and others.
+(2017).
+The MERRA-2 aerosol reanalysis, 1980 onward. Part I: System description and
+data assimilation evaluation.
+\textit{Journal of Climate}, 30(17), 6823--6850.
 
-\bibliography{references}
+\bibitem[Bosilovich et~al.(2016)Bosilovich, Lucchesi, and Suarez]{bosilovich2016merra}
+Bosilovich, M.~G., Lucchesi, R., and Suarez, M. (2016).
+MERRA-2: File specification GMAO Office Note No. 9 (Version 1.1).
+\end{thebibliography}
 \end{document}

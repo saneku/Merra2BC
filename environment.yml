@@ -1,0 +1,9 @@
+name: merra2bc
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - numpy
+  - scipy
+  - netcdf4
+  - pip
