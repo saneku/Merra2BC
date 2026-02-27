@@ -10,8 +10,8 @@ wrf_met_files="met_em.d01.2010*"
 mera_dir="/home/Merra2_data/"
 mera_files="svc_MERRA2_300.inst3_3d_aer_Nv.2010*"
 
-do_IC=True
-do_BC=True
+do_IC=False
+do_BC=False
 
 
 def _apply_cli_overrides():
@@ -46,29 +46,19 @@ def _apply_cli_overrides():
 
     parser.add_argument(
         "--do_IC",
-        dest="do_IC",
-        action="store_true",
-        default=do_IC,
-        help="Enable initial-condition update",
-    )
-    parser.add_argument(
-        "--no_do_IC",
-        dest="do_IC",
-        action="store_false",
-        help="Disable initial-condition update",
+        default=str(do_IC).lower(),
+        type=str.lower,
+        choices=("true", "false"),
+        metavar="{true,false}",
+        help="Enable/disable initial-condition update (true/false)",
     )
     parser.add_argument(
         "--do_BC",
-        dest="do_BC",
-        action="store_true",
-        default=do_BC,
-        help="Enable boundary-condition update",
-    )
-    parser.add_argument(
-        "--no_do_BC",
-        dest="do_BC",
-        action="store_false",
-        help="Disable boundary-condition update",
+        default=str(do_BC).lower(),
+        type=str.lower,
+        choices=("true", "false"),
+        metavar="{true,false}",
+        help="Enable/disable boundary-condition update (true/false)",
     )
 
     args, _ = parser.parse_known_args()
@@ -80,8 +70,8 @@ def _apply_cli_overrides():
     wrf_met_files = args.wrf_met_files
     mera_dir = args.mera_dir
     mera_files = args.mera_files
-    do_IC = args.do_IC
-    do_BC = args.do_BC
+    do_IC = args.do_IC == "true"
+    do_BC = args.do_BC == "true"
 
 
 _apply_cli_overrides()

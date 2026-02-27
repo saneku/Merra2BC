@@ -45,7 +45,7 @@ At runtime, command-line flags can override these defaults without editing the f
 3. Update `src/config.py` defaults (especially `spc_map`, paths, and masks).
 4. Zero relevant chemistry fields before interpolation:
    ```bash
-   python3 zero_fields.py
+   python3 zero_fields.py --do_IC=true --do_BC=true
    ```
 5. Run interpolation:
    ```bash
@@ -63,7 +63,7 @@ Print all options:
 python3 main.py --help
 ```
 
-Supported options:
+`main.py` supported options:
 - `--wrf_dir`
 - `--wrf_input_file`
 - `--wrf_bdy_file`
@@ -71,8 +71,8 @@ Supported options:
 - `--wrf_met_files`
 - `--mera_dir`
 - `--mera_files`
-- `--do_IC` / `--no_do_IC`
-- `--do_BC` / `--no_do_BC`
+- `--do_IC=true|false`
+- `--do_BC=true|false`
 
 Example (explicit paths, process both IC and BC):
 
@@ -81,13 +81,27 @@ python3 main.py \
   --wrf_dir /path/to/wrf/run \
   --wrf_met_dir /path/to/wps/run \
   --mera_dir /path/to/merra \
-  --do_IC --do_BC
+  --do_IC=true --do_BC=true
 ```
 
 Example (boundary conditions only):
 
 ```bash
-python3 main.py --no_do_IC --do_BC
+python3 main.py --do_IC=false --do_BC=true
+```
+
+`zero_fields.py` uses a fixed zero value (`1e-16`) and supports shared config overrides, including `--wrf_dir`, `--wrf_input_file`, `--wrf_bdy_file`, `--do_IC=true|false`, `--do_BC=true|false`.
+
+```bash
+python3 zero_fields.py \
+   --wrf_dir ./WRF_inp_bdy 
+   --do_IC=true
+
+OR
+
+python3 zero_fields.py \
+   --wrf_dir ./WRF_inp_bdy 
+   --do_BC=true
 ```
 
 ## Notes

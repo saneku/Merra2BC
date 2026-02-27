@@ -112,11 +112,11 @@ Here are the steps describing how to work with the {Merra2BC} interpolator:
 \item Runtime arguments can override configuration values without editing \textit{src/config.py}:
 \texttt{--wrf\_dir}, \texttt{--wrf\_input\_file}, \texttt{--wrf\_bdy\_file},
 \texttt{--wrf\_met\_dir}, \texttt{--wrf\_met\_files}, \texttt{--mera\_dir},
-\texttt{--mera\_files}, \texttt{--do\_IC}/\texttt{--no\_do\_IC}, and
-\texttt{--do\_BC}/\texttt{--no\_do\_BC}. Use ``python \textit{main.py} --help'' to print all options.
-\item \textit{real.exe} sets default boundary and initial conditions for some chemical species.  {Merra2BC} adds interpolated values to the existing values, which may cause incorrect concentration values. To avoid this, run ``python \textit{zero\_fields.py}'', which will zero the required fields.
+\texttt{--mera\_files}, \texttt{--do\_IC=true|false}, and
+\texttt{--do\_BC=true|false}. Use ``python \textit{main.py} --help'' to print all options.
+\item \textit{real.exe} sets default boundary and initial conditions for some chemical species.  {Merra2BC} adds interpolated values to the existing values, which may cause incorrect concentration values. To avoid this, run ``python \textit{zero\_fields.py} --do\_IC=true --do\_BC=true'', which will zero the required fields.
 \item Run ``python \textit{main.py}'', which will do the interpolation. As a result, files \textit{wrfinput\_d01} and \textit{wrfbdy\_d01} will be updated by interpolated MERRA-2 values. Example:
-``python \textit{main.py} --wrf\_dir /path/to/wrf/run --wrf\_met\_dir /path/to/wps/run --mera\_dir /path/to/merra --do\_IC --do\_BC''.
+``python \textit{main.py} --wrf\_dir /path/to/wrf/run --wrf\_met\_dir /path/to/wps/run --mera\_dir /path/to/merra --do\_IC=true --do\_BC=true''.
 \item Modify the WRF-Chem \textit{namelist.input} file at section \textit{\&chem}: set \textit{have\_bcs\_chem = .true.} to activate updated boundary conditions and, if needed, \textit{chem\_in\_opt = 1} to activate updated initial conditions.
 \item Run \textit{wrf.exe}.
 \end{enumerate}
