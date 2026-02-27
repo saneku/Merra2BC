@@ -4,7 +4,6 @@ import os
 from netCDF4 import Dataset
 from datetime import datetime, timedelta
 import numpy as np
-from scipy import interpolate
 
 from multiprocessing import Pool
 from functools import partial
@@ -24,6 +23,9 @@ mer_number_of_x_points=0
 mer_number_of_y_points=0
 mer_number_of_z_points=0
 
+_hor_grid_cache=None
+_hor_bnd_cache=None
+
 numbers = re.compile(r'(\d+)')
 def numericalSort(value):
     parts = numbers.split(value)
@@ -41,39 +43,113 @@ def get_file_name_by_index(index):
 
 
 #********************************
+def _build_axis_weights(source_axis, target_values):
+    idx_hi = np.searchsorted(source_axis, target_values, side='right')
+    idx_hi = np.clip(idx_hi, 1, len(source_axis) - 1)
+    idx_lo = idx_hi - 1
+
+    source_lo = source_axis[idx_lo]
+    source_hi = source_axis[idx_hi]
+    span = source_hi - source_lo
+
+    frac = np.zeros(target_values.shape, dtype=np.float64)
+    valid = span != 0
+    frac[valid] = (target_values[valid] - source_lo[valid]) / span[valid]
+    frac = np.clip(frac, 0.0, 1.0)
+
+    return idx_lo, idx_hi, frac
+
+
+def _build_bilinear_cache(target_lat, target_lon):
+    flat_lat = np.asarray(target_lat, dtype=np.float64).reshape(-1)
+    flat_lon = np.asarray(target_lon, dtype=np.float64).reshape(-1)
+
+    lat_lo, lat_hi, lat_frac = _build_axis_weights(mera_lat, flat_lat)
+    lon_lo, lon_hi, lon_frac = _build_axis_weights(mera_lon, flat_lon)
+
+    return {
+        "lat_ref": target_lat,
+        "lon_ref": target_lon,
+        "size": flat_lat.size,
+        "lat_lo": lat_lo,
+        "lat_hi": lat_hi,
+        "lon_lo": lon_lo,
+        "lon_hi": lon_hi,
+        "w00": (1.0 - lat_frac) * (1.0 - lon_frac),
+        "w10": lat_frac * (1.0 - lon_frac),
+        "w01": (1.0 - lat_frac) * lon_frac,
+        "w11": lat_frac * lon_frac,
+    }
+
+
+def _apply_bilinear_cache(field3d, cache):
+    z_count = field3d.shape[0]
+    out = np.empty((z_count, cache["size"]), dtype=field3d.dtype)
+
+    lat_lo = cache["lat_lo"]
+    lat_hi = cache["lat_hi"]
+    lon_lo = cache["lon_lo"]
+    lon_hi = cache["lon_hi"]
+    w00 = cache["w00"]
+    w10 = cache["w10"]
+    w01 = cache["w01"]
+    w11 = cache["w11"]
+
+    for z_level in range(z_count):
+        layer = field3d[z_level,:,:]
+        out[z_level,:] = (
+            layer[lat_lo, lon_lo] * w00
+            + layer[lat_hi, lon_lo] * w10
+            + layer[lat_lo, lon_hi] * w01
+            + layer[lat_hi, lon_hi] * w11
+        )
+
+    return out
+
+
 #Horizontal interpolation of 3d Merra field on WRF boundary
 def hor_interpolate_3dfield_on_wrf_boubdary(FIELD, wrf_length, wrf_lon, wrf_lat):
-    FIELD_BND=np.zeros([mer_number_of_z_points, wrf_length])
-    for z_level in range(mer_number_of_z_points):
-        f = interpolate.RectBivariateSpline(mera_lat, mera_lon, FIELD[z_level,:,:],kx=1, ky=1)
-        FIELD_BND[z_level,:]=f(wrf_lat,wrf_lon,grid=False)
-    return FIELD_BND
+    global _hor_bnd_cache
+
+    if (_hor_bnd_cache is None) or (_hor_bnd_cache["lat_ref"] is not wrf_lat) or (_hor_bnd_cache["lon_ref"] is not wrf_lon):
+        _hor_bnd_cache = _build_bilinear_cache(wrf_lat, wrf_lon)
+
+    if _hor_bnd_cache["size"] != wrf_length:
+        raise ValueError("WRF boundary size mismatch for horizontal interpolation cache.")
+
+    return _apply_bilinear_cache(FIELD, _hor_bnd_cache)
 
 #Vertical interpolation of Merra boundary on WRF boundary
 def ver_interpolate_3dfield_on_wrf_boubdary(MER_HOR_SPECIE_BND,MER_HOR_PRES_BND,WRF_PRES_BND,wrf_nz, wrf_length):
     WRF_SPECIE_BND = np.zeros([wrf_nz,wrf_length])  # Required SPEC on WRF boundary
     for i in range(0,wrf_length):
-        f = interpolate.interp1d(MER_HOR_PRES_BND[:,i], MER_HOR_SPECIE_BND[:,i], kind='linear',bounds_error=False,fill_value=0)
-        WRF_SPECIE_BND[:,i]=f(WRF_PRES_BND[:,i])
+        # np.interp expects an increasing coordinate. Vertical profiles here are top-down.
+        src_pres = MER_HOR_PRES_BND[::-1,i]
+        src_spec = MER_HOR_SPECIE_BND[::-1,i]
+        WRF_SPECIE_BND[:,i]=np.interp(WRF_PRES_BND[:,i], src_pres, src_spec, left=0.0, right=0.0)
     return WRF_SPECIE_BND
 
 #Horizontal interpolation of 3d Merra field on WRF horizontal grid
 def hor_interpolate_3dfield_on_wrf_grid(FIELD, wrf_ny, wrf_nx, wrf_lon, wrf_lat):
-    FIELD_HOR=np.zeros([mer_number_of_z_points, wrf_ny, wrf_nx])
+    global _hor_grid_cache
 
-    for z_level in range(mer_number_of_z_points):
-        f = interpolate.RectBivariateSpline(mera_lat, mera_lon, FIELD[z_level,:,:],kx=1, ky=1)
-        FIELD_HOR[z_level,:,:]=f(wrf_lat,wrf_lon,grid=False).reshape(wrf_ny, wrf_nx)
+    if (_hor_grid_cache is None) or (_hor_grid_cache["lat_ref"] is not wrf_lat) or (_hor_grid_cache["lon_ref"] is not wrf_lon):
+        _hor_grid_cache = _build_bilinear_cache(wrf_lat, wrf_lon)
 
-    return FIELD_HOR
+    if _hor_grid_cache["size"] != wrf_ny * wrf_nx:
+        raise ValueError("WRF grid size mismatch for horizontal interpolation cache.")
+
+    field_hor = _apply_bilinear_cache(FIELD, _hor_grid_cache)
+    return field_hor.reshape(FIELD.shape[0], wrf_ny, wrf_nx)
 
 #Vertical interpolation on WRF grid
 def ver_interpolate_3dfield_on_wrf_grid(MER_HOR_SPECIE, MER_HOR_PRES,WRF_PRES,wrf_nz, wrf_ny, wrf_nx):
     WRF_SPECIE = np.zeros([wrf_nz,wrf_ny,wrf_nx])  # Required SPEC on WRF grid
     for x in range(0,wrf_nx,1):
         for y in range(0,wrf_ny,1):
-            f = interpolate.interp1d(MER_HOR_PRES[:,y,x], MER_HOR_SPECIE[:,y,x], kind='linear',bounds_error=False,fill_value=0)
-            WRF_SPECIE[:,y,x]=f(WRF_PRES[:,y,x])
+            src_pres = MER_HOR_PRES[::-1,y,x]
+            src_spec = MER_HOR_SPECIE[::-1,y,x]
+            WRF_SPECIE[:,y,x]=np.interp(WRF_PRES[:,y,x], src_pres, src_spec, left=0.0, right=0.0)
     return WRF_SPECIE
 #********************************
 
@@ -115,7 +191,10 @@ def get_pressure_by_time(time,merra_file):
 
 
 def initialise():
-    global merra_files,mer_number_of_x_points,mer_number_of_y_points,mer_number_of_z_points,mera_lon,mera_lat,merra_vars,shifted_lons,shift_index
+    global merra_files,mer_number_of_x_points,mer_number_of_y_points,mer_number_of_z_points,mera_lon,mera_lat,merra_vars,shifted_lons,shift_index,_hor_grid_cache,_hor_bnd_cache
+
+    _hor_grid_cache=None
+    _hor_bnd_cache=None
 
     merra_files=sorted([f for f in os.listdir(config.mera_dir) if re.match(config.mera_files, f)], key=numericalSort)
     #print ("Open "+config.mera_dir+"/"+merra_files[0])
