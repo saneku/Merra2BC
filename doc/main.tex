@@ -11,22 +11,35 @@
 \usepackage{natbib}
 \usepackage{graphicx}
 \usepackage{url}
+\usepackage{geometry}
+\geometry{left=0.3in,right=0.3in,top=0.3in,bottom=0.3in}
 \newcommand{\unit}[1]{\ensuremath{\mathrm{#1}}}
 \newcommand{\multiline}[1]{#1}
 \newcommand{\hack}[1]{#1}
 
 \begin{document}
 
-\maketitle
+\noindent
+\begin{minipage}[t]{0.16\textwidth}
+\includegraphics[width=\linewidth]{repo_logo.png}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.80\textwidth}
+{\LARGE\bfseries Merra2BC User manual\par}
+{\large Alexander Ukhov, KAUST\par}
+{\large 1 March, 2026\par}
+\end{minipage}
+\vspace{0.6cm}
 
 \section{Introduction}
 \label{MERRA2BC}
 
 The {Merra2BC} interpolator creates initial and boundary conditions based on MERRA-2 reanalysis \citep{randles2017merra} for a WRF-Chem simulation by interpolating chemical species mixing ratios defined on the MERRA-2 grid to WRF-Chem grid. For the initial conditions, interpolated values are written to each node of the WRF-Chem grid. For the boundary conditions, only boundary nodes are affected.
-
+The workflow of the {Merra2BC} interpolator is shown in Fig.~\ref{fig:repo_thumbnail}. The utility is designed to be flexible and can be easily modified to work with different WRF-Chem chemical mechanisms and aerosol modules.
 {Merra2BC} is written in Python. The utility requires additional modules that need to be installed in the Python environment: NumPy (numpy), NetCDF4 (netcdf4) interface to work with NetCDF files, and SciPy (scipy) package.
 
-The full MERRA-2 reanalysis data set including aerosol and gaseous collections is publicly available online:
+\subsection{Data requirements}
+The required MERRA-2 reanalysis data set including aerosol and gaseous collections is publicly available online:
 \begin{itemize}
 \item \url{https://disc.gsfc.nasa.gov/datasets/M2I3NVAER_5.12.4/summary}
 \item \url{https://disc.gsfc.nasa.gov/datasets/M2I3NVCHM_5.12.4/summary}
@@ -34,6 +47,15 @@ The full MERRA-2 reanalysis data set including aerosol and gaseous collections i
 Depending on the requirements, all or one of the following aerosol and gaseous collections need to be downloaded:
 \textit{inst3\_3d\_aer\_Nv} -- gaseous and aerosol mass mixing ratios, (kg\,kg$^{-1}$) and
 \textit{inst3\_3d\_chm\_Nv} -- carbon monoxide and ozone mass mixing ratios, (kg\,kg$^{-1}$). Besides downloaded mass mixing ratios, pressure thickness \textit{DELP} and surface pressure \textit{PS} fields also need to be downloaded. Spatial coverage of the MERRA-2 files should include the area of the simulation domain. The time span of the downloaded files should match  the start and duration of the simulation. More information regarding MERRA-2 files' specification is provided in \citep{bosilovich2016merra}.
+
+\begin{figure}[h!]
+\centering
+% Source artwork lives in repo_thumbnail.svg; PNG is used for portable LaTeX rendering.
+\includegraphics[width=\textwidth]{repo_thumbnail.png}
+\caption{Merra2BC workflow overview from MERRA-2 inputs to updated WRF-Chem initial and boundary-condition files.}
+\label{fig:repo_thumbnail}
+\end{figure}
+
 
 \subsection{Reconstruction of the pressure in MERRA-2 and in WRF-Chem}
 
@@ -53,7 +75,7 @@ In WRF-Chem, the pressure field is not given in \textit{wrfinput\_d01} and \text
 {Merra2BC} file \textit{src/config.py} contains multiplication factors to convert MERRA-2 mass mixing ratios of gases given in kg\,kg$^{-1}$ into \unit{ppmv}. Aerosols are converted from kg\,kg$^{-1}$ to \unit{\mu}g\,kg$^{-1}$. When using the GOCART aerosol module in WRF-Chem simulation, all MERRA-2 aerosols and gases are matched with those from WRF-Chem. We simply multiply by a factor of $10^9$ to convert MERRA-2 aerosol mixing ratios given in kg\,kg$^{-1}$ into \unit{\mu}g\,kg$^{-1}$. In the case of gases, we need to multiply MERRA-2 mass mixing ratios by a ratio of molar masses $M_{air}/M_{gas}$ multiplied by $10^6$ to convert kg\,kg$^{-1}$ into \unit{ppmv}, where $M_{gas}$ and $M_{air}$ are molar masses (g\,mol$^{-1}$) of the required gas and air (28.97\,g\,mol$^{-1}$), respectively. If another aerosol module is chosen in WRF-Chem, then different multiplication factors should be used.
 
 \subsection{Interpolation procedure}
-
+The interpolation procedure is based on the bivariate spline approximation for horizontal interpolation and linear interpolation for vertical interpolation.
 A brief description of the interpolation procedure applied to the initial conditions is presented in Alg.~\ref{fig:figA2}. For boundary conditions, the procedure is similar, except that additional updates of domain boundary tendencies are required and interpolation is performed for each step, where boundary conditions are applied.
 
 \begin{algorithm}
