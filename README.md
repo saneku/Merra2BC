@@ -6,11 +6,11 @@
   <img src="doc/repo_logo.png" alt="Merra2BC logo" width="240"/>
 </p>
 
-![Merra2BC workflow thumbnail](doc/repo_thumbnail.svg)
-
 Merra2BC interpolates MERRA-2 chemical species to the WRF-Chem grid and updates:
 - initial conditions (`wrfinput_d01`)
 - time-varying boundary conditions (`wrfbdy_d01`)
+
+![Merra2BC workflow thumbnail](doc/repo_thumbnail.svg)
 
 ## Requirements
 - Python 3
