@@ -165,7 +165,7 @@ if config.do_BC:
             wrf_module.update_tendency_boundaries(wrfbdy_f,wrf_spec,time_index,dt,wrf_sp_index)
             wrf_sp_index=wrf_sp_index+1
 
-        print("--- %s seconds ---" % (time.time() - start_time))
+        #print("--- %s seconds ---" % (time.time() - start_time))
 
     print ("Closing prev. opened MERRA2 file with index "+str(index_of_opened_mera_file))
     merra_f.close()

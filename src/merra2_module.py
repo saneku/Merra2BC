@@ -145,7 +145,15 @@ def ver_interpolate_3dfield_on_wrf_boubdary(MER_HOR_SPECIE_BND,MER_HOR_PRES_BND,
         # np.interp expects an increasing coordinate. Vertical profiles here are top-down.
         src_pres = MER_HOR_PRES_BND[::-1,i]
         src_spec = MER_HOR_SPECIE_BND[::-1,i]
-        WRF_SPECIE_BND[:,i]=np.interp(WRF_PRES_BND[:,i], src_pres, src_spec, left=0.0, right=0.0)
+        # Use nearest-value extrapolation instead of zeros for levels outside MERRA pressure range.
+        # This avoids artificial empty cells near the surface on finer WRF grids.
+        WRF_SPECIE_BND[:,i]=np.interp(
+            WRF_PRES_BND[:,i],
+            src_pres,
+            src_spec,
+            left=src_spec[0],
+            right=src_spec[-1],
+        )
     return WRF_SPECIE_BND
 
 #Horizontal interpolation of 3d Merra field on WRF horizontal grid
@@ -168,7 +176,13 @@ def ver_interpolate_3dfield_on_wrf_grid(MER_HOR_SPECIE, MER_HOR_PRES,WRF_PRES,wr
         for y in range(0,wrf_ny,1):
             src_pres = MER_HOR_PRES[::-1,y,x]
             src_spec = MER_HOR_SPECIE[::-1,y,x]
-            WRF_SPECIE[:,y,x]=np.interp(WRF_PRES[:,y,x], src_pres, src_spec, left=0.0, right=0.0)
+            WRF_SPECIE[:,y,x]=np.interp(
+                WRF_PRES[:,y,x],
+                src_pres,
+                src_spec,
+                left=src_spec[0],
+                right=src_spec[-1],
+            )
     return WRF_SPECIE
 #********************************
 
