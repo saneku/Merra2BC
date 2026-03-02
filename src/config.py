@@ -1,47 +1,49 @@
 import argparse
 
-wrf_dir="/home/WRFV4.1.3/run_tutorial/"
-wrf_input_file="wrfinput_d01"
-wrf_bdy_file="wrfbdy_d01"
+wrf_input_file="/home/WRFV4.1.3/run_tutorial/wrfinput_d01"
+wrf_bdy_file="/home/WRFV4.1.3/run_tutorial/wrfbdy_d01"
 
-wrf_met_dir="/home/WPSV4.1.3/run_tutorial/"
-wrf_met_files="met_em.d01.2010*"
+wrf_met_files="/home/WPSV4.1.3/run_tutorial/met_em.d01.2010*"
 
-mera_dir="/home/Merra2_data/"
-mera_files="svc_MERRA2_300.inst3_3d_aer_Nv.2010*"
+merra2_files="/home/Merra2_data/svc_MERRA2_300.inst3_3d_aer_Nv.2010*"
 
 do_IC=False
 do_BC=False
 
 
 def _apply_cli_overrides():
-    global wrf_dir, wrf_input_file, wrf_bdy_file
-    global wrf_met_dir, wrf_met_files
-    global mera_dir, mera_files
+    global wrf_input_file, wrf_bdy_file
+    global wrf_met_files
+    global merra2_files
     global do_IC, do_BC
 
     parser = argparse.ArgumentParser(
         description="MERRA2 to WRF boundary/initial condition interpolator settings"
     )
 
-    parser.add_argument("--wrf_dir", default=wrf_dir, type=str, help="WRF directory")
     parser.add_argument(
-        "--wrf_input_file", default=wrf_input_file, type=str, help="WRF input filename"
+        "--wrf_input_file",
+        default=wrf_input_file,
+        type=str,
+        help="Full path to wrfinput file",
     )
     parser.add_argument(
-        "--wrf_bdy_file", default=wrf_bdy_file, type=str, help="WRF boundary filename"
+        "--wrf_bdy_file",
+        default=wrf_bdy_file,
+        type=str,
+        help="Full path to wrfbdy file",
     )
     parser.add_argument(
-        "--wrf_met_dir", default=wrf_met_dir, type=str, help="WPS met_em directory"
+        "--wrf_met_files",
+        default=wrf_met_files,
+        type=str,
+        help="Path mask for met_em files (glob)",
     )
     parser.add_argument(
-        "--wrf_met_files", default=wrf_met_files, type=str, help="WPS met_em file mask"
-    )
-    parser.add_argument(
-        "--mera_dir", default=mera_dir, type=str, help="MERRA2 directory"
-    )
-    parser.add_argument(
-        "--mera_files", default=mera_files, type=str, help="MERRA2 filename regex"
+        "--merra2_files",
+        default=merra2_files,
+        type=str,
+        help="Path mask for MERRA2 files (glob)",
     )
 
     parser.add_argument(
@@ -63,13 +65,10 @@ def _apply_cli_overrides():
 
     args, _ = parser.parse_known_args()
 
-    wrf_dir = args.wrf_dir
     wrf_input_file = args.wrf_input_file
     wrf_bdy_file = args.wrf_bdy_file
-    wrf_met_dir = args.wrf_met_dir
     wrf_met_files = args.wrf_met_files
-    mera_dir = args.mera_dir
-    mera_files = args.mera_files
+    merra2_files = args.merra2_files
     do_IC = args.do_IC == "true"
     do_BC = args.do_BC == "true"
 
@@ -77,6 +76,7 @@ def _apply_cli_overrides():
 _apply_cli_overrides()
 
 ###########################################
+'''
 #GOCART DUST ONLY
 spc_map = [ 'DUST_1 -> 1.0*[DU001];1.e9',
             'DUST_2 -> 1.0*[DU002];1.e9',
@@ -84,7 +84,12 @@ spc_map = [ 'DUST_1 -> 1.0*[DU001];1.e9',
             'DUST_4 -> 1.0*[DU004];1.e9',
             'DUST_5 -> 1.0*[DU005];1.e9']
 
+#GOCART SO2 and SULF ONLY
+#spc_map = [ 'so2 -> 0.453*[SO2];1.e6','sulf -> 0.302*[SO4];1.e6']
+'''
+
 #GOCART FULL
+#MERRA2_400.inst3_3d_aer_Nv.*
 spc_map = [ 'DUST_1 -> 1.0*[DU001];1.e9',
             'DUST_2 -> 1.0*[DU002];1.e9',
             'DUST_3 -> 1.0*[DU003];1.e9',
@@ -103,11 +108,12 @@ spc_map = [ 'DUST_1 -> 1.0*[DU001];1.e9',
             'dms -> 0.467*[DMS];1.e6']
             #,'msa -> 0.302*[MSA];1.e6'
 
-spc_map = [ 'o3 -> 0.604*[O3];1.e6','co -> 1.0*[CO];1.e6']
-#spc_map = [ 'so2 -> 0.453*[SO2];1.e6','sulf -> 0.302*[SO4];1.e6']
+#MERRA2_400.inst3_3d_chm_Nv.*
+#spc_map = [ 'o3 -> 0.604*[O3];1.e6','co -> 1.0*[CO];1.e6']
 
 ###########################################
 
+'''
 #CBMZ-MOSAIC_8bins SO2, Sulf, O3, CO, DUST and Sea salt (NaCl).
 #oc_a0X,bc_a0X still need to be done
 spc_map =['so2 -> 0.453*[SO2];1.e6',
@@ -158,3 +164,4 @@ spc_map =['so2 -> 0.453*[SO2];1.e6',
           'num_a06->2.663e+13*[DU001]+4.953e+13*[DU002]+1.008e+14*[SS003]+2.560e+12*[SO4];1',
           'num_a07->1.012e+13*[DU002]+1.049e+13*[DU003]+3.313e+12*[SS003]+8.469e+12*[SS004]+1.829e+10*[SO4];1',
           'num_a08->7.276e+11*[DU003]+1.502e+12*[DU004]+1.436e+12*[SS004]+1.599e-03*[SS005]+5.048e+07*[SO4];1']
+'''

@@ -1,6 +1,7 @@
 from . import config
 import re
 import os
+import glob
 from netCDF4 import Dataset
 import numpy as np
 import codecs
@@ -44,23 +45,17 @@ def get_met_file_by_time(time):
     if met_file is not None:
         return met_file
 
-    # Fallback: canonical met_em filename for this timestamp.
-    canonical = "met_em.d01." + time + ".nc"
-    if os.path.exists(config.wrf_met_dir + "/" + canonical):
-        return canonical
-
-    # Fallback for mask patterns ending with '*'.
-    if config.wrf_met_files.endswith("*"):
-        candidate = config.wrf_met_files[:-1] + time + ".nc"
-        if os.path.exists(config.wrf_met_dir + "/" + candidate):
+    # Fallback: search currently matched files by timestamp in basename.
+    for candidate in met_files:
+        if time in os.path.basename(candidate):
             return candidate
 
     raise FileNotFoundError(
         "Could not resolve met_em file for time "
         + str(time)
-        + " in "
-        + config.wrf_met_dir
-        + ". Check --wrf_met_files and available files."
+        + " using mask "
+        + str(config.wrf_met_files)
+        + "."
     )
 
 def get_index_in_file_by_time(time):
@@ -71,8 +66,11 @@ def get_BaseMapProjectionByWrfProjection():
 
 numbers = re.compile(r'(\d+)')
 def numericalSort1(value):
-    parts = numbers.split(value)
-    return int(float(parts[3])*1e6+float(parts[5])*1e4+float(parts[7])*1e2+float(parts[9]))
+    basename = os.path.basename(value)
+    match = re.search(r'(\d{4})-(\d{2})-(\d{2})_(\d{2}):(\d{2}):(\d{2})', basename)
+    if match:
+        return "".join(match.groups())
+    return basename
 
 
 def get_ordered_met_files():
@@ -109,16 +107,17 @@ def update_tendency_boundaries(wrfbdy_f,name,index,dt,wrf_sp_index):
 def initialise():
     global met_files,wrf_times,wrf_p_top,znu,xlon,xlat,nx,ny,nz,nw,wrf_bnd_lons,wrf_bnd_lats,spec_number,wrf_vars,cen_lat,cen_lon,projection,dx,dy,true_lat2,true_lat1
 
-    met_files=sorted([f for f in os.listdir(config.wrf_met_dir) if re.match(config.wrf_met_files, f)], key=numericalSort1)
-    wrfbddy = Dataset(config.wrf_dir+"/"+config.wrf_bdy_file,'r')
+    met_files=sorted(glob.glob(config.wrf_met_files), key=numericalSort1)
+    met_times_files.clear()
+    wrf_times.clear()
+
+    wrfbddy = Dataset(config.wrf_bdy_file,'r')
     wrf_time_len = len(wrfbddy.variables['Times'][:])
     if len(met_files) < wrf_time_len:
         wrfbddy.close()
         raise FileNotFoundError(
-            "Not enough met_em files in "
-            + config.wrf_met_dir
-            + " matching mask "
-            + config.wrf_met_files
+            "Not enough met_em files matching mask "
+            + str(config.wrf_met_files)
             + ". Found "
             + str(len(met_files))
             + ", but wrfbdy has "
@@ -135,7 +134,7 @@ def initialise():
     wrfbddy.close()
 
     #Reading "PRESSURE TOP OF THE MODEL, PA" and "eta values on half (mass) levels"
-    wrfinput=Dataset(config.wrf_dir+"/"+config.wrf_input_file,'r')
+    wrfinput=Dataset(config.wrf_input_file,'r')
     wrf_p_top=wrfinput.variables['P_TOP'][:]
     znu=wrfinput.variables['ZNU'][:]
     xlon=wrfinput.variables['XLONG'][0,:]

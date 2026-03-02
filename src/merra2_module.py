@@ -1,6 +1,7 @@
 from . import config
 import re
 import os
+import glob
 from netCDF4 import Dataset
 from datetime import datetime, timedelta
 import numpy as np
@@ -28,8 +29,22 @@ _hor_bnd_cache=None
 
 numbers = re.compile(r'(\d+)')
 def numericalSort(value):
-    parts = numbers.split(value)
-    return parts[9]
+    parts = numbers.split(os.path.basename(value))
+    if len(parts) > 9:
+        return parts[9]
+    return os.path.basename(value)
+
+
+def _extract_date_token(file_path):
+    parts = numbers.split(os.path.basename(file_path))
+    if len(parts) > 9 and len(parts[9]) == 8:
+        return parts[9]
+
+    match = re.search(r'(\d{8})', os.path.basename(file_path))
+    if match:
+        return match.group(1)
+
+    raise ValueError("Could not extract YYYYMMDD date from file name: " + str(file_path))
 
 def get_file_index_by_time(time):
     return mera_times_files.get(time)
@@ -38,6 +53,10 @@ def get_index_in_file_by_time(time):
     return mera_times.get(time)
 
 def get_file_name_by_index(index):
+    return os.path.basename(merra_files[index])
+
+
+def get_file_path_by_index(index):
     return merra_files[index]
 
 
@@ -196,9 +215,13 @@ def initialise():
     _hor_grid_cache=None
     _hor_bnd_cache=None
 
-    merra_files=sorted([f for f in os.listdir(config.mera_dir) if re.match(config.mera_files, f)], key=numericalSort)
-    #print ("Open "+config.mera_dir+"/"+merra_files[0])
-    merra_f = Dataset(config.mera_dir+"/"+merra_files[0],'r')
+    merra_files=sorted(glob.glob(config.merra2_files), key=numericalSort)
+    if not merra_files:
+        raise FileNotFoundError(
+            "No MERRA2 files matched mask: " + str(config.merra2_files)
+        )
+
+    merra_f = Dataset(merra_files[0],'r')
     mer_number_of_x_points=merra_f.variables['lon'].size
     mer_number_of_y_points=merra_f.variables['lat'].size
     #not all merra2 files (loading diagnostic) have 'lev' variable
@@ -238,7 +261,7 @@ def initialise():
 
     index=0
     for merra_file in merra_files:
-        date=numbers.split(merra_file)[9]
+        date=_extract_date_token(merra_file)
         for i in range(0,times_per_file,1):
             t=datetime.strptime(date, '%Y%m%d')+timedelta(minutes =(i*(24/times_per_file)*60))
             mera_times_files.update({t.strftime("%Y-%m-%d_%H:%M:%S"):index})

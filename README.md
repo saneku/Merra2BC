@@ -71,13 +71,10 @@ python3 main.py --help
 ```
 
 `main.py` supported options:
-- `--wrf_dir`
-- `--wrf_input_file`
-- `--wrf_bdy_file`
-- `--wrf_met_dir`
-- `--wrf_met_files`
-- `--mera_dir`
-- `--mera_files`
+- `--wrf_input_file` (full path to `wrfinput_d01`)
+- `--wrf_bdy_file` (full path to `wrfbdy_d01`)
+- `--wrf_met_files` (full-path glob mask for `met_em` files)
+- `--merra2_files` (full-path glob mask for MERRA2 files)
 - `--do_IC=true|false`
 - `--do_BC=true|false`
 
@@ -85,9 +82,10 @@ Example (explicit paths, process both IC and BC):
 
 ```bash
 python3 main.py \
-  --wrf_dir /path/to/wrf/run \
-  --wrf_met_dir /path/to/wps/run \
-  --mera_dir /path/to/merra \
+  --wrf_input_file /path/to/wrf/run/wrfinput_d01 \
+  --wrf_bdy_file /path/to/wrf/run/wrfbdy_d01 \
+  --wrf_met_files '/path/to/wps/run/met_em.d01.2010-*' \
+  --merra2_files '/path/to/merra/MERRA2_*.nc4' \
   --do_IC=true --do_BC=true
 ```
 
@@ -97,17 +95,17 @@ Example (boundary conditions only):
 python3 main.py --do_IC=false --do_BC=true
 ```
 
-`zero_fields.py` uses a fixed zero value (`1e-16`) and supports shared config overrides, including `--wrf_dir`, `--wrf_input_file`, `--wrf_bdy_file`, `--do_IC=true|false`, `--do_BC=true|false`.
+`zero_fields.py` uses a fixed zero value (`1e-16`) and supports shared config overrides, including `--wrf_input_file`, `--wrf_bdy_file`, `--do_IC=true|false`, `--do_BC=true|false`.
 
 ```bash
 python3 zero_fields.py \
-   --wrf_dir ./WRF_inp_bdy 
+   --wrf_input_file /path/to/wrf/run/wrfinput_d01 \
    --do_IC=true
 
 OR
 
 python3 zero_fields.py \
-   --wrf_dir ./WRF_inp_bdy 
+   --wrf_bdy_file /path/to/wrf/run/wrfbdy_d01 \
    --do_BC=true
 ```
 
