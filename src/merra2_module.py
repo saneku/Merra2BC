@@ -28,7 +28,29 @@ _hor_grid_cache=None
 _hor_bnd_cache=None
 
 numbers = re.compile(r'(\d+)')
+
+
+def _extract_valid_datetime_token(file_path):
+    basename = os.path.basename(file_path)
+
+    match = re.search(r'validtime_(\d{8})_(\d{2})', basename)
+    if match:
+        return datetime.strptime(match.group(1) + match.group(2), '%Y%m%d%H')
+
+    # Generic fallback: use the last YYYYMMDD_HH pair in the filename.
+    pairs = re.findall(r'(\d{8})_(\d{2})', basename)
+    if pairs:
+        date_token, hour_token = pairs[-1]
+        return datetime.strptime(date_token + hour_token, '%Y%m%d%H')
+
+    return None
+
+
 def numericalSort(value):
+    valid_dt = _extract_valid_datetime_token(value)
+    if valid_dt is not None:
+        return valid_dt.strftime('%Y%m%d%H')
+
     parts = numbers.split(os.path.basename(value))
     if len(parts) > 9:
         return parts[9]
@@ -36,13 +58,17 @@ def numericalSort(value):
 
 
 def _extract_date_token(file_path):
+    valid_dt = _extract_valid_datetime_token(file_path)
+    if valid_dt is not None:
+        return valid_dt.strftime('%Y%m%d')
+
     parts = numbers.split(os.path.basename(file_path))
     if len(parts) > 9 and len(parts[9]) == 8:
         return parts[9]
 
-    match = re.search(r'(\d{8})', os.path.basename(file_path))
-    if match:
-        return match.group(1)
+    matches = re.findall(r'(\d{8})', os.path.basename(file_path))
+    if matches:
+        return matches[-1]
 
     raise ValueError("Could not extract YYYYMMDD date from file name: " + str(file_path))
 
@@ -58,6 +84,89 @@ def get_file_name_by_index(index):
 
 def get_file_path_by_index(index):
     return merra_files[index]
+
+
+def _get_var_case_insensitive(nc_file, var_name):
+    if var_name in nc_file.variables:
+        return nc_file.variables[var_name]
+
+    target = var_name.lower()
+    for key in nc_file.variables:
+        if key.lower() == target:
+            return nc_file.variables[key]
+
+    raise KeyError(var_name)
+
+
+def _slice_var_at_time(var_obj, time_idx):
+    dims = tuple(d.lower() for d in var_obj.dimensions)
+    data = var_obj[:]
+
+    time_axis = None
+    for axis, dim_name in enumerate(dims):
+        if dim_name == 'time' or dim_name.startswith('time'):
+            time_axis = axis
+            break
+
+    if time_axis is None:
+        return np.asanyarray(data), dims
+
+    if time_idx is None:
+        time_idx = 0
+
+    if time_idx >= data.shape[time_axis]:
+        raise IndexError(
+            "Time index "
+            + str(time_idx)
+            + " is out of bounds for variable "
+            + str(var_obj.name)
+            + " with shape "
+            + str(data.shape)
+        )
+
+    sliced = np.take(data, time_idx, axis=time_axis)
+    sliced_dims = dims[:time_axis] + dims[time_axis+1:]
+    return np.asanyarray(sliced), sliced_dims
+
+
+def _to_lev_lat_lon(data, dims, var_name):
+    if data.ndim != len(dims):
+        return data
+
+    lev_axis = lat_axis = lon_axis = None
+    for axis, dim_name in enumerate(dims):
+        if dim_name in ('lev', 'level', 'plev') or dim_name.startswith('lev'):
+            lev_axis = axis
+        elif dim_name == 'lat' or 'lat' in dim_name:
+            lat_axis = axis
+        elif dim_name == 'lon' or 'lon' in dim_name:
+            lon_axis = axis
+
+    if data.ndim == 3 and lev_axis is not None and lat_axis is not None and lon_axis is not None:
+        if (lev_axis, lat_axis, lon_axis) != (0, 1, 2):
+            return np.transpose(data, (lev_axis, lat_axis, lon_axis))
+        return data
+
+    if data.ndim == 3:
+        return data
+
+    if data.ndim == 2:
+        raise ValueError(
+            "Variable "
+            + str(var_name)
+            + " is 2D after time slicing (dims="
+            + str(dims)
+            + "). Expected 3D [lev,lat,lon]."
+        )
+
+    raise ValueError(
+        "Variable "
+        + str(var_name)
+        + " has unsupported shape "
+        + str(data.shape)
+        + " with dims "
+        + str(dims)
+    )
 
 
 
@@ -189,7 +298,9 @@ def ver_interpolate_3dfield_on_wrf_grid(MER_HOR_SPECIE, MER_HOR_PRES,WRF_PRES,wr
 #extracts 3d field from merra2 file from given time
 def get_3dfield_by_time(time,merra_file,field_name):
     mera_time_idx=get_index_in_file_by_time(time)
-    field=merra_file.variables[field_name][mera_time_idx,:]
+    var_obj = _get_var_case_insensitive(merra_file, field_name)
+    raw_field, dims = _slice_var_at_time(var_obj, mera_time_idx)
+    field = _to_lev_lat_lon(raw_field, dims, var_obj.name)
 
     if shifted_lons:
         field=np.roll(field,shift_index,axis=2)
@@ -198,7 +309,7 @@ def get_3dfield_by_time(time,merra_file,field_name):
 
 
 def get_pressure_by_time(time,merra_file):
-    global Ptop_mera
+    global Ptop_mera, mer_number_of_z_points
     #MER_Pres will be restored on 73 edges
     MER_Pres = np.zeros([mer_number_of_z_points+1,mer_number_of_y_points,mer_number_of_x_points])
     #filling top edge with Ptop_mera
@@ -206,7 +317,14 @@ def get_pressure_by_time(time,merra_file):
 
     # Extract deltaP from NetCDF file at index defined by time
     mera_time_idx=get_index_in_file_by_time(time)
-    DELP = merra_file.variables['DELP'][mera_time_idx,:]  #Pa
+    delp_var = _get_var_case_insensitive(merra_file, 'DELP')
+    raw_delp, dims_delp = _slice_var_at_time(delp_var, mera_time_idx)
+    DELP = _to_lev_lat_lon(raw_delp, dims_delp, delp_var.name)  # Pa
+
+    if mer_number_of_z_points == 0:
+        mer_number_of_z_points = DELP.shape[0]
+        MER_Pres = np.zeros([mer_number_of_z_points+1,mer_number_of_y_points,mer_number_of_x_points])
+        MER_Pres[0,:,:]=Ptop_mera
 
     for z_level in range(mer_number_of_z_points):
         MER_Pres[z_level+1]=MER_Pres[z_level]+DELP[z_level]
@@ -224,10 +342,12 @@ def get_pressure_by_time(time,merra_file):
 
 
 def initialise():
-    global merra_files,mer_number_of_x_points,mer_number_of_y_points,mer_number_of_z_points,mera_lon,mera_lat,merra_vars,shifted_lons,shift_index,_hor_grid_cache,_hor_bnd_cache
+    global merra_files,mer_number_of_x_points,mer_number_of_y_points,mer_number_of_z_points,mera_lon,mera_lat,merra_vars,shifted_lons,shift_index,_hor_grid_cache,_hor_bnd_cache,mera_times,mera_times_files
 
     _hor_grid_cache=None
     _hor_bnd_cache=None
+    mera_times.clear()
+    mera_times_files.clear()
 
     merra_files=sorted(glob.glob(config.merra2_files), key=numericalSort)
     if not merra_files:
@@ -261,7 +381,7 @@ def initialise():
             if lon >180:
                 mera_lon[index]=mera_lon[index]-360.0
             index=index+1
-        shift_index=len(mera_lon)/2
+        shift_index=len(mera_lon)//2
         mera_lon=np.roll(mera_lon,shift_index)
         shifted_lons=True
         print ("###########################")
@@ -269,12 +389,23 @@ def initialise():
     print ("Lower left corner: lat="+str(min(mera_lat))+" long="+str(min(mera_lon)))
     print ("Upper right corner: lat="+str(max(mera_lat))+" long="+str(max(mera_lon)))
 
-    #number of times in  mera file
-    times_per_file=merra_f.variables['time'].size
+    #number of times in mera file
+    times_per_file = int(np.asarray(merra_f.variables['time'][:]).size)
+    if times_per_file <= 0:
+        merra_f.close()
+        raise ValueError("MERRA2 file has no time entries: " + str(merra_files[0]))
     merra_f.close()
 
     index=0
     for merra_file in merra_files:
+        valid_dt = _extract_valid_datetime_token(merra_file)
+        if times_per_file == 1 and valid_dt is not None:
+            key = valid_dt.strftime("%Y-%m-%d_%H:%M:%S")
+            mera_times_files.update({key:index})
+            mera_times.update({key:0})
+            index=index+1
+            continue
+
         date=_extract_date_token(merra_file)
         for i in range(0,times_per_file,1):
             t=datetime.strptime(date, '%Y%m%d')+timedelta(minutes =(i*(24/times_per_file)*60))
