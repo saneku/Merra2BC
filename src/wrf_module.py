@@ -45,6 +45,32 @@ def _extract_met_time(file_path):
     except ValueError:
         raise ValueError("Could not extract WRF time from met_em file name: " + str(file_path))
 
+
+def _extract_met_lon_lat(metfile):
+    lon_name = None
+    lat_name = None
+
+    if "XLONG_M" in metfile.variables and "XLAT_M" in metfile.variables:
+        lon_name = "XLONG_M"
+        lat_name = "XLAT_M"
+    elif "XLONG" in metfile.variables and "XLAT" in metfile.variables:
+        lon_name = "XLONG"
+        lat_name = "XLAT"
+
+    if lon_name is None or lat_name is None:
+        raise ValueError("Could not find XLONG/XLAT fields in met_em file.")
+
+    lon = metfile.variables[lon_name][:]
+    lat = metfile.variables[lat_name][:]
+
+    if lon.ndim == 3:
+        lon = lon[0,:]
+    if lat.ndim == 3:
+        lat = lat[0,:]
+
+    return lon, lat
+
+
 def get_pressure_from_metfile(metfile):
     PSFC=metfile.variables['PSFC'][:]
     WRF_Pres = np.zeros([nz,ny,nx])
@@ -146,6 +172,10 @@ def initialise():
             "No met_em files matched mask " + str(config.wrf_met_files) + "."
         )
 
+    wrfbdy_var_names = []
+    has_wrfbdy_ptop = False
+    has_wrfbdy_znu = False
+
     if config.do_BC:
         wrfbddy = Dataset(config.wrf_bdy_file,'r')
         wrf_time_len = len(wrfbddy.variables['Times'][:])
@@ -167,6 +197,15 @@ def initialise():
             met_times_files.update({wrftime:met_files[i]})
 
         nw=len(wrfbddy.dimensions['bdy_width'])
+        wrfbdy_var_names=[var for var in wrfbddy.variables]
+        if "P_TOP" in wrfbddy.variables:
+            wrf_p_top=wrfbddy.variables["P_TOP"][:]
+            has_wrfbdy_ptop = True
+        if "ZNU" in wrfbddy.variables:
+            znu=wrfbddy.variables["ZNU"][:]
+            has_wrfbdy_znu = True
+        if "bottom_top" in wrfbddy.dimensions:
+            nz=len(wrfbddy.dimensions["bottom_top"])
         wrfbddy.close()
     else:
         for i, met_file in enumerate(met_files):
@@ -174,28 +213,42 @@ def initialise():
             wrf_times.update({wrftime:i})
             met_times_files.update({wrftime:met_file})
 
-    #Reading "PRESSURE TOP OF THE MODEL, PA" and "eta values on half (mass) levels"
-    wrfinput=Dataset(config.wrf_input_file,'r')
-    wrf_p_top=wrfinput.variables['P_TOP'][:]
-    znu=wrfinput.variables['ZNU'][:]
-    xlon=wrfinput.variables['XLONG'][0,:]
-    xlat=wrfinput.variables['XLAT'][0,:]
-    wrf_vars=[var for var in wrfinput.variables]
-    
-    nx=len(wrfinput.dimensions['west_east'])
-    ny=len(wrfinput.dimensions['south_north'])
-    nz=len(wrfinput.dimensions['bottom_top'])
+    # BC-only mode does not require wrfinput if wrfbdy contains vertical metadata.
+    if config.do_IC or not config.do_BC:
+        wrfinput=Dataset(config.wrf_input_file,'r')
+        wrf_p_top=wrfinput.variables['P_TOP'][:]
+        znu=wrfinput.variables['ZNU'][:]
+        xlon=wrfinput.variables['XLONG'][0,:]
+        xlat=wrfinput.variables['XLAT'][0,:]
+        wrf_vars=[var for var in wrfinput.variables]
 
-    projection=wrfinput.getncattr('MAP_PROJ_CHAR')
-    cen_lat=wrfinput.getncattr('CEN_LAT')
-    cen_lon=wrfinput.getncattr('CEN_LON')
-    dy=wrfinput.getncattr('DY')
-    dx=wrfinput.getncattr('DX')
+        nx=len(wrfinput.dimensions['west_east'])
+        ny=len(wrfinput.dimensions['south_north'])
+        nz=len(wrfinput.dimensions['bottom_top'])
 
-    true_lat1=wrfinput.getncattr('TRUELAT1')
-    true_lat2=wrfinput.getncattr('TRUELAT2')
+        projection=wrfinput.getncattr('MAP_PROJ_CHAR')
+        cen_lat=wrfinput.getncattr('CEN_LAT')
+        cen_lon=wrfinput.getncattr('CEN_LON')
+        dy=wrfinput.getncattr('DY')
+        dx=wrfinput.getncattr('DX')
 
-    wrfinput.close()
+        true_lat1=wrfinput.getncattr('TRUELAT1')
+        true_lat2=wrfinput.getncattr('TRUELAT2')
+
+        wrfinput.close()
+    else:
+        if not has_wrfbdy_ptop or not has_wrfbdy_znu:
+            raise ValueError(
+                "BC-only mode requires P_TOP and ZNU in wrfbdy, or provide --wrf_input_file."
+            )
+
+        metfile0 = Dataset(met_files[0], 'r')
+        xlon, xlat = _extract_met_lon_lat(metfile0)
+        metfile0.close()
+
+        ny = xlat.shape[0]
+        nx = xlon.shape[1]
+        wrf_vars = sorted(set([var[:-4] for var in wrfbdy_var_names if var.endswith("_BXS")]))
 
     wrf_bnd_lons=np.concatenate((xlon[:,0],xlon[ny-1,:],xlon[:,nx-1],xlon[0,:]), axis=0)
     wrf_bnd_lats=np.concatenate((xlat[:,0],xlat[ny-1,:],xlat[:,nx-1],xlat[0,:]), axis=0)
