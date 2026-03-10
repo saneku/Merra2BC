@@ -10,8 +10,8 @@ start_time = time.time()
 zero = 1e-16
 #For GOCART
 fields_to_zero=['DUST_1','DUST_2','DUST_3','DUST_4','DUST_5',
-                'o3','co','so2','sulf','SEAS_1','SEAS_2','SEAS_3',
-                'SEAS_4','BC1','BC2','OC1','OC2','dms']
+                'o3','so2','sulf','SEAS_1','SEAS_2','SEAS_3',
+                'SEAS_4','BC1','BC2','OC1','OC2','dms'] # 'co'
 
 '''
 #For MOSAIC 8 bins

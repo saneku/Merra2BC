@@ -105,7 +105,8 @@ spc_map = [ 'DUST_1 -> 1.0*[du001];1.e9',
             'BC2 -> 1.0*[bcphilic];1.e9',
             'OC1 -> 1.0*[ocphobic];1.e9', 
             'OC2 -> 1.0*[ocphilic];1.e9',
-            'dms -> 0.467*[dms];1.e6']
+            'dms -> 0.467*[dms];1.e6',
+            'o3 -> 0.604*[o3];1.e6']
             #,'msa -> 0.302*[MSA];1.e6'
 
 #MERRA2_400.inst3_3d_chm_Nv.*
