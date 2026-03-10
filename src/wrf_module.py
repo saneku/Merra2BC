@@ -31,13 +31,19 @@ wrf_bnd_lons=[]
 wrf_bnd_lats=[]
 
 
+def _normalize_wrf_time(time_text):
+    match = re.search(r'(\d{4})-(\d{2})-(\d{2})_(\d{2})[:_](\d{2})[:_](\d{2})', str(time_text))
+    if not match:
+        raise ValueError("Could not parse WRF time: " + str(time_text))
+    return "{}-{}-{}_{}:{}:{}".format(*match.groups())
+
+
 def _extract_met_time(file_path):
     basename = os.path.basename(file_path)
-    match = re.search(r'(\d{4}-\d{2}-\d{2}_\d{2}:\d{2}:\d{2})', basename)
-    if match:
-        return match.group(1)
-
-    raise ValueError("Could not extract WRF time from met_em file name: " + str(file_path))
+    try:
+        return _normalize_wrf_time(basename)
+    except ValueError:
+        raise ValueError("Could not extract WRF time from met_em file name: " + str(file_path))
 
 def get_pressure_from_metfile(metfile):
     PSFC=metfile.variables['PSFC'][:]
@@ -50,13 +56,22 @@ def get_met_file_by_time_old(time):
     return met_times_files.get(time)
 
 def get_met_file_by_time(time):
+    normalized_time = _normalize_wrf_time(time)
     met_file = met_times_files.get(time)
+    if met_file is not None:
+        return met_file
+    met_file = met_times_files.get(normalized_time)
     if met_file is not None:
         return met_file
 
     # Fallback: search currently matched files by timestamp in basename.
     for candidate in met_files:
-        if time in os.path.basename(candidate):
+        try:
+            if _extract_met_time(candidate) == normalized_time:
+                return candidate
+        except ValueError:
+            continue
+        if str(time) in os.path.basename(candidate):
             return candidate
 
     raise FileNotFoundError(
@@ -76,9 +91,14 @@ def get_BaseMapProjectionByWrfProjection():
 numbers = re.compile(r'(\d+)')
 def numericalSort1(value):
     basename = os.path.basename(value)
-    match = re.search(r'(\d{4})-(\d{2})-(\d{2})_(\d{2}):(\d{2}):(\d{2})', basename)
-    if match:
-        return "".join(match.groups())
+    try:
+        match = re.search(r'(\d{4})-(\d{2})-(\d{2})_(\d{2})[:_](\d{2})[:_](\d{2})', basename)
+        if match:
+            return "".join(match.groups())
+        normalized = _normalize_wrf_time(basename)
+        return normalized.replace("-", "").replace("_", "").replace(":", "")
+    except ValueError:
+        pass
     return basename
 
 
