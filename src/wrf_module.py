@@ -30,6 +30,15 @@ projections={"Lambert Conformal":"lcc","Mercator":"merc"}
 wrf_bnd_lons=[]
 wrf_bnd_lats=[]
 
+
+def _extract_met_time(file_path):
+    basename = os.path.basename(file_path)
+    match = re.search(r'(\d{4}-\d{2}-\d{2}_\d{2}:\d{2}:\d{2})', basename)
+    if match:
+        return match.group(1)
+
+    raise ValueError("Could not extract WRF time from met_em file name: " + str(file_path))
+
 def get_pressure_from_metfile(metfile):
     PSFC=metfile.variables['PSFC'][:]
     WRF_Pres = np.zeros([nz,ny,nx])
@@ -110,28 +119,40 @@ def initialise():
     met_files=sorted(glob.glob(config.wrf_met_files), key=numericalSort1)
     met_times_files.clear()
     wrf_times.clear()
+    nw=0
 
-    wrfbddy = Dataset(config.wrf_bdy_file,'r')
-    wrf_time_len = len(wrfbddy.variables['Times'][:])
-    if len(met_files) < wrf_time_len:
-        wrfbddy.close()
+    if not met_files:
         raise FileNotFoundError(
-            "Not enough met_em files matching mask "
-            + str(config.wrf_met_files)
-            + ". Found "
-            + str(len(met_files))
-            + ", but wrfbdy has "
-            + str(wrf_time_len)
-            + " timestamps."
+            "No met_em files matched mask " + str(config.wrf_met_files) + "."
         )
 
-    for i in range(0,wrf_time_len,1):
-        wrftime = codecs.utf_8_decode(b''.join(wrfbddy.variables['Times'][i]))[0]
-        wrf_times.update({wrftime:i})
-        met_times_files.update({wrftime:met_files[i]})
+    if config.do_BC:
+        wrfbddy = Dataset(config.wrf_bdy_file,'r')
+        wrf_time_len = len(wrfbddy.variables['Times'][:])
+        if len(met_files) < wrf_time_len:
+            wrfbddy.close()
+            raise FileNotFoundError(
+                "Not enough met_em files matching mask "
+                + str(config.wrf_met_files)
+                + ". Found "
+                + str(len(met_files))
+                + ", but wrfbdy has "
+                + str(wrf_time_len)
+                + " timestamps."
+            )
 
-    nw=len(wrfbddy.dimensions['bdy_width'])
-    wrfbddy.close()
+        for i in range(0,wrf_time_len,1):
+            wrftime = codecs.utf_8_decode(b''.join(wrfbddy.variables['Times'][i]))[0]
+            wrf_times.update({wrftime:i})
+            met_times_files.update({wrftime:met_files[i]})
+
+        nw=len(wrfbddy.dimensions['bdy_width'])
+        wrfbddy.close()
+    else:
+        for i, met_file in enumerate(met_files):
+            wrftime = _extract_met_time(met_file)
+            wrf_times.update({wrftime:i})
+            met_times_files.update({wrftime:met_file})
 
     #Reading "PRESSURE TOP OF THE MODEL, PA" and "eta values on half (mass) levels"
     wrfinput=Dataset(config.wrf_input_file,'r')
