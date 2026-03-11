@@ -13,6 +13,19 @@ from netCDF4 import Dataset
 import numpy as np
 from datetime import datetime
 
+
+def _cli_option_provided(option_name):
+    return any(
+        arg == option_name or arg.startswith(option_name + "=")
+        for arg in sys.argv[1:]
+    )
+
+
+if not _cli_option_provided("--wrf_input_file"):
+    utils.error_message(
+        "Argument --wrf_input_file is required for main.py, even when --do_IC=false."
+    )
+
 #modules initialisation
 merra2_module.initialise()
 wrf_module.initialise()

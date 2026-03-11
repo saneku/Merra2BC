@@ -213,42 +213,28 @@ def initialise():
             wrf_times.update({wrftime:i})
             met_times_files.update({wrftime:met_file})
 
-    # BC-only mode does not require wrfinput if wrfbdy contains vertical metadata.
-    if config.do_IC or not config.do_BC:
-        wrfinput=Dataset(config.wrf_input_file,'r')
-        wrf_p_top=wrfinput.variables['P_TOP'][:]
-        znu=wrfinput.variables['ZNU'][:]
-        xlon=wrfinput.variables['XLONG'][0,:]
-        xlat=wrfinput.variables['XLAT'][0,:]
-        wrf_vars=[var for var in wrfinput.variables]
+    # main.py now requires --wrf_input_file for every run mode.
+    wrfinput=Dataset(config.wrf_input_file,'r')
+    wrf_p_top=wrfinput.variables['P_TOP'][:]
+    znu=wrfinput.variables['ZNU'][:]
+    xlon=wrfinput.variables['XLONG'][0,:]
+    xlat=wrfinput.variables['XLAT'][0,:]
+    wrf_vars=[var for var in wrfinput.variables]
 
-        nx=len(wrfinput.dimensions['west_east'])
-        ny=len(wrfinput.dimensions['south_north'])
-        nz=len(wrfinput.dimensions['bottom_top'])
+    nx=len(wrfinput.dimensions['west_east'])
+    ny=len(wrfinput.dimensions['south_north'])
+    nz=len(wrfinput.dimensions['bottom_top'])
 
-        projection=wrfinput.getncattr('MAP_PROJ_CHAR')
-        cen_lat=wrfinput.getncattr('CEN_LAT')
-        cen_lon=wrfinput.getncattr('CEN_LON')
-        dy=wrfinput.getncattr('DY')
-        dx=wrfinput.getncattr('DX')
+    projection=wrfinput.getncattr('MAP_PROJ_CHAR')
+    cen_lat=wrfinput.getncattr('CEN_LAT')
+    cen_lon=wrfinput.getncattr('CEN_LON')
+    dy=wrfinput.getncattr('DY')
+    dx=wrfinput.getncattr('DX')
 
-        true_lat1=wrfinput.getncattr('TRUELAT1')
-        true_lat2=wrfinput.getncattr('TRUELAT2')
+    true_lat1=wrfinput.getncattr('TRUELAT1')
+    true_lat2=wrfinput.getncattr('TRUELAT2')
 
-        wrfinput.close()
-    else:
-        if not has_wrfbdy_ptop or not has_wrfbdy_znu:
-            raise ValueError(
-                "BC-only mode requires P_TOP and ZNU in wrfbdy, or provide --wrf_input_file."
-            )
-
-        metfile0 = Dataset(met_files[0], 'r')
-        xlon, xlat = _extract_met_lon_lat(metfile0)
-        metfile0.close()
-
-        ny = xlat.shape[0]
-        nx = xlon.shape[1]
-        wrf_vars = sorted(set([var[:-4] for var in wrfbdy_var_names if var.endswith("_BXS")]))
+    wrfinput.close()
 
     wrf_bnd_lons=np.concatenate((xlon[:,0],xlon[ny-1,:],xlon[:,nx-1],xlon[0,:]), axis=0)
     wrf_bnd_lats=np.concatenate((xlat[:,0],xlat[ny-1,:],xlat[:,nx-1],xlat[0,:]), axis=0)
