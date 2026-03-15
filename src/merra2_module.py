@@ -224,10 +224,12 @@ def get_pressure_by_time(time,merra_file):
 
 
 def initialise():
-    global merra_files,mer_number_of_x_points,mer_number_of_y_points,mer_number_of_z_points,mera_lon,mera_lat,merra_vars,shifted_lons,shift_index,_hor_grid_cache,_hor_bnd_cache
+    global merra_files,mer_number_of_x_points,mer_number_of_y_points,mer_number_of_z_points,mera_lon,mera_lat,merra_vars,shifted_lons,shift_index,_hor_grid_cache,_hor_bnd_cache,mera_times,mera_times_files
 
     _hor_grid_cache=None
     _hor_bnd_cache=None
+    mera_times.clear()
+    mera_times_files.clear()
 
     merra_files=sorted(glob.glob(config.merra2_files), key=numericalSort)
     if not merra_files:
@@ -269,15 +271,72 @@ def initialise():
     print ("Lower left corner: lat="+str(min(mera_lat))+" long="+str(min(mera_lon)))
     print ("Upper right corner: lat="+str(max(mera_lat))+" long="+str(max(mera_lon)))
 
-    #number of times in  mera file
-    times_per_file=merra_f.variables['time'].size
+    # Number of times can differ by file; keep per-file values.
+    times_per_file_by_file = [merra_f.variables['time'].size]
     merra_f.close()
 
+    for merra_file in merra_files[1:]:
+        check_f = Dataset(merra_file, 'r')
+        cur_x = check_f.variables['lon'].size
+        cur_y = check_f.variables['lat'].size
+
+        if (cur_x != mer_number_of_x_points) or (cur_y != mer_number_of_y_points):
+            check_f.close()
+            raise ValueError(
+                "Incompatible MERRA grids matched --merra2_files. "
+                + "Reference grid is "
+                + str(mer_number_of_y_points)
+                + "x"
+                + str(mer_number_of_x_points)
+                + ", but "
+                + os.path.basename(merra_file)
+                + " is "
+                + str(cur_y)
+                + "x"
+                + str(cur_x)
+                + ". Use a single consistent collection/grid per run."
+            )
+
+        if 'lev' not in check_f.variables:
+            check_f.close()
+            raise ValueError(
+                "Variable 'lev' is missing in " + os.path.basename(merra_file) + "."
+            )
+        cur_z = check_f.variables['lev'].size
+        if cur_z != mer_number_of_z_points:
+            check_f.close()
+            raise ValueError(
+                "Incompatible MERRA vertical levels matched --merra2_files. "
+                + "Reference has "
+                + str(mer_number_of_z_points)
+                + " levels, but "
+                + os.path.basename(merra_file)
+                + " has "
+                + str(cur_z)
+                + "."
+            )
+
+        times_per_file_by_file.append(check_f.variables['time'].size)
+        check_f.close()
+
     index=0
-    for merra_file in merra_files:
+    for merra_file, times_per_file in zip(merra_files, times_per_file_by_file):
         date=_extract_date_token(merra_file)
         for i in range(0,times_per_file,1):
             t=datetime.strptime(date, '%Y%m%d')+timedelta(minutes =(i*(24/times_per_file)*60))
-            mera_times_files.update({t.strftime("%Y-%m-%d_%H:%M:%S"):index})
-            mera_times.update({t.strftime("%Y-%m-%d_%H:%M:%S"):i})
+            time_key = t.strftime("%Y-%m-%d_%H:%M:%S")
+            if time_key in mera_times_files:
+                prev_index = mera_times_files.get(time_key)
+                raise ValueError(
+                    "Duplicate MERRA timestamp "
+                    + time_key
+                    + " found in both "
+                    + os.path.basename(merra_files[prev_index])
+                    + " and "
+                    + os.path.basename(merra_file)
+                    + ". Narrow --merra2_files (do not mix collections like aer/chm)."
+                )
+
+            mera_times_files.update({time_key:index})
+            mera_times.update({time_key:i})
         index=index+1
