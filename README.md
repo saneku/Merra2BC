@@ -45,7 +45,7 @@ Defaults are defined in `src/config.py`:
 At runtime, command-line flags can override these defaults without editing the file.
 
 ## Quick Start
-1. Run `real.exe` to generate `wrfinput_d01` and `wrfbdy_d01`.
+1. Run `real.exe` with `chem_in_opt = 0` to generate `wrfinput_d01` and `wrfbdy_d01`.
 2. Download required MERRA-2 collections:
    - [M2I3NVAER_5.12.4](https://disc.gsfc.nasa.gov/datasets/M2I3NVAER_5.12.4/summary)
    - [M2I3NVCHM_5.12.4](https://disc.gsfc.nasa.gov/datasets/M2I3NVCHM_5.12.4/summary)
@@ -58,7 +58,7 @@ At runtime, command-line flags can override these defaults without editing the f
    ```bash
    python3 main.py
    ```
-6. In `namelist.input` under `&chem`, enable updated chemistry fields:
+6. Before running `wrf.exe`, in `namelist.input` under `&chem` set:
    - `have_bcs_chem = .true.` for boundary conditions
    - `chem_in_opt = 1` for initial conditions
 7. Run `wrf.exe`.
@@ -95,7 +95,7 @@ Example (boundary conditions only):
 python3 main.py --do_IC=false --do_BC=true
 ```
 
-`zero_fields.py` uses a fixed zero value (`1e-16`) and supports shared config overrides, including `--wrf_input_file`, `--wrf_bdy_file`, `--do_IC=true|false`, `--do_BC=true|false`.
+`zero_fields.py` uses a fixed zero value (`1e-16`) and supports shared config overrides, including `--wrf_input_file`, `--wrf_bdy_file`, `--do_IC=true|false`, `--do_BC=true|false`. The fields zeroed should be the same WRF fields that are updated later by `main.py` (based on the active `spc_map`).
 
 ```bash
 python3 zero_fields.py \
