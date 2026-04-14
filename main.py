@@ -105,6 +105,9 @@ if config.do_IC:
             print ("\t\t - Updating wrfinput field "+wrf_spec+"[0]="+wrf_spec+"[0]+"+merra_specie+"*"+str(coef)+"*"+str(wrf_mult))
             wrfinput_f.variables[wrf_spec][0,:]=wrfinput_f.variables[wrf_spec][0,:]+WRF_SPECIE*coef*wrf_mult
 
+    if config.init_co2_ch4:
+        wrf_module.init_co2_ch4_ic(wrfinput_f)
+
     print ("Closing wrfintput: "+config.wrf_input_file)
     wrfinput_f.close()
 
@@ -182,6 +185,9 @@ if config.do_BC:
 
     print ("Closing prev. opened MERRA2 file with index "+str(index_of_opened_mera_file))
     merra_f.close()
+
+    if config.init_co2_ch4:
+        wrf_module.init_co2_ch4_bc(wrfbdy_f)
 
     print ("Closing "+config.wrf_bdy_file)
     wrfbdy_f.close()
