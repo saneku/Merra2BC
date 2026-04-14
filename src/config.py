@@ -63,7 +63,13 @@ def _apply_cli_overrides():
         help="Enable/disable boundary-condition update (true/false)",
     )
 
-    args, _ = parser.parse_known_args()
+    args, unknown = parser.parse_known_args()
+    if unknown:
+        parser.error(
+            "Unrecognized arguments: "
+            + " ".join(unknown)
+            + ". If you pass file masks, quote them to avoid shell expansion."
+        )
 
     wrf_input_file = args.wrf_input_file
     wrf_bdy_file = args.wrf_bdy_file

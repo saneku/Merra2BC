@@ -64,11 +64,27 @@ def get_index_in_file_by_time(time):
 def get_BaseMapProjectionByWrfProjection():
     return projections.get(projection)
 
+def _normalize_time_key(time_key):
+    tkey = str(time_key).strip()
+    match = re.match(r"^(\d{4}-\d{2}-\d{2})_(\d{2})[:_](\d{2})[:_](\d{2})$", tkey)
+    if match:
+        return (
+            match.group(1)
+            + "_"
+            + match.group(2)
+            + ":"
+            + match.group(3)
+            + ":"
+            + match.group(4)
+        )
+    return tkey
+
 def _extract_met_time_from_file(file_path):
     with Dataset(file_path, 'r') as met_f:
         if 'Times' not in met_f.variables or len(met_f.variables['Times'][:]) == 0:
             raise ValueError("Could not read Times from met_em file: " + str(file_path))
-        return codecs.utf_8_decode(b''.join(met_f.variables['Times'][0]))[0]
+        wrf_time = codecs.utf_8_decode(b''.join(met_f.variables['Times'][0]))[0]
+        return _normalize_time_key(wrf_time)
 
 numbers = re.compile(r'(\d+)')
 def numericalSort1(value):
@@ -140,6 +156,7 @@ def initialise():
 
         for i in range(0,wrf_time_len,1):
             wrftime = codecs.utf_8_decode(b''.join(wrfbddy.variables['Times'][i]))[0]
+            wrftime = _normalize_time_key(wrftime)
             wrf_times.update({wrftime:i})
             met_times_files.update({wrftime:met_files[i]})
 

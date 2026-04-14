@@ -78,6 +78,10 @@ python3 main.py --help
 - `--do_IC=true|false`
 - `--do_BC=true|false`
 
+Important:
+- Quote glob masks passed to `--wrf_met_files` and `--merra2_files` to prevent shell expansion.
+- Use one MERRA collection per run (`inst3_3d_aer_Nv` or `inst3_3d_chm_Nv`) consistent with the active `spc_map`; do not mix both collections in one mask.
+
 Example (explicit paths, process both IC and BC):
 
 ```bash
