@@ -9,13 +9,14 @@ merra2_files="/home/Merra2_data/svc_MERRA2_300.inst3_3d_aer_Nv.2010*"
 
 do_IC=False
 do_BC=False
+init_co2_ch4=False
 
 
 def _apply_cli_overrides():
     global wrf_input_file, wrf_bdy_file
     global wrf_met_files
     global merra2_files
-    global do_IC, do_BC
+    global do_IC, do_BC, init_co2_ch4
 
     parser = argparse.ArgumentParser(
         description="MERRA2 to WRF boundary/initial condition interpolator settings"
@@ -62,6 +63,14 @@ def _apply_cli_overrides():
         metavar="{true,false}",
         help="Enable/disable boundary-condition update (true/false)",
     )
+    parser.add_argument(
+        "--init_co2_ch4",
+        default=str(init_co2_ch4).lower(),
+        type=str.lower,
+        choices=("true", "false"),
+        metavar="{true,false}",
+        help="Set fixed CO2/CH4 ppmv fields in IC/BC (true/false)",
+    )
 
     args, unknown = parser.parse_known_args()
     if unknown:
@@ -77,6 +86,7 @@ def _apply_cli_overrides():
     merra2_files = args.merra2_files
     do_IC = args.do_IC == "true"
     do_BC = args.do_BC == "true"
+    init_co2_ch4 = args.init_co2_ch4 == "true"
 
 
 _apply_cli_overrides()

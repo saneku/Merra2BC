@@ -122,7 +122,7 @@ Horizontal interpolation of MERRA-2 pressure on WRF-Chem latitude, longitude nod
 
 Here are the steps describing how to work with the {Merra2BC} interpolator:
 \begin{enumerate}
-\item Run \textit{real.exe}, which will produce initial \textit{wrfinput\_d01} and boundary conditions \textit{wrfbdy\_d01} files required by the WRF-Chem simulation.
+\item Run \textit{real.exe} with \textit{chem\_in\_opt = 0}, which will produce initial \textit{wrfinput\_d01} and boundary conditions \textit{wrfbdy\_d01} files required by the WRF-Chem simulation.
 \item Download required MERRA-2 files from \url{https://disc.gsfc.nasa.gov/datasets/M2I3NVAER_5.12.4/summary} and \url{https://disc.gsfc.nasa.gov/datasets/M2I3NVCHM_5.12.4/summary};
 \item Download {Merra2BC} from \url{https://github.com/saneku/Merra2BC}.
 \item Set defaults in \textit{src/config.py} file, which contains
@@ -132,14 +132,17 @@ Here are the steps describing how to work with the {Merra2BC} interpolator:
 \item[c.] a path to the downloaded MERRA-2 files.
 \end{itemize}
 \item Runtime arguments can override configuration values without editing \textit{src/config.py}:
-\texttt{--wrf\_dir}, \texttt{--wrf\_input\_file}, \texttt{--wrf\_bdy\_file},
-\texttt{--wrf\_met\_dir}, \texttt{--wrf\_met\_files}, \texttt{--mera\_dir},
-\texttt{--mera\_files}, \texttt{--do\_IC=true|false}, and
-\texttt{--do\_BC=true|false}. Use ``python \textit{main.py} --help'' to print all options.
+\texttt{--wrf\_input\_file}, \texttt{--wrf\_bdy\_file},
+\texttt{--wrf\_met\_files}, \texttt{--merra2\_files},
+\texttt{--do\_IC=true|false}, \texttt{--do\_BC=true|false}, and
+\texttt{--init\_co2\_ch4=true|false}. Use ``python \textit{main.py} --help'' to print all options.
+Quote masks passed to \texttt{--wrf\_met\_files} and \texttt{--merra2\_files} to avoid shell expansion.
+Use one MERRA-2 collection per run (\textit{inst3\_3d\_aer\_Nv} or \textit{inst3\_3d\_chm\_Nv}) consistent with active \textit{spc\_map}.
 \item \textit{real.exe} sets default boundary and initial conditions for some chemical species.  {Merra2BC} adds interpolated values to the existing values, which may cause incorrect concentration values. To avoid this, run ``python \textit{zero\_fields.py} --do\_IC=true --do\_BC=true'', which will zero the required fields.
 \item Run ``python \textit{main.py}'', which will do the interpolation. As a result, files \textit{wrfinput\_d01} and \textit{wrfbdy\_d01} will be updated by interpolated MERRA-2 values. Example:
-``python \textit{main.py} --wrf\_dir /path/to/wrf/run --wrf\_met\_dir /path/to/wps/run --mera\_dir /path/to/merra --do\_IC=true --do\_BC=true''.
-\item Modify the WRF-Chem \textit{namelist.input} file at section \textit{\&chem}: set \textit{have\_bcs\_chem = .true.} to activate updated boundary conditions and, if needed, \textit{chem\_in\_opt = 1} to activate updated initial conditions.
+``python \textit{main.py} --wrf\_input\_file /path/to/wrfinput\_d01 --wrf\_bdy\_file /path/to/wrfbdy\_d01 --wrf\_met\_files '/path/to/met\_em.d01.*.nc' --merra2\_files '/path/to/MERRA2\_400.inst3\_3d\_aer\_Nv.2025*.nc4' --do\_IC=true --do\_BC=true --init\_co2\_ch4=false''.
+If \texttt{--init\_co2\_ch4=true} is used, \textit{co2} and \textit{ch4} are set to fixed values (400 and 1.7\,\unit{ppmv}, respectively) in IC/BC, and corresponding BC tendencies are set to zero.
+\item Modify the WRF-Chem \textit{namelist.input} file at section \textit{\&chem}: set \textit{have\_bcs\_chem = .true.} to activate updated boundary conditions and \textit{chem\_in\_opt = 1} to preserve updated initial conditions.
 \item Run \textit{wrf.exe}.
 \end{enumerate}
 

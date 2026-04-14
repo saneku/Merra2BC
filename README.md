@@ -77,6 +77,7 @@ python3 main.py --help
 - `--merra2_files` (full-path glob mask for MERRA2 files)
 - `--do_IC=true|false`
 - `--do_BC=true|false`
+- `--init_co2_ch4=true|false` (default `false`; sets `co2=400 ppmv`, `ch4=1.7 ppmv`; for BC also sets `co2/ch4` tendencies to `0`)
 
 Important:
 - Quote glob masks passed to `--wrf_met_files` and `--merra2_files` to prevent shell expansion.
@@ -90,7 +91,8 @@ python3 main.py \
   --wrf_bdy_file /path/to/wrf/run/wrfbdy_d01 \
   --wrf_met_files '/path/to/wps/run/met_em.d01.2010-*' \
   --merra2_files '/path/to/merra/MERRA2_*.nc4' \
-  --do_IC=true --do_BC=true
+  --do_IC=true --do_BC=true \
+  --init_co2_ch4=false
 ```
 
 Example (boundary conditions only):

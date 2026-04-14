@@ -1,4 +1,5 @@
 from . import config
+from . import utils
 import re
 import os
 import glob
@@ -29,6 +30,8 @@ projections={"Lambert Conformal":"lcc","Mercator":"merc"}
 
 wrf_bnd_lons=[]
 wrf_bnd_lats=[]
+CO2_PPMV=400.0
+CH4_PPMV=1.7
 
 def get_pressure_from_metfile(metfile):
     PSFC=metfile.variables['PSFC'][:]
@@ -124,6 +127,46 @@ def update_tendency_boundaries(wrfbdy_f,name,index,dt,wrf_sp_index):
         wrfbdy_f.variables[name+"_BTXE"][index-1,:]=(wrfbdy_f.variables[name+"_BXE"][index,:]-wrfbdy_f.variables[name+"_BXE"][index-1,:])/dt
         wrfbdy_f.variables[name+"_BTYS"][index-1,:]=(wrfbdy_f.variables[name+"_BYS"][index,:]-wrfbdy_f.variables[name+"_BYS"][index-1,:])/dt
         wrfbdy_f.variables[name+"_BTYE"][index-1,:]=(wrfbdy_f.variables[name+"_BYE"][index,:]-wrfbdy_f.variables[name+"_BYE"][index-1,:])/dt
+
+
+def _require_var(nc_file, var_name, file_label):
+    if var_name not in nc_file.variables:
+        utils.error_message(
+            "Variable " + var_name + " is missing in " + file_label + ". Exiting..."
+        )
+    return nc_file.variables[var_name]
+
+
+def init_co2_ch4_ic(wrfinput_f):
+    print (
+        "\t\t - Setting fixed IC fields: co2="
+        + str(CO2_PPMV)
+        + " ppmv, ch4="
+        + str(CH4_PPMV)
+        + " ppmv"
+    )
+    _require_var(wrfinput_f, "co2", "wrfinput")[:] = CO2_PPMV
+    _require_var(wrfinput_f, "ch4", "wrfinput")[:] = CH4_PPMV
+
+
+def init_co2_ch4_bc(wrfbdy_f):
+    print (
+        "\t\t - Setting fixed BC fields: co2="
+        + str(CO2_PPMV)
+        + " ppmv, ch4="
+        + str(CH4_PPMV)
+        + " ppmv; tendencies set to 0"
+    )
+    for spec_name, value in [("co2", CO2_PPMV), ("ch4", CH4_PPMV)]:
+        _require_var(wrfbdy_f, spec_name + "_BXS", "wrfbdy")[:] = value
+        _require_var(wrfbdy_f, spec_name + "_BXE", "wrfbdy")[:] = value
+        _require_var(wrfbdy_f, spec_name + "_BYS", "wrfbdy")[:] = value
+        _require_var(wrfbdy_f, spec_name + "_BYE", "wrfbdy")[:] = value
+
+        _require_var(wrfbdy_f, spec_name + "_BTXS", "wrfbdy")[:] = 0.0
+        _require_var(wrfbdy_f, spec_name + "_BTXE", "wrfbdy")[:] = 0.0
+        _require_var(wrfbdy_f, spec_name + "_BTYS", "wrfbdy")[:] = 0.0
+        _require_var(wrfbdy_f, spec_name + "_BTYE", "wrfbdy")[:] = 0.0
 
 
 def initialise():
