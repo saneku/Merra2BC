@@ -1,0 +1,5 @@
+# MPAS-A aerosol profile for files that contain only so2 and dust_1 tracers.
+# Use with MERRA-2 aerosol collection: inst3_3d_aer_Nv
+
+so2 -> 1.0*[so2];1.0
+dust_1 -> 1.0*[du001];1.0

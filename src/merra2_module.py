@@ -390,7 +390,10 @@ def initialise():
     print ("Upper right corner: lat="+str(max(mera_lat))+" long="+str(max(mera_lon)))
 
     #number of times in mera file
-    times_per_file = int(np.asarray(merra_f.variables['time'][:]).size)
+    if "time" in merra_f.dimensions:
+        times_per_file = len(merra_f.dimensions["time"])
+    else:
+        times_per_file = int(np.asarray(merra_f.variables['time'][:]).size)
     if times_per_file <= 0:
         merra_f.close()
         raise ValueError("MERRA2 file has no time entries: " + str(merra_files[0]))

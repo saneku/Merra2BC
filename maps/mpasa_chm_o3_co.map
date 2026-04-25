@@ -1,0 +1,6 @@
+# MPAS-A chemistry profile for files that contain o3 and co tracers.
+# Use with MERRA-2 chemistry collection: inst3_3d_chm_Nv
+# MERRA-2 CO is mol/mol; MPAS co is typically kg/kg, so apply Mw(CO)/Mw(air).
+
+o3 -> 1.0*[o3];1.0
+co -> 1.0*[co];0.966862271
