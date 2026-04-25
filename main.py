@@ -210,26 +210,97 @@ def run_wrfchem():
                 wrf_spec=wrf_name_and_coef[0]
                 coef=wrf_name_and_coef[1]
                 wrf_mult=merra2wrf_mapper.coefficients[wrf_spec]
-                print ("\t\t - Updating wrfbdy field: "+wrf_spec+"["+str(time_index)+"]="+wrf_spec+"["+str(time_index)+"]+"+merra_specie+"*"+str(coef)+"*"+str(wrf_mult))
-                wrf_module.update_boundaries(WRF_SPECIE_BND*coef*wrf_mult,wrfbdy_f,wrf_spec,time_index)
+                print ("\t\t - Updating wrfinput field "+wrf_spec+"[0]="+wrf_spec+"[0]+"+merra_specie+"*"+str(coef)+"*"+str(wrf_mult))
+                wrfinput_f.variables[wrf_spec][0,:]=wrfinput_f.variables[wrf_spec][0,:]+WRF_SPECIE*coef*wrf_mult
 
-        wrf_sp_index=0
-        for wrf_spec in merra2wrf_mapper.get_wrf_vars():
-            wrf_module.update_tendency_boundaries(wrfbdy_f,wrf_spec,time_index,dt,wrf_sp_index)
-            wrf_sp_index=wrf_sp_index+1
+        if config.init_co2_ch4:
+            wrf_module.init_co2_ch4_ic(wrfinput_f)
 
-        #print("--- %s seconds ---" % (time.time() - start_time))
+        print ("Closing wrfintput: "+config.wrf_input_file)
+        wrfinput_f.close()
 
-    print ("Closing prev. opened MERRA2 file with index "+str(index_of_opened_mera_file))
-    merra_f.close()
+        print ("Closing mera file "+merra2_module.get_file_name_by_index(index_of_opened_mera_file))
+        merra_f.close()
 
-    if config.init_co2_ch4:
-        wrf_module.init_co2_ch4_bc(wrfbdy_f)
+        print ("Closing metfile "+wrf_module.get_met_file_by_time(cur_time))
+        metfile.close()
 
-    print ("Closing "+config.wrf_bdy_file)
-    wrfbdy_f.close()
+        print ("FINISH INITIAL CONDITIONS")
 
-    print("FINISH BOUNDARY CONDITIONS")
+
+    if config.do_BC:
+        print ("\n\nSTART BOUNDARY CONDITIONS")
+
+        print ("Opening "+config.wrf_bdy_file)
+        wrfbdy_f=Dataset(config.wrf_bdy_file,'r+')
+
+        #difference betweeen two given times
+        dt=(datetime.strptime(time_intersection[1], '%Y-%m-%d_%H:%M:%S')-datetime.strptime(time_intersection[0], '%Y-%m-%d_%H:%M:%S')).total_seconds()
+
+        cur_time=time_intersection[0]
+        index_of_opened_mera_file=merra2_module.get_file_index_by_time(cur_time)
+        print ("\nOpening MERRA2 file: "+merra2_module.get_file_name_by_index(index_of_opened_mera_file)+" file which has index "+str(index_of_opened_mera_file))
+        merra_f = Dataset(merra2_module.get_file_path_by_index(index_of_opened_mera_file),'r')
+
+        for cur_time in time_intersection:
+            if (merra2_module.get_file_index_by_time(cur_time)!=index_of_opened_mera_file):
+                print ("Closing prev. opened MERRA2 file with index "+str(index_of_opened_mera_file))
+                merra_f.close()
+
+                index_of_opened_mera_file=merra2_module.get_file_index_by_time(cur_time)
+                print ("\nOpening MERRA2 file: "+merra2_module.get_file_name_by_index(index_of_opened_mera_file)+" file which has index "+str(index_of_opened_mera_file))
+                merra_f = Dataset(merra2_module.get_file_path_by_index(index_of_opened_mera_file),'r')
+
+
+            print ("\n\tCur_time="+cur_time)
+            print ("\tReading MERRA Pressure at index "+str(merra2_module.get_index_in_file_by_time(cur_time)))
+            MERA_PRES=merra2_module.get_pressure_by_time(cur_time,merra_f)
+
+            print ("\tHorizontal interpolation of MERRA Pressure on WRF boundary")
+            MER_HOR_PRES_BND=merra2_module.hor_interpolate_3dfield_on_wrf_boubdary(MERA_PRES,len(wrf_module.wrf_bnd_lons),wrf_module.wrf_bnd_lons,wrf_module.wrf_bnd_lats)
+
+            print ("\tReading WRF Pressure from: "+wrf_module.get_met_file_by_time(cur_time))
+            metfile= Dataset(wrf_module.get_met_file_by_time(cur_time),'r')
+            WRF_PRES=wrf_module.get_pressure_from_metfile(metfile)
+            WRF_PRES_BND=np.concatenate((WRF_PRES[:,:,0],WRF_PRES[:,wrf_module.ny-1,:],WRF_PRES[:,:,wrf_module.nx-1],WRF_PRES[:,0,:]), axis=1)
+            metfile.close()
+
+            time_index=wrf_module.get_index_in_file_by_time(cur_time)
+            for merra_specie in merra2wrf_mapper.get_merra_vars():
+                print ("\n\t\t - Reading "+merra_specie+" field from MERRA.")
+                MER_SPECIE=merra2_module.get_3dfield_by_time(cur_time,merra_f,merra_specie)
+
+                print ("\t\tHorizontal interpolation of "+merra_specie+" on WRF boundary")
+                MER_HOR_SPECIE_BND=merra2_module.hor_interpolate_3dfield_on_wrf_boubdary(MER_SPECIE,len(wrf_module.wrf_bnd_lons),wrf_module.wrf_bnd_lons,wrf_module.wrf_bnd_lats)
+
+                print ("\t\tVertical interpolation of "+merra_specie+" on WRF boundary")
+                WRF_SPECIE_BND=merra2_module.ver_interpolate_3dfield_on_wrf_boubdary(MER_HOR_SPECIE_BND,MER_HOR_PRES_BND,WRF_PRES_BND,wrf_module.nz,len(wrf_module.wrf_bnd_lons))
+                WRF_SPECIE_BND=np.flipud(WRF_SPECIE_BND)
+
+                for wrf_name_and_coef in merra2wrf_mapper.get_list_of_wrf_spec_by_merra_var(merra_specie):
+                    wrf_spec=wrf_name_and_coef[0]
+                    coef=wrf_name_and_coef[1]
+                    wrf_mult=merra2wrf_mapper.coefficients[wrf_spec]
+                    print ("\t\t - Updating wrfbdy field: "+wrf_spec+"["+str(time_index)+"]="+wrf_spec+"["+str(time_index)+"]+"+merra_specie+"*"+str(coef)+"*"+str(wrf_mult))
+                    wrf_module.update_boundaries(WRF_SPECIE_BND*coef*wrf_mult,wrfbdy_f,wrf_spec,time_index)
+
+            wrf_sp_index=0
+            for wrf_spec in merra2wrf_mapper.get_wrf_vars():
+                wrf_module.update_tendency_boundaries(wrfbdy_f,wrf_spec,time_index,dt,wrf_sp_index)
+                wrf_sp_index=wrf_sp_index+1
+
+            #print("--- %s seconds ---" % (time.time() - start_time))
+
+        print ("Closing prev. opened MERRA2 file with index "+str(index_of_opened_mera_file))
+        merra_f.close()
+
+        if config.init_co2_ch4:
+            wrf_module.init_co2_ch4_bc(wrfbdy_f)
+
+        print ("Closing "+config.wrf_bdy_file)
+        wrfbdy_f.close()
+
+        print("FINISH BOUNDARY CONDITIONS")
 
 
 print("--- %s seconds ---" % (time.time() - start_time))
