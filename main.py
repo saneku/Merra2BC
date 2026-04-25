@@ -303,4 +303,230 @@ def run_wrfchem():
         print("FINISH BOUNDARY CONDITIONS")
 
 
+def run_mpasa():
+    merra2_module.initialise()
+    mpasa_module.initialise()
+    merra2wrf_mapper.initialise()
+
+    _require_merra_species_available()
+
+    for var in merra2wrf_mapper.get_wrf_vars():
+        if config.do_IC and (not mpasa_module.has_init_var(var)):
+            utils.error_message(
+                "Could not find variable "
+                + str(var)
+                + " in MPAS init file "
+                + str(config.mpas_init_file)
+                + ". Exiting..."
+            )
+
+        lbc_name = "lbc_" + str(var)
+        if config.do_BC and (not mpasa_module.has_lbc_var(lbc_name)):
+            utils.error_message(
+                "Could not find variable "
+                + str(lbc_name)
+                + " in MPAS lbc files. Exiting..."
+            )
+
+    merra_lons = np.asarray(merra2_module.mera_lon, dtype=np.float64)
+    merra_lats = np.asarray(merra2_module.mera_lat, dtype=np.float64)
+    lon_step = float(np.median(np.abs(np.diff(np.sort(merra_lons))))) if merra_lons.size > 1 else 1.0
+    lat_step = float(np.median(np.abs(np.diff(np.sort(merra_lats))))) if merra_lats.size > 1 else 1.0
+    lon_tol = max(1.0e-6, lon_step)
+    lat_tol = max(1.0e-6, lat_step)
+
+    mpas_lons_for_merra = _align_periodic_lons_to_source_range(mpasa_module.mpas_cell_lons, merra_lons)
+    mpas_lats_for_merra = np.asarray(mpasa_module.mpas_cell_lats, dtype=np.float64)
+
+    if (
+        (min(mpas_lons_for_merra) < min(merra_lons) - lon_tol)
+        or (max(mpas_lons_for_merra) > max(merra_lons) + lon_tol)
+        or (min(mpas_lats_for_merra) < min(merra_lats) - lat_tol)
+        or (max(mpas_lats_for_merra) > max(merra_lats) + lat_tol)
+    ):
+        utils.error_message("MPAS area is not fully covered by MERRA2 area. Exiting...")
+
+    requested_times = []
+    if config.do_IC:
+        requested_times.append(mpasa_module.get_init_time())
+    if config.do_BC:
+        requested_times.extend(mpasa_module.get_lbc_times_ordered())
+    requested_times = _sort_unique_times(requested_times)
+
+    if not requested_times:
+        print("Nothing to do: both --do_IC and --do_BC are false.")
+        return
+
+    missing = _print_missing_times(requested_times, merra2_module.mera_times)
+    if missing:
+        utils.error_message("Requested MPAS times are not fully covered by MERRA2 time range. Exiting...")
+
+    print("\nTimes for processing:")
+    for item in requested_times:
+        print(item)
+
+    index_of_opened_mera_file = None
+    merra_f = None
+
+    def _open_merra_for_time(time_key):
+        nonlocal index_of_opened_mera_file
+        nonlocal merra_f
+
+        needed_index = merra2_module.get_file_index_by_time(time_key)
+        if needed_index is None:
+            utils.error_message("Could not resolve MERRA2 file for time " + str(time_key))
+
+        if index_of_opened_mera_file == needed_index and merra_f is not None:
+            return
+
+        if merra_f is not None:
+            print("Closing prev. opened MERRA2 file with index " + str(index_of_opened_mera_file))
+            merra_f.close()
+
+        index_of_opened_mera_file = needed_index
+        print(
+            "Opening MERRA2 file: "
+            + merra2_module.get_file_name_by_index(index_of_opened_mera_file)
+            + " file which has index "
+            + str(index_of_opened_mera_file)
+        )
+        merra_f = Dataset(merra2_module.get_file_path_by_index(index_of_opened_mera_file), "r")
+
+    if config.do_IC:
+        cur_time = mpasa_module.get_init_time()
+        print("\nSTART MPAS INITIAL CONDITIONS")
+        print("Cur_time=" + str(cur_time))
+        _open_merra_for_time(cur_time)
+
+        print("\tReading MERRA pressure")
+        MERA_PRES = merra2_module.get_pressure_by_time(cur_time, merra_f)
+        print("\tHorizontal interpolation of MERRA pressure on MPAS cells")
+        MER_HOR_PRES = merra2_module.hor_interpolate_3dfield_on_wrf_boubdary(
+            MERA_PRES,
+            mpasa_module.n_cells,
+            mpas_lons_for_merra,
+            mpas_lats_for_merra,
+        )
+
+        print("Opening MPAS init file: " + str(config.mpas_init_file))
+        init_f = Dataset(config.mpas_init_file, "r+")
+        MPAS_PRES = mpasa_module.get_init_pressure(init_f).T
+
+        for merra_specie in merra2wrf_mapper.get_merra_vars():
+            print("\t\t - Reading " + str(merra_specie) + " field from MERRA2")
+            MER_SPECIE = merra2_module.get_3dfield_by_time(cur_time, merra_f, merra_specie)
+
+            print("\t\t - Horizontal interpolation of " + str(merra_specie) + " on MPAS cells")
+            MER_HOR_SPECIE = merra2_module.hor_interpolate_3dfield_on_wrf_boubdary(
+                MER_SPECIE,
+                mpasa_module.n_cells,
+                mpas_lons_for_merra,
+                mpas_lats_for_merra,
+            )
+
+            print("\t\t - Vertical interpolation of " + str(merra_specie) + " on MPAS levels")
+            MPAS_SPECIE = _vertical_interpolate_columns(MER_HOR_SPECIE, MER_HOR_PRES, MPAS_PRES)
+
+            for out_name_and_coef in merra2wrf_mapper.get_list_of_wrf_spec_by_merra_var(merra_specie):
+                out_var = out_name_and_coef[0]
+                coef = out_name_and_coef[1]
+                out_mult = merra2wrf_mapper.coefficients[out_var]
+                print(
+                    "\t\t - Updating MPAS init field "
+                    + str(out_var)
+                    + " = "
+                    + str(out_var)
+                    + " + "
+                    + str(merra_specie)
+                    + " * "
+                    + str(coef)
+                    + " * "
+                    + str(out_mult)
+                )
+                mpasa_module.update_init_field(init_f, out_var, MPAS_SPECIE * coef * out_mult)
+
+        if config.init_co2_ch4:
+            mpasa_module.init_co2_ch4_ic(init_f)
+
+        init_f.close()
+        print("FINISH MPAS INITIAL CONDITIONS")
+
+    if config.do_BC:
+        print("\n\nSTART MPAS BOUNDARY CONDITIONS")
+        for cur_time in mpasa_module.get_lbc_times_ordered():
+            lbc_path = mpasa_module.get_lbc_file_by_time(cur_time)
+            if lbc_path is None:
+                utils.error_message("Could not resolve MPAS lbc file for time " + str(cur_time))
+
+            print("\n\tCur_time=" + str(cur_time))
+            print("\tOpening MPAS lbc file: " + str(lbc_path))
+            lbc_f = Dataset(lbc_path, "r+")
+            _open_merra_for_time(cur_time)
+
+            print("\tReading MERRA pressure")
+            MERA_PRES = merra2_module.get_pressure_by_time(cur_time, merra_f)
+            print("\tHorizontal interpolation of MERRA pressure on MPAS cells")
+            MER_HOR_PRES = merra2_module.hor_interpolate_3dfield_on_wrf_boubdary(
+                MERA_PRES,
+                mpasa_module.n_cells,
+                mpas_lons_for_merra,
+                mpas_lats_for_merra,
+            )
+
+            MPAS_PRES = mpasa_module.get_lbc_pressure(lbc_f).T
+
+            for merra_specie in merra2wrf_mapper.get_merra_vars():
+                print("\t\t - Reading " + str(merra_specie) + " field from MERRA2")
+                MER_SPECIE = merra2_module.get_3dfield_by_time(cur_time, merra_f, merra_specie)
+
+                print("\t\t - Horizontal interpolation of " + str(merra_specie) + " on MPAS cells")
+                MER_HOR_SPECIE = merra2_module.hor_interpolate_3dfield_on_wrf_boubdary(
+                    MER_SPECIE,
+                    mpasa_module.n_cells,
+                    mpas_lons_for_merra,
+                    mpas_lats_for_merra,
+                )
+
+                print("\t\t - Vertical interpolation of " + str(merra_specie) + " on MPAS levels")
+                MPAS_SPECIE = _vertical_interpolate_columns(MER_HOR_SPECIE, MER_HOR_PRES, MPAS_PRES)
+
+                for out_name_and_coef in merra2wrf_mapper.get_list_of_wrf_spec_by_merra_var(merra_specie):
+                    out_var = out_name_and_coef[0]
+                    coef = out_name_and_coef[1]
+                    out_mult = merra2wrf_mapper.coefficients[out_var]
+                    lbc_var = "lbc_" + str(out_var)
+                    print(
+                        "\t\t - Updating MPAS lbc field "
+                        + str(lbc_var)
+                        + " = "
+                        + str(lbc_var)
+                        + " + "
+                        + str(merra_specie)
+                        + " * "
+                        + str(coef)
+                        + " * "
+                        + str(out_mult)
+                    )
+                    mpasa_module.update_lbc_field(lbc_f, lbc_var, MPAS_SPECIE * coef * out_mult)
+
+            if config.init_co2_ch4:
+                mpasa_module.init_co2_ch4_lbc(lbc_f)
+
+            lbc_f.close()
+
+        print("FINISH MPAS BOUNDARY CONDITIONS")
+
+    if merra_f is not None:
+        print("Closing prev. opened MERRA2 file with index " + str(index_of_opened_mera_file))
+        merra_f.close()
+
+
+if config.target == "wrfchem":
+    run_wrfchem()
+elif config.target == "mpasa":
+    run_mpasa()
+else:
+    utils.error_message("Unknown --target value: " + str(config.target))
+
+
 print("--- %s seconds ---" % (time.time() - start_time))
