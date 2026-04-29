@@ -142,3 +142,19 @@ cl_a05 -> 0.14702944*[SpeciesConcVV_SALA] + 0.09849255*[SpeciesConcVV_SALC];1.e9
 cl_a06 -> 0.30594581*[SpeciesConcVV_SALC];1.e9
 cl_a07 -> 0.30594581*[SpeciesConcVV_SALC];1.e9
 cl_a08 -> 0.30594581*[SpeciesConcVV_SALC];1.e9
+
+# Aerosol number concentration (#/kg-dryair). Coefficients convert each
+# species from mol/mol to kg/kg, distribute it to the MOSAIC bin, then divide
+# by one representative dry particle mass for that bin. Particle masses use
+# the same bin centers and densities as misc/gocart2mosaic.py:
+#   sulfate/nitrate/ammonium/carbon: 1.8 g/cm3
+#   sea salt: 2.165 g/cm3
+#   dust: 2.5 g/cm3 for bins a01-a05, 2.65 g/cm3 for bins a06-a08
+num_a01 -> 6.696484e+16*[SpeciesConcVV_BCPI] + 6.696484e+16*[SpeciesConcVV_BCPO] + 5.855237e+16*[SpeciesConcVV_DST1] + 1.005866e+17*[SpeciesConcVV_NH4] + 3.456968e+17*[SpeciesConcVV_NIT] + 6.696484e+16*[SpeciesConcVV_OCPI] + 6.696484e+16*[SpeciesConcVV_OCPO] + 1.870361e+18*[SpeciesConcVV_SALA] + 5.356070e+17*[SpeciesConcVV_SO4];1.0
+num_a02 -> 4.938504e+16*[SpeciesConcVV_BCPI] + 4.938504e+16*[SpeciesConcVV_BCPO] + 2.195713e+16*[SpeciesConcVV_DST1] + 7.418036e+16*[SpeciesConcVV_NH4] + 2.549436e+17*[SpeciesConcVV_NIT] + 4.938504e+16*[SpeciesConcVV_OCPI] + 4.938504e+16*[SpeciesConcVV_OCPO] + 2.337951e+17*[SpeciesConcVV_SALA] + 3.949981e+17*[SpeciesConcVV_SO4];1.0
+num_a03 -> 1.441448e+16*[SpeciesConcVV_BCPI] + 1.441448e+16*[SpeciesConcVV_BCPO] + 1.372321e+16*[SpeciesConcVV_DST1] + 2.165172e+16*[SpeciesConcVV_NH4] + 7.441279e+16*[SpeciesConcVV_NIT] + 1.441448e+16*[SpeciesConcVV_OCPI] + 1.441448e+16*[SpeciesConcVV_OCPO] + 2.922439e+16*[SpeciesConcVV_SALA] + 1.152918e+17*[SpeciesConcVV_SO4];1.0
+num_a04 -> 1.675554e+15*[SpeciesConcVV_BCPI] + 1.675554e+15*[SpeciesConcVV_BCPO] + 2.664261e+15*[SpeciesConcVV_DST1] + 2.516819e+15*[SpeciesConcVV_NH4] + 8.649821e+15*[SpeciesConcVV_NIT] + 1.675554e+15*[SpeciesConcVV_OCPI] + 1.675554e+15*[SpeciesConcVV_OCPO] + 3.653048e+15*[SpeciesConcVV_SALA] + 1.340164e+16*[SpeciesConcVV_SO4];1.0
+num_a05 -> 7.752261e+13*[SpeciesConcVV_BCPI] + 7.752261e+13*[SpeciesConcVV_BCPO] + 3.330326e+14*[SpeciesConcVV_DST1] + 1.164453e+14*[SpeciesConcVV_NH4] + 4.002000e+14*[SpeciesConcVV_NIT] + 3.186811e+14*[SpeciesConcVV_NITs] + 7.752261e+13*[SpeciesConcVV_OCPI] + 7.752261e+13*[SpeciesConcVV_OCPO] + 3.096287e+14*[SpeciesConcVV_SALA] + 2.074150e+14*[SpeciesConcVV_SALC] + 6.200518e+14*[SpeciesConcVV_SO4] + 4.937501e+14*[SpeciesConcVV_SO4s];1.0
+num_a06 -> 1.417464e+12*[SpeciesConcVV_BCPI] + 1.417464e+12*[SpeciesConcVV_BCPO] + 2.662972e+13*[SpeciesConcVV_DST1] + 4.952742e+13*[SpeciesConcVV_DST2] + 2.129146e+12*[SpeciesConcVV_NH4] + 7.317467e+12*[SpeciesConcVV_NIT] + 1.237392e+14*[SpeciesConcVV_NITs] + 1.417464e+12*[SpeciesConcVV_OCPI] + 1.417464e+12*[SpeciesConcVV_OCPO] + 8.053625e+13*[SpeciesConcVV_SALC] + 1.133735e+13*[SpeciesConcVV_SO4] + 1.917160e+14*[SpeciesConcVV_SO4s];1.0
+num_a07 -> 1.012917e+10*[SpeciesConcVV_BCPI] + 1.012917e+10*[SpeciesConcVV_BCPO] + 1.011671e+13*[SpeciesConcVV_DST2] + 1.048719e+13*[SpeciesConcVV_DST3] + 1.521489e+10*[SpeciesConcVV_NH4] + 5.229021e+10*[SpeciesConcVV_NIT] + 1.546741e+13*[SpeciesConcVV_NITs] + 1.012917e+10*[SpeciesConcVV_OCPI] + 1.012917e+10*[SpeciesConcVV_OCPO] + 1.006703e+13*[SpeciesConcVV_SALC] + 8.101634e+10*[SpeciesConcVV_SO4] + 2.396450e+13*[SpeciesConcVV_SO4s];1.0
+num_a08 -> 2.793986e+07*[SpeciesConcVV_BCPI] + 2.793986e+07*[SpeciesConcVV_BCPO] + 7.275561e+11*[SpeciesConcVV_DST3] + 1.502271e+12*[SpeciesConcVV_DST4] + 4.198481e+07*[SpeciesConcVV_NH4] + 1.442909e+08*[SpeciesConcVV_NIT] + 1.933426e+12*[SpeciesConcVV_NITs] + 2.793986e+07*[SpeciesConcVV_OCPI] + 2.793986e+07*[SpeciesConcVV_OCPO] + 1.258379e+12*[SpeciesConcVV_SALC] + 2.235489e+08*[SpeciesConcVV_SO4] + 2.995562e+12*[SpeciesConcVV_SO4s];1.0
