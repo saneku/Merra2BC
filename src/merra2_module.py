@@ -129,6 +129,17 @@ def _slice_var_at_time(var_obj, time_idx):
     return np.asanyarray(sliced), sliced_dims
 
 
+def _vertical_axis_is_surface_first(nc_file):
+    if "lev" not in nc_file.variables:
+        return False
+
+    lev = np.asarray(nc_file.variables["lev"][:], dtype=np.float64)
+    if lev.size < 2:
+        return False
+
+    return lev[0] > lev[-1]
+
+
 def _to_lev_lat_lon(data, dims, var_name):
     if data.ndim != len(dims):
         return data
@@ -305,18 +316,47 @@ def get_3dfield_by_time(time,merra_file,field_name):
     if shifted_lons:
         field=np.roll(field,shift_index,axis=2)
 
+    if _vertical_axis_is_surface_first(merra_file):
+        return field
+
     return np.flipud(field)
 
 
 def get_pressure_by_time(time,merra_file):
     global Ptop_mera, mer_number_of_z_points
+    mera_time_idx=get_index_in_file_by_time(time)
+
+    pressure_var_name = None
+    for candidate in ("Met_PMIDDRY", "Met_PMID", "PMID"):
+        if candidate in merra_file.variables:
+            pressure_var_name = candidate
+            break
+
+    if pressure_var_name is not None:
+        pressure_var = merra_file.variables[pressure_var_name]
+        raw_pres, dims_pres = _slice_var_at_time(pressure_var, mera_time_idx)
+        MER_Pres = _to_lev_lat_lon(raw_pres, dims_pres, pressure_var.name)
+        units = str(getattr(pressure_var, "units", "")).lower()
+        if units in ("hpa", "mb", "mbar", "millibar", "millibars"):
+            MER_Pres = MER_Pres * 100.0
+
+        if mer_number_of_z_points == 0:
+            mer_number_of_z_points = MER_Pres.shape[0]
+
+        if shifted_lons:
+            MER_Pres=np.roll(MER_Pres,shift_index,axis=2)
+
+        if _vertical_axis_is_surface_first(merra_file):
+            return MER_Pres
+
+        return np.flipud(MER_Pres)
+
     #MER_Pres will be restored on 73 edges
     MER_Pres = np.zeros([mer_number_of_z_points+1,mer_number_of_y_points,mer_number_of_x_points])
     #filling top edge with Ptop_mera
     MER_Pres[0,:,:]=Ptop_mera
 
     # Extract deltaP from NetCDF file at index defined by time
-    mera_time_idx=get_index_in_file_by_time(time)
     delp_var = _get_var_case_insensitive(merra_file, 'DELP')
     raw_delp, dims_delp = _slice_var_at_time(delp_var, mera_time_idx)
     DELP = _to_lev_lat_lon(raw_delp, dims_delp, delp_var.name)  # Pa

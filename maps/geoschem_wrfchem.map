@@ -1,0 +1,144 @@
+# GEOS-Chem SpeciesConcVV to WRF-Chem mapping profile.
+# Input GEOS-Chem species in geoschem.txt are "mol mol-1 dry".
+# WRF gas fields in wrfinput.txt are "ppmv": mol/mol * 1.e6.
+# WRF aerosol mass fields are "ug/kg-dryair": mol/mol * MW_species/MW_air * 1.e9.
+# MW_air = 28.97 g/mol.
+# Aerosol molecular-weight assumptions:
+#   SO4=96.06, NO3=62.00, NH4=18.04, BC/OC carbon=12.01,
+#   Na=22.989769, Cl=35.453, dust bulk=28.97 g/mol.
+# Fine aerosol bin fractions use the normalized accumulation-mode lognormal
+# distribution from misc/Sulfate_redistribution.py, rather than the blended
+# 25% Aitken / 75% accumulation profile. Sea-salt-associated sulfate/nitrate
+# use a normalized coarse sea-salt-like distribution over bins a05-a08.
+
+# Gas-phase direct and common renamed mappings.
+o3 -> 1.0*[SpeciesConcVV_O3];1.e6
+h2o2 -> 1.0*[SpeciesConcVV_H2O2];1.e6
+no -> 1.0*[SpeciesConcVV_NO];1.e6
+no2 -> 1.0*[SpeciesConcVV_NO2];1.e6
+no3 -> 1.0*[SpeciesConcVV_NO3];1.e6
+n2o5 -> 1.0*[SpeciesConcVV_N2O5];1.e6
+hono -> 1.0*[SpeciesConcVV_HNO2];1.e6
+hno3 -> 1.0*[SpeciesConcVV_HNO3];1.e6
+hno4 -> 1.0*[SpeciesConcVV_HNO4];1.e6
+so2 -> 1.0*[SpeciesConcVV_SO2];1.e6
+co -> 1.0*[SpeciesConcVV_CO];1.e6
+co2 -> 1.0*[SpeciesConcVV_CO2];1.e6
+hcho -> 1.0*[SpeciesConcVV_CH2O];1.e6
+ccho -> 1.0*[SpeciesConcVV_ALD2];1.e6
+rcho -> 1.0*[SpeciesConcVV_RCHO];1.e6
+acet -> 1.0*[SpeciesConcVV_ACET];1.e6
+mek -> 1.0*[SpeciesConcVV_MEK];1.e6
+hcooh -> 1.0*[SpeciesConcVV_HCOOH];1.e6
+meoh -> 1.0*[SpeciesConcVV_MOH];1.e6
+etoh -> 1.0*[SpeciesConcVV_EOH];1.e6
+gly -> 1.0*[SpeciesConcVV_GLYX];1.e6
+mgly -> 1.0*[SpeciesConcVV_MGLY];1.e6
+cres -> 1.0*[SpeciesConcVV_CSL];1.e6
+phen -> 1.0*[SpeciesConcVV_PHEN];1.e6
+methacro -> 1.0*[SpeciesConcVV_MACR];1.e6
+mvk -> 1.0*[SpeciesConcVV_MVK];1.e6
+ethene -> 1.0*[SpeciesConcVV_C2H4];1.e6
+isoprene -> 1.0*[SpeciesConcVV_ISOP];1.e6
+c2h6 -> 1.0*[SpeciesConcVV_C2H6];1.e6
+c3h8 -> 1.0*[SpeciesConcVV_C3H8];1.e6
+c2h2 -> 1.0*[SpeciesConcVV_C2H2];1.e6
+c3h6 -> 1.0*[SpeciesConcVV_PRPE];1.e6
+alk4 -> 1.0*[SpeciesConcVV_ALK4];1.e6
+aro1 -> 1.0*[SpeciesConcVV_BENZ] + 1.0*[SpeciesConcVV_TOLU];1.e6
+aro2 -> 1.0*[SpeciesConcVV_XYLE];1.e6
+terp -> 1.0*[SpeciesConcVV_MTPA] + 1.0*[SpeciesConcVV_LIMO] + 1.0*[SpeciesConcVV_MTPO];1.e6
+rno3 -> 1.0*[SpeciesConcVV_R4N2];1.e6
+pan -> 1.0*[SpeciesConcVV_PAN];1.e6
+pan2 -> 1.0*[SpeciesConcVV_PPN];1.e6
+ma_pan -> 1.0*[SpeciesConcVV_MPAN];1.e6
+ho -> 1.0*[SpeciesConcVV_OH];1.e6
+ho2 -> 1.0*[SpeciesConcVV_HO2];1.e6
+c_o2 -> 1.0*[SpeciesConcVV_MO2];1.e6
+rco_o2 -> 1.0*[SpeciesConcVV_RCO3];1.e6
+nh3 -> 1.0*[SpeciesConcVV_NH3];1.e6
+hcl -> 1.0*[SpeciesConcVV_HCl];1.e6
+
+# Sulfate aerosol. SO4 uses normalized accumulation-mode fractions; SO4s
+# is treated as sea-salt-associated coarse sulfate and mapped to bins a05-a08.
+so4_a01 -> 0.08510240*[SpeciesConcVV_SO4];1.e9
+so4_a02 -> 0.50208884*[SpeciesConcVV_SO4];1.e9
+so4_a03 -> 1.17239516*[SpeciesConcVV_SO4];1.e9
+so4_a04 -> 1.09024360*[SpeciesConcVV_SO4];1.e9
+so4_a05 -> 0.40353712*[SpeciesConcVV_SO4] + 0.32133848*[SpeciesConcVV_SO4s];1.e9
+so4_a06 -> 0.05902788*[SpeciesConcVV_SO4] + 0.99816850*[SpeciesConcVV_SO4s];1.e9
+so4_a07 -> 0.00337449*[SpeciesConcVV_SO4] + 0.99816850*[SpeciesConcVV_SO4s];1.e9
+so4_a08 -> 0.00007449*[SpeciesConcVV_SO4] + 0.99816850*[SpeciesConcVV_SO4s];1.e9
+
+# Nitrate aerosol. NIT uses normalized accumulation-mode fractions; NITs
+# is treated as sea-salt-associated coarse nitrate and mapped to bins a05-a08.
+no3_a01 -> 0.05492764*[SpeciesConcVV_NIT];1.e9
+no3_a02 -> 0.32406317*[SpeciesConcVV_NIT];1.e9
+no3_a03 -> 0.75669894*[SpeciesConcVV_NIT];1.e9
+no3_a04 -> 0.70367586*[SpeciesConcVV_NIT];1.e9
+no3_a05 -> 0.26045494*[SpeciesConcVV_NIT] + 0.20740148*[SpeciesConcVV_NITs];1.e9
+no3_a06 -> 0.03809836*[SpeciesConcVV_NIT] + 0.64424783*[SpeciesConcVV_NITs];1.e9
+no3_a07 -> 0.00217799*[SpeciesConcVV_NIT] + 0.64424783*[SpeciesConcVV_NITs];1.e9
+no3_a08 -> 0.00004808*[SpeciesConcVV_NIT] + 0.64424783*[SpeciesConcVV_NITs];1.e9
+
+# Ammonium aerosol, normalized accumulation-mode split.
+nh4_a01 -> 0.01598217*[SpeciesConcVV_NH4];1.e9
+nh4_a02 -> 0.09429193*[SpeciesConcVV_NH4];1.e9
+nh4_a03 -> 0.22017498*[SpeciesConcVV_NH4];1.e9
+nh4_a04 -> 0.20474698*[SpeciesConcVV_NH4];1.e9
+nh4_a05 -> 0.07578398*[SpeciesConcVV_NH4];1.e9
+nh4_a06 -> 0.01108539*[SpeciesConcVV_NH4];1.e9
+nh4_a07 -> 0.00063373*[SpeciesConcVV_NH4];1.e9
+nh4_a08 -> 0.00001399*[SpeciesConcVV_NH4];1.e9
+
+# Black carbon aerosol, hydrophobic + hydrophilic, normalized accumulation-mode split.
+bc_a01 -> 0.01064002*[SpeciesConcVV_BCPO] + 0.01064002*[SpeciesConcVV_BCPI];1.e9
+bc_a02 -> 0.06277417*[SpeciesConcVV_BCPO] + 0.06277417*[SpeciesConcVV_BCPI];1.e9
+bc_a03 -> 0.14657991*[SpeciesConcVV_BCPO] + 0.14657991*[SpeciesConcVV_BCPI];1.e9
+bc_a04 -> 0.13630882*[SpeciesConcVV_BCPO] + 0.13630882*[SpeciesConcVV_BCPI];1.e9
+bc_a05 -> 0.05045264*[SpeciesConcVV_BCPO] + 0.05045264*[SpeciesConcVV_BCPI];1.e9
+bc_a06 -> 0.00738002*[SpeciesConcVV_BCPO] + 0.00738002*[SpeciesConcVV_BCPI];1.e9
+bc_a07 -> 0.00042190*[SpeciesConcVV_BCPO] + 0.00042190*[SpeciesConcVV_BCPI];1.e9
+bc_a08 -> 0.00000931*[SpeciesConcVV_BCPO] + 0.00000931*[SpeciesConcVV_BCPI];1.e9
+
+# Organic carbon aerosol, hydrophobic + hydrophilic, normalized accumulation-mode split.
+oc_a01 -> 0.01064002*[SpeciesConcVV_OCPO] + 0.01064002*[SpeciesConcVV_OCPI];1.e9
+oc_a02 -> 0.06277417*[SpeciesConcVV_OCPO] + 0.06277417*[SpeciesConcVV_OCPI];1.e9
+oc_a03 -> 0.14657991*[SpeciesConcVV_OCPO] + 0.14657991*[SpeciesConcVV_OCPI];1.e9
+oc_a04 -> 0.13630882*[SpeciesConcVV_OCPO] + 0.13630882*[SpeciesConcVV_OCPI];1.e9
+oc_a05 -> 0.05045264*[SpeciesConcVV_OCPO] + 0.05045264*[SpeciesConcVV_OCPI];1.e9
+oc_a06 -> 0.00738002*[SpeciesConcVV_OCPO] + 0.00738002*[SpeciesConcVV_OCPI];1.e9
+oc_a07 -> 0.00042190*[SpeciesConcVV_OCPO] + 0.00042190*[SpeciesConcVV_OCPI];1.e9
+oc_a08 -> 0.00000931*[SpeciesConcVV_OCPO] + 0.00000931*[SpeciesConcVV_OCPI];1.e9
+
+# Dust aerosol mapped to WRF inorganic mass (oin). GEOS DST bins use a
+# fictitious mol/mol convention here with MW_dust = MW_air = 28.97 g/mol.
+# Size bins are treated as GOCART-like radius bins 0.1-1.0, 1.0-1.8,
+# 1.8-3.0, and 3.0-6.0 um.
+oin_a01 -> 0.01292134*[SpeciesConcVV_DST1];1.e9
+oin_a02 -> 0.03876401*[SpeciesConcVV_DST1];1.e9
+oin_a03 -> 0.19382003*[SpeciesConcVV_DST1];1.e9
+oin_a04 -> 0.30103000*[SpeciesConcVV_DST1];1.e9
+oin_a05 -> 0.30103000*[SpeciesConcVV_DST1];1.e9
+oin_a06 -> 0.20411998*[SpeciesConcVV_DST1] + 0.37963357*[SpeciesConcVV_DST2];1.e9
+oin_a07 -> 0.62036643*[SpeciesConcVV_DST2] + 0.64308455*[SpeciesConcVV_DST3];1.e9
+oin_a08 -> 0.35691545*[SpeciesConcVV_DST3] + 0.73696559*[SpeciesConcVV_DST4];1.e9
+
+# Sea salt aerosol. SALA is treated as accumulation-mode salt, SALC as coarse
+# salt. The profile writes Na and Cl mass separately for WRF MOSAIC.
+na_a01 -> 0.14060805*[SpeciesConcVV_SALA];1.e9
+na_a02 -> 0.14060805*[SpeciesConcVV_SALA];1.e9
+na_a03 -> 0.14060805*[SpeciesConcVV_SALA];1.e9
+na_a04 -> 0.14060805*[SpeciesConcVV_SALA];1.e9
+na_a05 -> 0.09534237*[SpeciesConcVV_SALA] + 0.06386825*[SpeciesConcVV_SALC];1.e9
+na_a06 -> 0.19839290*[SpeciesConcVV_SALC];1.e9
+na_a07 -> 0.19839290*[SpeciesConcVV_SALC];1.e9
+na_a08 -> 0.19839290*[SpeciesConcVV_SALC];1.e9
+cl_a01 -> 0.21683459*[SpeciesConcVV_SALA];1.e9
+cl_a02 -> 0.21683459*[SpeciesConcVV_SALA];1.e9
+cl_a03 -> 0.21683459*[SpeciesConcVV_SALA];1.e9
+cl_a04 -> 0.21683459*[SpeciesConcVV_SALA];1.e9
+cl_a05 -> 0.14702944*[SpeciesConcVV_SALA] + 0.09849255*[SpeciesConcVV_SALC];1.e9
+cl_a06 -> 0.30594581*[SpeciesConcVV_SALC];1.e9
+cl_a07 -> 0.30594581*[SpeciesConcVV_SALC];1.e9
+cl_a08 -> 0.30594581*[SpeciesConcVV_SALC];1.e9
