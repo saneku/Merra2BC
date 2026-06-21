@@ -11,7 +11,6 @@ mpas_lbc_files = ""
 
 do_IC = False
 do_BC = False
-init_co2_ch4 = False
 
 # Runtime targets:
 # - wrfchem: IC + BC in wrfinput/wrfbdy
@@ -25,6 +24,10 @@ def _repo_root():
 
 
 def _default_mapping_profile_for_target(model_target):
+    if model_target == "wrfchem":
+        return os.path.join(_repo_root(), "maps", "wrfchem_aer_so2_dust1.map")
+    if model_target == "mpasa":
+        return os.path.join(_repo_root(), "maps", "mpasa_aer_so2_dust1.map")
     return os.path.join(_repo_root(), "maps", model_target + ".map")
 
 
@@ -56,8 +59,6 @@ def _fallback_species_map_for_target(model_target):
         "OC2 -> 1.0*[ocphilic];1.e9",
         "dms -> 0.467*[dms];1.e6",
         "msa -> 0.302*[msa];1.e6",
-        "nh3 -> 1.701*[nh3];1.e6",
-        "co2 -> 1.0*[co2];1.e6",
     ]
 
 
@@ -94,7 +95,7 @@ def _apply_cli_overrides():
     global wrf_met_files
     global merra2_files
     global mpas_init_file, mpas_lbc_files
-    global do_IC, do_BC, init_co2_ch4
+    global do_IC, do_BC
     global target, mapping_profile
 
     parser = argparse.ArgumentParser(
@@ -155,14 +156,6 @@ def _apply_cli_overrides():
         help="Enable/disable boundary-condition update (true/false)",
     )
     parser.add_argument(
-        "--init_co2_ch4",
-        default=str(init_co2_ch4).lower(),
-        type=str.lower,
-        choices=("true", "false"),
-        metavar="{true,false}",
-        help="Set fixed CO2/CH4 ppmv fields in IC/BC (true/false)",
-    )
-    parser.add_argument(
         "--target",
         default=target,
         type=str.lower,
@@ -173,10 +166,16 @@ def _apply_cli_overrides():
         "--mapping_profile",
         default=mapping_profile,
         type=str,
-        help="Path to species mapping profile (.map). If omitted, uses maps/<target>.map",
+        help="Path to species mapping profile (.map). If omitted, uses the target aerosol/SO2 profile",
     )
 
-    args, _ = parser.parse_known_args()
+    args, unknown = parser.parse_known_args()
+    if unknown:
+        parser.error(
+            "Unrecognized arguments: "
+            + " ".join(unknown)
+            + ". If you pass file masks, quote them to avoid shell expansion."
+        )
 
     wrf_input_file = args.wrf_input_file
     wrf_bdy_file = args.wrf_bdy_file
@@ -186,8 +185,6 @@ def _apply_cli_overrides():
     mpas_lbc_files = args.mpas_lbc_files
     do_IC = args.do_IC == "true"
     do_BC = args.do_BC == "true"
-    init_co2_ch4 = args.init_co2_ch4 == "true"
-
     target = args.target
     if args.mapping_profile:
         mapping_profile = args.mapping_profile

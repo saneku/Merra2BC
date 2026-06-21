@@ -29,10 +29,6 @@ KAPPA = RD / CP
 GAMMA = 1.0 / (1.0 - KAPPA)
 EPS = RD / RV
 
-MOLAR_MASS_DRY_AIR = 28.97
-MOLAR_MASS = {"co2": 44.01, "ch4": 16.04}
-
-
 def _decode_nc_chars(char_array):
     data = np.asarray(char_array)
     if data.dtype.kind in ("S", "U"):
@@ -283,48 +279,6 @@ def _coerce_added_shape(added_field, target_shape, field_name):
     )
 
 
-def _normalize_units_text(units):
-    return str(units).strip().lower().replace(" ", "")
-
-
-def _ppmv_to_kgkg(ppmv, species_name):
-    key = str(species_name).lower()
-    if key not in MOLAR_MASS:
-        utils.error_message("Missing molar mass for species: " + str(species_name))
-    return float(ppmv) * 1.0e-6 * MOLAR_MASS[key] / MOLAR_MASS_DRY_AIR
-
-
-def _co2_ch4_value_for_variable_units(var_obj, species_name, ppmv_value):
-    units_attr = getattr(var_obj, "units", None)
-    if units_attr is None:
-        print(
-            "WARNING: units attribute missing for "
-            + str(var_obj.name)
-            + "; assuming kg kg^-1 for "
-            + str(species_name)
-        )
-        return _ppmv_to_kgkg(ppmv_value, species_name), "kg kg^-1 (assumed)"
-
-    units_norm = _normalize_units_text(units_attr)
-
-    if units_norm in {"kgkg-1", "kgkg^{-1}", "kg/kg"}:
-        return _ppmv_to_kgkg(ppmv_value, species_name), str(units_attr)
-
-    if units_norm in {"molmol-1", "molmol^{-1}", "mol/mol", "1"}:
-        return float(ppmv_value) * 1.0e-6, str(units_attr)
-
-    if "ppmv" in units_norm or units_norm == "ppm":
-        return float(ppmv_value), str(units_attr)
-
-    utils.error_message(
-        "Unsupported units for "
-        + str(var_obj.name)
-        + ": "
-        + str(units_attr)
-        + ". Supported: kg kg^-1, mol mol^-1, or ppmv."
-    )
-
-
 def _set_var_constant(var_obj, value):
     if var_obj.ndim == 3:
         var_obj[:, :, :] = value
@@ -350,40 +304,18 @@ def _require_var_case_insensitive(nc_file, var_name, file_label):
     return resolved, nc_file.variables[resolved]
 
 
-def init_co2_ch4_ic(init_file, co2_ppmv=400.0, ch4_ppmv=1.7):
-    for species_name, ppmv_value in [("co2", co2_ppmv), ("ch4", ch4_ppmv)]:
-        resolved, var_obj = _require_var_case_insensitive(init_file, species_name, "MPAS init file")
-        value, units_label = _co2_ch4_value_for_variable_units(var_obj, species_name, ppmv_value)
-        print(
-            "\t\t - Setting MPAS init field "
-            + str(resolved)
-            + " to "
-            + str(value)
-            + " ["
-            + str(units_label)
-            + "] from "
-            + str(ppmv_value)
-            + " ppmv"
-        )
+def apply_constant_ic(init_file, constants):
+    for var_name, value in constants.items():
+        resolved, var_obj = _require_var_case_insensitive(init_file, var_name, "MPAS init file")
+        print("\t\t - Setting MPAS init field " + str(resolved) + " to " + str(value))
         _set_var_constant(var_obj, value)
 
 
-def init_co2_ch4_lbc(lbc_file, co2_ppmv=400.0, ch4_ppmv=1.7):
-    for species_name, ppmv_value in [("co2", co2_ppmv), ("ch4", ch4_ppmv)]:
-        var_name = "lbc_" + str(species_name)
-        resolved, var_obj = _require_var_case_insensitive(lbc_file, var_name, "MPAS lbc file")
-        value, units_label = _co2_ch4_value_for_variable_units(var_obj, species_name, ppmv_value)
-        print(
-            "\t\t - Setting MPAS lbc field "
-            + str(resolved)
-            + " to "
-            + str(value)
-            + " ["
-            + str(units_label)
-            + "] from "
-            + str(ppmv_value)
-            + " ppmv"
-        )
+def apply_constant_lbc(lbc_file, constants):
+    for var_name, value in constants.items():
+        lbc_name = "lbc_" + str(var_name)
+        resolved, var_obj = _require_var_case_insensitive(lbc_file, lbc_name, "MPAS lbc file")
+        print("\t\t - Setting MPAS lbc field " + str(resolved) + " to " + str(value))
         _set_var_constant(var_obj, value)
 
 

@@ -30,8 +30,6 @@ projections={"Lambert Conformal":"lcc","Mercator":"merc"}
 
 wrf_bnd_lons=[]
 wrf_bnd_lats=[]
-CO2_PPMV=400.0
-CH4_PPMV=1.7
 
 
 def _normalize_wrf_time(time_text):
@@ -170,36 +168,30 @@ def _require_var(nc_file, var_name, file_label):
     return nc_file.variables[var_name]
 
 
-def init_co2_ch4_ic(wrfinput_f):
-    print (
-        "\t\t - Setting fixed IC fields: co2="
-        + str(CO2_PPMV)
-        + " ppmv, ch4="
-        + str(CH4_PPMV)
-        + " ppmv"
-    )
-    _require_var(wrfinput_f, "co2", "wrfinput")[:] = CO2_PPMV
-    _require_var(wrfinput_f, "ch4", "wrfinput")[:] = CH4_PPMV
+def apply_constant_ic(wrfinput_f, constants):
+    for spec_name, value in constants.items():
+        print ("\t\t - Setting fixed IC field " + str(spec_name) + "=" + str(value))
+        _require_var(wrfinput_f, spec_name, "wrfinput")[:] = value
 
 
-def init_co2_ch4_bc(wrfbdy_f):
-    print (
-        "\t\t - Setting fixed BC fields: co2="
-        + str(CO2_PPMV)
-        + " ppmv, ch4="
-        + str(CH4_PPMV)
-        + " ppmv; tendencies set to 0"
-    )
-    for spec_name, value in [("co2", CO2_PPMV), ("ch4", CH4_PPMV)]:
+def apply_constant_bc(wrfbdy_f, constants):
+    for spec_name, value in constants.items():
+        print (
+            "\t\t - Setting fixed BC field "
+            + str(spec_name)
+            + "="
+            + str(value)
+            + "; tendencies set to 0"
+        )
         _require_var(wrfbdy_f, spec_name + "_BXS", "wrfbdy")[:] = value
         _require_var(wrfbdy_f, spec_name + "_BXE", "wrfbdy")[:] = value
         _require_var(wrfbdy_f, spec_name + "_BYS", "wrfbdy")[:] = value
         _require_var(wrfbdy_f, spec_name + "_BYE", "wrfbdy")[:] = value
 
-        _require_var(wrfbdy_f, spec_name + "_BTXS", "wrfbdy")[:] = 0.0
-        _require_var(wrfbdy_f, spec_name + "_BTXE", "wrfbdy")[:] = 0.0
-        _require_var(wrfbdy_f, spec_name + "_BTYS", "wrfbdy")[:] = 0.0
-        _require_var(wrfbdy_f, spec_name + "_BTYE", "wrfbdy")[:] = 0.0
+        for tendency_name in ["_BTXS", "_BTXE", "_BTYS", "_BTYE"]:
+            var_name = spec_name + tendency_name
+            if var_name in wrfbdy_f.variables:
+                wrfbdy_f.variables[var_name][:] = 0.0
 
 
 def initialise():

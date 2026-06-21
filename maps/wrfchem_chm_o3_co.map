@@ -1,0 +1,11 @@
+# WRF-Chem chemistry profile
+# Use with MERRA-2 chemistry collection: inst3_3d_chm_Nv
+# Constant entries do not read MERRA variables.
+# Format:
+#   <OUT_VAR> -> <coef>*[<MERRA_VAR>] [+ <coef>*[<MERRA_VAR>] ...] ; <out_multiplier>
+#   <OUT_VAR> -> <constant_value> ; <out_multiplier>
+
+o3 -> 0.604*[O3];1.e6
+co -> 1.0*[CO];1.e6
+co2 -> 400.0;1.0
+ch4 -> 1.7;1.0

@@ -2,34 +2,48 @@
 import re
 from . import config
 
-#mapping between MERRA2 species and WRF species
-chem_map={}                         #merra to wrf spec map
-coefficients={}                     #wrf multiplier map
+# Mapping between MERRA2 species and output species.
+chem_map={}                         # MERRA variable -> output species map
+coefficients={}                     # output multiplier map
+constant_map={}                     # output species -> constant value in output units
+
 
 def initialise():
+    chem_map.clear()
+    coefficients.clear()
+    constant_map.clear()
 
     for a in config.spc_map:
         m=re.split('->|;',a)
-        #print m
-        ar=re.findall(r'(-?\ *\.?[0-9]+\.?[0-9]*(?:[Ee]\ *?[-+]?\ *[0-9]+)?)\*\[?(\w+)\]?', m[1])
-	#ar=re.findall(r'(-?\ *\.?[0-9]+\.?[0-9]*(?:[Ee]\ *-?\ *[0-9]+)?)\*\[?(\w+)\]?', m[1])
-        #m=re.findall(r'(\w+) (\-\>)((-?\ *\.?[0-9]+\.?[0-9]*(?:[Ee]\ *-?\ *[0-9]+)?)\*\[?(\w+)\]?', a[0])
-        #http://stackoverflow.com/questions/18152597/extract-scientific-number-from-string
-        m[0]=m[0].strip()
-        m[2]=float(m[2])
-        for r in ar:
-            mylist=chem_map.get(r[1])
-            if mylist==None:
-                mylist=[]
+        if len(m) < 3:
+            raise ValueError("Invalid mapping line: " + str(a))
 
-            mylist.append([m[0],float(r[0])])
-            chem_map.update({r[1]:mylist})
-        coefficients.update({m[0]:m[2]})
+        out_name=m[0].strip()
+        rhs=m[1].strip()
+        multiplier=float(m[2])
+        ar=re.findall(r'(-?\ *\.?[0-9]+\.?[0-9]*(?:[Ee]\ *?[-+]?\ *[0-9]+)?)\*\[?(\w+)\]?', rhs)
+
+        if ar:
+            for r in ar:
+                mylist=chem_map.get(r[1])
+                if mylist==None:
+                    mylist=[]
+
+                mylist.append([out_name,float(r[0])])
+                chem_map.update({r[1]:mylist})
+        else:
+            constant_map.update({out_name:float(rhs)*multiplier})
+
+        coefficients.update({out_name:multiplier})
 
     print ("\nConversion MAP:")
     for i in chem_map:
         print (i+":\t"+str(chem_map.get(i)))
 
+    if constant_map:
+        print ("\nConstant MAP:")
+        for i in constant_map:
+            print (i+":\t"+str(constant_map.get(i)))
 
     print ("\nWRF multiplier MAP:")
     for i in coefficients:
@@ -46,9 +60,11 @@ def get_merra_vars():
 def get_wrf_vars():
     return coefficients.keys()
 
-#initialise()
-#print get_wrf_vars()
-#print get_merra_vars()
-#print ("DU001="+str(get_list_of_wrf_spec_by_merra_name("DU001")))
-#for t in get_list_of_wrf_spec_by_merra_var("DU001"):
-#    print (t[0]+" * "+str(t[1]))
+def get_constant_vars():
+    return constant_map.keys()
+
+def get_constant_map():
+    return constant_map
+
+def is_constant_var(name):
+    return name in constant_map

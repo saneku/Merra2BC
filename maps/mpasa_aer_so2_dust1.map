@@ -1,5 +1,23 @@
-# MPAS-A aerosol profile for files that contain only so2 and dust_1 tracers.
+# MPAS-A aerosol profile with full tracer coverage from merra2_aer_dump.txt
 # Use with MERRA-2 aerosol collection: inst3_3d_aer_Nv
+# Source variables in this dump are already mass mixing ratios (kg/kg).
 
-so2 -> 1.0*[so2];1.0
-dust_1 -> 1.0*[du001];1.0
+so2 -> 1.0*[SO2];1.0
+sulf -> 1.0*[SO4];1.0
+dms -> 1.0*[DMS];1.0
+msa -> 1.0*[MSA];1.0
+
+dust_1 -> 1.0*[DU001];1.0
+dust_2 -> 1.0*[DU002];1.0
+dust_3 -> 1.0*[DU003];1.0
+dust_4 -> 1.0*[DU004];1.0
+dust_5 -> 1.0*[DU005];1.0
+
+seas_1 -> 1.0*[SS001];1.0
+seas_2 -> 1.0*[SS002];1.0
+seas_3 -> 1.0*[SS003];1.0
+seas_4 -> 1.0*[SS004];1.0
+seas_5 -> 1.0*[SS005];1.0
+
+bc -> 1.0*[BCPHILIC] + 1.0*[BCPHOBIC];1.0
+oc -> 1.0*[OCPHILIC] + 1.0*[OCPHOBIC];1.0

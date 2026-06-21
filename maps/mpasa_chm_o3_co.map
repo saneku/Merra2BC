@@ -1,6 +1,11 @@
-# MPAS-A chemistry profile for files that contain o3 and co tracers.
+# MPAS-A chemistry profile with full tracer coverage from merra2_chm_dump.txt.
 # Use with MERRA-2 chemistry collection: inst3_3d_chm_Nv
 # MERRA-2 CO is mol/mol; MPAS co is typically kg/kg, so apply Mw(CO)/Mw(air).
+# Fixed greenhouse gases are in MPAS output units (kg/kg):
+# CO2 = 400 ppmv * 1e-6 * Mw(CO2)/Mw(air) = 6.0766e-4
+# CH4 = 1.7 ppmv * 1e-6 * Mw(CH4)/Mw(air) = 9.4125e-7
 
-o3 -> 1.0*[o3];1.0
-co -> 1.0*[co];0.966862271
+o3 -> 1.0*[O3];1.0
+co -> 1.0*[CO];0.966862271
+co2 -> 6.0766e-4;1.0
+ch4 -> 9.4125e-7;1.0

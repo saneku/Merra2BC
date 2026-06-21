@@ -213,8 +213,8 @@ def run_wrfchem():
                 print ("\t\t - Updating wrfinput field "+wrf_spec+"[0]="+wrf_spec+"[0]+"+merra_specie+"*"+str(coef)+"*"+str(wrf_mult))
                 wrfinput_f.variables[wrf_spec][0,:]=wrfinput_f.variables[wrf_spec][0,:]+WRF_SPECIE*coef*wrf_mult
 
-        if config.init_co2_ch4:
-            wrf_module.init_co2_ch4_ic(wrfinput_f)
+        if merra2wrf_mapper.get_constant_map():
+            wrf_module.apply_constant_ic(wrfinput_f, merra2wrf_mapper.get_constant_map())
 
         print ("Closing wrfintput: "+config.wrf_input_file)
         wrfinput_f.close()
@@ -294,8 +294,8 @@ def run_wrfchem():
         print ("Closing prev. opened MERRA2 file with index "+str(index_of_opened_mera_file))
         merra_f.close()
 
-        if config.init_co2_ch4:
-            wrf_module.init_co2_ch4_bc(wrfbdy_f)
+        if merra2wrf_mapper.get_constant_map():
+            wrf_module.apply_constant_bc(wrfbdy_f, merra2wrf_mapper.get_constant_map())
 
         print ("Closing "+config.wrf_bdy_file)
         wrfbdy_f.close()
@@ -445,8 +445,8 @@ def run_mpasa():
                 )
                 mpasa_module.update_init_field(init_f, out_var, MPAS_SPECIE * coef * out_mult)
 
-        if config.init_co2_ch4:
-            mpasa_module.init_co2_ch4_ic(init_f)
+        if merra2wrf_mapper.get_constant_map():
+            mpasa_module.apply_constant_ic(init_f, merra2wrf_mapper.get_constant_map())
 
         init_f.close()
         print("FINISH MPAS INITIAL CONDITIONS")
@@ -509,8 +509,8 @@ def run_mpasa():
                     )
                     mpasa_module.update_lbc_field(lbc_f, lbc_var, MPAS_SPECIE * coef * out_mult)
 
-            if config.init_co2_ch4:
-                mpasa_module.init_co2_ch4_lbc(lbc_f)
+            if merra2wrf_mapper.get_constant_map():
+                mpasa_module.apply_constant_lbc(lbc_f, merra2wrf_mapper.get_constant_map())
 
             lbc_f.close()
 

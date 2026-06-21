@@ -44,13 +44,17 @@ Defaults are defined in `src/config.py`:
 - whether to process IC/BC by default (`do_IC`, `do_BC`)
 
 Mapping profiles live under `maps/`:
-- `maps/wrfchem.map` (current production workflow)
-- `maps/mpasa.map` (CheMPAS-A starter profile)
-- In `maps/mpasa.map`, `co` includes `Mw(CO)/Mw(air)=28.01/28.97` to convert MERRA-2 `CO` (`mol/mol`) to MPAS `co` (`kg/kg`).
+- `maps/wrfchem_aer_so2_dust1.map` for WRF-Chem aerosol/SO2 fields (`inst3_3d_aer_Nv`)
+- `maps/wrfchem_chm_o3_co.map` for WRF-Chem O3/CO plus fixed CO2/CH4 (`inst3_3d_chm_Nv`)
+- `maps/mpasa_aer_so2_dust1.map` for MPAS-A aerosol/SO2 fields
+- `maps/mpasa_chm_o3_co.map` for MPAS-A O3/CO plus fixed CO2/CH4 fields
+- In `maps/mpasa_chm_o3_co.map`, `co` includes `Mw(CO)/Mw(air)=28.01/28.97` to convert MERRA-2 `CO` (`mol/mol`) to MPAS `co` (`kg/kg`).
+- In `maps/mpasa_chm_o3_co.map`, fixed `co2` and `ch4` constants are converted from ppmv to MPAS kg/kg units: `400 ppmv CO2 -> 6.0766e-4 kg/kg`, `1.7 ppmv CH4 -> 9.4125e-7 kg/kg`.
 
 Format for each mapping line:
 ```text
 <OUT_VAR> -> <coef>*[<MERRA_VAR>] [+ <coef>*[<MERRA_VAR>] ...] ; <out_multiplier>
+<OUT_VAR> -> <constant_value> ; <out_multiplier>
 ```
 
 At runtime, command-line flags can override these defaults without editing source files.
@@ -90,9 +94,8 @@ python3 main.py --help
 - `--mpas_lbc_files` (glob mask for MPAS `lbc.*.nc`; required only when `--target mpasa --do_BC=true`)
 - `--do_IC=true|false`
 - `--do_BC=true|false`
-- `--init_co2_ch4=true|false` (default `false`; input values are `co2=400 ppmv`, `ch4=1.7 ppmv`; WRF writes ppmv and zeroes BC tendencies, MPAS writes constant `co2/ch4` and `lbc_co2/lbc_ch4` with unit-aware conversion)
 - `--target=wrfchem|mpasa`
-- `--mapping_profile=/path/to/profile.map` (optional; defaults to `maps/<target>.map`)
+- `--mapping_profile=/path/to/profile.map` (optional; defaults to the target aerosol/SO2 profile)
 
 Example (explicit paths, process both IC and BC):
 
@@ -102,8 +105,7 @@ python3 main.py \
   --wrf_bdy_file /path/to/wrf/run/wrfbdy_d01 \
   --wrf_met_files '/path/to/wps/run/met_em.d01.2010-*' \
   --merra2_files '/path/to/merra/MERRA2_*.nc4' \
-  --do_IC=true --do_BC=true \
-  --init_co2_ch4=false
+  --do_IC=true --do_BC=true
 ```
 
 Example (boundary conditions only):
@@ -162,7 +164,7 @@ python3 main.py \
 - Interpolated values are added to existing WRF-Chem fields.
 - Running `zero_fields.py` before `main.py` is recommended to avoid double counting.
 - For `--target mpasa`, interpolated values are added to MPAS chemistry fields in init/lbc files.
-- For `--target mpasa --init_co2_ch4=true`, constants are derived from ppmv and converted by target-variable units (`kg kg^-1`, `mol mol^-1`, or `ppmv`).
+- Constant map entries are written directly in output-variable units. For example, WRF-Chem can use `co2 -> 400.0;1.0` for ppmv, while MPAS kg/kg constants must be converted before being placed in the map. For WRF-Chem BC constants, corresponding `BT*` tendency fields are set to zero.
 - MPAS pressure for vertical interpolation is used from `pressure`/`lbc_pressure` if present. If not present, it is reconstructed from `rho/theta/qv` (or `lbc_rho/lbc_theta/lbc_qv`).
 - Global MPAS runs typically use IC only (`--do_BC=false` and no `--mpas_lbc_files`).
 
